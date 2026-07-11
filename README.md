@@ -10,6 +10,7 @@ agent did, what's open, what's decided, and what went wrong before.
 
 | Path | What it is |
 |---|---|
+| [`universal-kickoff.md`](universal-kickoff.md) | **Session entry point — hand this to the agent.** Fill its Pre-Flight and it walks any agent through the door: get both repos on disk, bootstrap or sync `.context/`, load the matching edition, run the protocol. Step 0 branches on agent type (local IDE vs cloud/sandbox), so a local agent never re-clones the repo or touches a PAT. Start here. |
 | [`ai-engineering-protocol.md`](ai-engineering-protocol.md) | **Cloud/sandbox edition** — for agents that clone the repo themselves and authenticate with a PAT. Generic template — fill Pre-Flight per project. |
 | [`ai-engineering-protocol-local.md`](ai-engineering-protocol-local.md) | **Local agent edition** — for IDE-integrated agents (Claude Code, Cursor, Copilot) working on an already-cloned repo with the user's own git credentials. Generic template. |
 | [`context-skeleton/`](context-skeleton/) | The 16-file stub tree for bootstrapping `.context/` in a target repo. Every file carries its entry template in an HTML comment. Includes the self-gitignored `secrets/` module and the `flaws/` workflow-friction log. |
@@ -20,10 +21,12 @@ agent did, what's open, what's decided, and what went wrong before.
 
 ## Usage
 
-1. Fill in the **Pre-Flight** section of the edition that matches your agent
-   (cloud or local) and hand the file to the agent as its instructions. To
-   run a mission-scoped session, add one overlay from `roles/` — where the
-   role file and the edition conflict, the role file wins.
+1. Fill in the **Pre-Flight** section of [`universal-kickoff.md`](universal-kickoff.md)
+   (the recommended entry point — it routes local vs cloud/sandbox agents and
+   hands off to the right edition), or of the specific edition that matches
+   your agent, and hand the file to the agent as its instructions. To run a
+   mission-scoped session, add one overlay from `roles/` — where the role file
+   and the edition conflict, the role file wins.
 2. The agent bootstraps the target repo's memory on first session:
 
    ```bash

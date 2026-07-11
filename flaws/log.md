@@ -186,3 +186,13 @@ Flaws consolidated from LocalMind Session 7 are now **fixed in this commit**:
 - **Suggested fix:** Pitfall: "Don't apply a review finding without reproducing it — grep the referenced section first."
 - **Source:** TisoneK/.context — package repo session, 2026-07-11
 - **Status:** fixed in this commit — Phase 5 reference restored + Pitfall #31 added to both editions
+
+---
+## 2026-07-11 — Claude Code / claude-opus-4-8 (consolidated from vert, Session 1)
+
+- **Flaw:** The universal kickoff's Step 0 was written cloud-first — PAT setup, cloning the project repo, unconditional `git config`, a token-strip dance on push, and "don't unset `GIT_TOKEN`." A local IDE agent already sitting inside the already-cloned repo had to mentally translate every step, and "clone the project repo" (Step 0b) was a no-op that muddied where to work. Compounding it: the kickoff was a user's local (Desktop) artifact never committed to the package — so a fix to it couldn't reach other users/agents (same pattern as the earlier `QUICKSTART` flaw).
+- **Symptom:** During vert Session 1 (a local Claude Code session), the agent had to reconcile the kickoff's clone-based flow against the local protocol edition ("repo is already local, don't clone"), and only avoided the redundant project clone by deferring to the local edition.
+- **Root cause:** One kickoff served both editions, but its Step 0 assumed the cloud flow and never branched on "local agent, repo already present." And the kickoff lived only on the user's machine, outside version control.
+- **Suggested fix:** (1) Branch Step 0 on agent type — a Local path (confirm you're in the repo, never re-clone, no PAT, don't touch git identity unless empty, clone only the package as a sibling) and a Cloud/sandbox path (the original PAT + clone-both flow); mark every PAT/`GIT_TOKEN` reference cloud-only; normalize paths so `../.context-package` (a sibling of the project) resolves for both. (2) Commit the kickoff into the package so the fix is versioned and shared.
+- **Source:** TisoneK/vert — `.context/flaws/log.md`, Session 1 (2026-07-11)
+- **Status:** fixed in this commit — `universal-kickoff.md` added to the package with Step 0 branched local/cloud, PAT refs marked cloud-only, a shared `0c. Verify` + path-normalization note, model-identity guidance refined (record an explicit system-prompt model ID rather than only "user fills in"), and a Local-repo-path Pre-Flight field added. Linked from README.
