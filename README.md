@@ -12,8 +12,9 @@ agent did, what's open, what's decided, and what went wrong before.
 |---|---|
 | [`ai-engineering-protocol.md`](ai-engineering-protocol.md) | **Cloud/sandbox edition** — for agents that clone the repo themselves and authenticate with a PAT. Generic template — fill Pre-Flight per project. |
 | [`ai-engineering-protocol-local.md`](ai-engineering-protocol-local.md) | **Local agent edition** — for IDE-integrated agents (Claude Code, Cursor, Copilot) working on an already-cloned repo with the user's own git credentials. Generic template. |
-| [`context-skeleton/`](context-skeleton/) | The 14-file stub tree for bootstrapping `.context/` in a target repo. Every file carries its entry template in an HTML comment. Includes the self-gitignored `secrets/` module. |
+| [`context-skeleton/`](context-skeleton/) | The 16-file stub tree for bootstrapping `.context/` in a target repo. Every file carries its entry template in an HTML comment. Includes the self-gitignored `secrets/` module and the `flaws/` workflow-friction log. |
 | [`roles/`](roles/) | **Role overlays** — small files that re-scope a base edition to a mission: reviewer (read-only), security-auditor, docs-agent. Engineer (full-scope) is the default, no overlay needed. |
+| [`flaws/`](flaws/) | **Consolidated workflow flaws** — friction agents hit with the protocol/`.context/` system itself, back-ported from all projects using this package. The source of truth for protocol improvements. |
 | [`localmind-review.md`](localmind-review.md) | Example session deliverable — a real review report produced by an agent following the protocol (LocalMind, Session 2). |
 
 ## Usage
