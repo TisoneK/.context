@@ -128,6 +128,7 @@ or am I editing the agent's memory of the project?"
 ### ENTRY (before Step 1)
 - **The session starts when the user hands you this file (plus an optional role overlay).**
 - **First action:** Read the Two Surfaces section above, then read Pre-Flight, then begin Step 1.
+- **Check the user's first chat message for a target description.** The user may include a target in their chat message instead of pre-filling the Pre-Flight Target field (e.g., "Fix the file upload 413 error" or "Refactor the agent loop"). If the chat message contains a target description, use it as the session's Target — it overrides the Pre-Flight Target field. If the chat message is just "start" or "begin," use the Pre-Flight Target field (default: general sweep). This lets the user reuse the same kickoff file for different targets without editing it each time.
 - **Do not edit any file until Phase 1 (Steps 1–8) is complete.** No exceptions, no "this task is too small." Phase 1 exists so you work from complete context, not partial context. Skipping it is the most common protocol violation.
 
 ### TRANSITIONS (between phases)
