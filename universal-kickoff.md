@@ -97,7 +97,7 @@ codebase and its `.context/` memory in a better state.
 | Repo | What it holds | Cloned where |
 |------|---------------|--------------|
 | **Project repo** (the "root repo") | The product code + its `.context/` memory | `<workspace>/<REPO>` |
-| **Package repo** (`TisoneK/.context`) | The protocol editions + skeleton + roles + consolidated flaws | `<workspace>/.context-package` |
+| **Package repo** (`TisoneK/.context`) | The protocol editions + skeleton + roles + consolidated flaws | `<workspace>/.context` |
 
 The package repo is a **reference** — the agent reads the protocol from
 it and copies the skeleton to bootstrap `.context/` in the project repo.
@@ -174,11 +174,16 @@ git status                   # tree should be clean before you start
 **0-L.2 — Clone ONLY the package repo, as a sibling of the project repo.**
 ```bash
 cd ..                                                        # parent of the project repo
-git clone https://github.com/TisoneK/.context.git .context-package
+git clone https://github.com/TisoneK/.context.git .context
 cd -                                                         # back into the project repo
 ```
-- If `.context-package` already exists beside the repo, don't re-clone —
-  freshen it: `git -C ../.context-package pull --ff-only`.
+- If `.context` already exists beside the repo, don't re-clone —
+  freshen it: `git -C ../.context pull --ff-only`.
+- **Heads-up on the name:** this clones the package one level **above** the
+  project as `../.context` (matching the remote repo `TisoneK/.context`). That
+  is a different directory from the project's own in-repo `.context/` memory
+  dir — same basename, different location. Package = `../.context` (sibling);
+  memory = `./.context` (inside the repo).
 
 → Go to **0c. Verify**.
 
@@ -217,7 +222,7 @@ git config user.email "<GIT_EMAIL>"
 **0-C.3 — Clone the package repo (public — no PAT).**
 ```bash
 cd <workspace>
-git clone https://github.com/TisoneK/.context.git .context-package
+git clone https://github.com/TisoneK/.context.git .context
 ```
 
 > **DO NOT unset `GIT_TOKEN` yet** — it's needed for every push this session.
@@ -233,27 +238,33 @@ git clone https://github.com/TisoneK/.context.git .context-package
 ```bash
 # Local agent — project repo is the cwd; package is a sibling:
 ls .                       # project repo (your working dir)
-ls ../.context-package     # package repo with protocol + skeleton
+ls ../.context     # package repo with protocol + skeleton
 
 # Cloud/sandbox agent — both live under the workspace:
 ls <workspace>/<REPO>
-ls <workspace>/.context-package
+ls <workspace>/.context
 ```
 
 You should see:
 - the project repo — its code (and `.context/` if it already exists)
-- `.context-package/ai-engineering-protocol.md` — cloud/sandbox edition
-- `.context-package/ai-engineering-protocol-local.md` — local agent edition
-- `.context-package/context-skeleton/` — the 17-file stub tree
-- `.context-package/roles/` — role overlays
-- `.context-package/QUICKSTART.md` — the two-repo mental model
+- `.context/ai-engineering-protocol.md` — cloud/sandbox edition
+- `.context/ai-engineering-protocol-local.md` — local agent edition
+- `.context/context-skeleton/` — the 17-file stub tree
+- `.context/roles/` — role overlays
+- `.context/QUICKSTART.md` — the two-repo mental model
 
 > **Paths from here on.** After Step 0 your cwd is the **project repo root**
 > for both agent types, and the package repo is a **sibling** of it. So
 > wherever the steps below write `<workspace>/<REPO>`, read "the repo root
-> (your cwd)", and wherever they write `<workspace>/.context-package`, read
-> **`../.context-package`** — that relative path is correct for local and
+> (your cwd)", and wherever they write `<workspace>/.context`, read
+> **`../.context`** — that relative path is correct for local and
 > cloud/sandbox agents alike.
+>
+> **Two `.context` names, don't conflate them:** `../.context` (one level
+> **up**, a sibling of the project) is the **package clone**; `./.context`
+> (**inside** the project) is that project's **memory dir**. Package paths in
+> the steps below are always `../.context/...`; memory paths are always
+> `.context/...`.
 
 ---
 
@@ -271,8 +282,8 @@ the initial data, commit, and push — BEFORE starting the protocol phases.
 
 ```bash
 # From the project repo root (your cwd). The package is a sibling, so
-# ../.context-package works for both local and cloud/sandbox agents.
-cp -r ../.context-package/context-skeleton .context
+# ../.context works for both local and cloud/sandbox agents.
+cp -r ../.context/context-skeleton .context
 ```
 
 Verify the skeleton landed (17 files including the self-gitignored `secrets/`):
@@ -390,15 +401,15 @@ don't need to fetch it from GitHub — read it from disk:
 
 ```bash
 # Cloud/sandbox agent:
-cat <workspace>/.context-package/ai-engineering-protocol.md
+cat <workspace>/.context/ai-engineering-protocol.md
 
 # Local agent:
-cat <workspace>/.context-package/ai-engineering-protocol-local.md
+cat <workspace>/.context/ai-engineering-protocol-local.md
 ```
 
 If `workflows/active.md` says to use a role overlay, also read:
 ```bash
-cat <workspace>/.context-package/roles/<role>.md
+cat <workspace>/.context/roles/<role>.md
 ```
 
 **Read the full protocol before proceeding.** It's ~800 lines. Take the
@@ -469,10 +480,10 @@ If you're editing anything else, you're in **project mode**.
 
 | If you need... | Look in... |
 |---|---|
-| The protocol file | `<workspace>/.context-package/ai-engineering-protocol.md` (or `-local.md`) |
-| The skeleton (for bootstrapping) | `<workspace>/.context-package/context-skeleton/` |
-| Role overlays | `<workspace>/.context-package/roles/` |
-| The two-repo mental model | `<workspace>/.context-package/QUICKSTART.md` |
+| The protocol file | `<workspace>/.context/ai-engineering-protocol.md` (or `-local.md`) |
+| The skeleton (for bootstrapping) | `<workspace>/.context/context-skeleton/` |
+| Role overlays | `<workspace>/.context/roles/` |
+| The two-repo mental model | `<workspace>/.context/QUICKSTART.md` |
 | Prior agent sessions | `<REPO>/.context/agents/sessions.md` |
 | Open tasks | `<REPO>/.context/tasks/backlog.md` |
 | Known traps | `<REPO>/.context/inefficiencies/log.md` |
