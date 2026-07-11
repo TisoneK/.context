@@ -37,9 +37,10 @@ This directory describes the **process**.
     └── <slug>           # one secret per file: line 1 = value, lines 2+ = notes
 ```
 
-Every file in this directory carries its own entry template in an HTML
-comment at the top — read the file you're about to write to and follow
-its template. Don't invent formats.
+Every file agents write to carries its entry template in an HTML
+comment — at the top of the file itself, or in its directory's README
+(`reviews/`, `secrets/`). Read the template before writing; don't
+invent formats.
 
 ## Rules (for agents and humans)
 

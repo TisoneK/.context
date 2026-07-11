@@ -333,8 +333,9 @@ git push origin main  # uses the user's existing credentials
     └── <slug>           # one secret per file: line 1 = value, lines 2+ = notes
 ```
 
-Every `.context/` file carries its own entry template in an HTML comment
-at the top — follow it, don't invent formats.
+Every `.context/` file agents write to carries its entry template in an
+HTML comment — at the top of the file itself, or in its directory's
+README (`reviews/`, `secrets/`). Follow it, don't invent formats.
 
 ### What goes where (quick reference)
 
@@ -400,7 +401,7 @@ at the top — follow it, don't invent formats.
 ### Bootstrap (first session in a repo without `.context/`)
 
 1. **If the protocol package's `context-skeleton/` folder is available** (it ships alongside this file), copy it in: `cp -r context-skeleton <repo>/.context` — it contains all 14 stub files with their entry templates (including the self-gitignored `secrets/` module).
-2. **Otherwise create the tree by hand:** every file starts with a title, a one-line purpose (including whether it's append-only or overwrite), and its entry template inside an HTML comment. Use the Entry templates above for the logs; overwrite files (`tasks/current.md`, `workflows/active.md`, `user/*`) get current-state field lists; `reviews/` gets a `README.md` stating the `YYYY-MM-DD-review.md` naming and report structure.
+2. **Otherwise create the tree by hand:** every file starts with a title, a one-line purpose (including whether it's append-only or overwrite), and its entry template inside an HTML comment. Use the Entry templates above for the logs; overwrite files (`tasks/current.md`, `workflows/active.md`, `user/*`) get current-state field lists; `reviews/` gets a `README.md` stating the `YYYY-MM-DD-review.md` naming and report structure; `secrets/` gets its self-ignoring `.gitignore` (`*` + `!.gitignore` + `!README.md`) and a README with the hard rules — create these two before anything else in that directory.
 3. Write `.context/README.md` from the Structure + What-goes-where + Rules sections above (the skeleton already includes it).
 4. Fill `user/identity.md` and `user/preferences.md` from Pre-Flight, `workflows/active.md` from Session Parameters, and add your row to `system/ai-models.md`.
 5. **Migrate:** `git mv docs/report/*.md .context/reviews/` if prior reviews exist; leave a pointer README behind.
