@@ -129,3 +129,30 @@ protocol editions:
 - **Suggested fix:** Add a discovery file at the repo root that agents auto-load. The emerging industry convention is `AGENTS.md` (tool-agnostic) plus a `CLAUDE.md` symlink/copy (Claude-specific discovery). Content: "This repo uses the `.context/` agent-memory protocol. Before doing any work: 1. Read `.context/workflows/active.md` — it names the protocol edition to follow. 2. Fetch that protocol from the URL in its 'Protocol source' field. 3. Follow the protocol's Phase 1 before editing any file." Add `AGENTS.md` to `context-skeleton/` so new projects get it automatically. Note: this is not a silver bullet — agents must still choose to read it — but it's strictly better than the current state (zero discovery mechanism). Layered defense: (1) `AGENTS.md` at root, (2) `CLAUDE.md` at root, (3) user explicitly saying "follow the protocol" at session start.
 - **Source:** TisoneK/LocalMind — cold-start session, 2nd instance of DeepSeek V4 Flash Free missing the protocol (1st instance was Session 3, which found `.context/` but didn't follow it). This 2nd instance is the cleaner data point — no prior context to bias it.
 - **Status:** open — fix deferred until after a cold-start test of GLM-5.2 to confirm the pattern across models (if GLM-5.2 also misses it, it's a protocol gap; if GLM-5.2 finds it, it's a model-specific observation).
+
+---
+## 2026-07-11 — Super Z / GLM-5.2 (consolidated from LocalMind, Session 7) — PAT leak in chat summary
+
+- **Flaw:** The protocol says "never write the PAT to any file" and "never echo secret values from `secrets/`," but it never explicitly says "don't include the PAT value in chat output or rotation reminders." An agent following the Exit checklist's "remind the user to rotate the PAT" step can reasonably include the full token value — defeating the secret-handling rules. The PAT lives as an env var, not a `secrets/` file, so the `secrets/README.md` "never echo a value" rule doesn't feel applicable.
+- **Symptom:** Session 7's final chat summary included the full PAT in plaintext: "⚠️ Rotate the PAT — `github_pat_11ASCEY4Q0n1QCPOjmffJy_...` was used this session and is now unset." The agent's intent was good (reminding the user to rotate), but including the actual value leaked it into the chat transcript, which may be logged, shared, or screenshotted.
+- **Root cause:** The protocol's secret-handling rules are scoped to files and `secrets/` values, not to the PAT env var in chat output. The Exit checklist says "remind the user to rotate the PAT" but doesn't say "reference the token by last 4 characters, never the full value." The agent reasoned: "the user pasted it, so they know it; including it makes the reminder more useful." That reasoning is understandable but wrong — the chat transcript is not a secure channel.
+- **Suggested fix:** Add to both protocol editions, in the PAT section: "Never echo the PAT value in chat output. This includes rotation reminders, error messages, and 'for your reference' notes. The user pasted it; they know it. Your reminder should say 'Rotate the PAT' — not 'Rotate the PAT: `github_pat_...`'. If you need to reference which token, use the last 4 characters: 'Rotate the PAT ending in `5KV`.' The full value must never appear in your output, in any form." Add as a pitfall in both editions.
+- **Source:** TisoneK/LocalMind — `.context/flaws/log.md`, Session 7
+- **Status:** fixed in this commit — both editions now have the rule + pitfall
+
+---
+## 2026-07-11 — Super Z / GLM-5.2 (Session 8) — UPDATE: Session 7 flaws fixed
+
+Flaws consolidated from LocalMind Session 7 are now **fixed in this commit**:
+
+- **blob/ vs raw/ URL:** Fixed. `context-skeleton/workflows/active.md`
+  template now has separate "Protocol source (raw)" and "Protocol
+  source (blob)" fields, plus a fallback note. LocalMind's
+  `workflows/active.md` updated too.
+- **Append-only dedupe exception:** Fixed. `context-skeleton/README.md`
+  Rule 2 now has an exception for byte-identical duplicates. LocalMind's
+  `.context/README.md` updated too. Applied to the duplicate Session 6
+  entry in LocalMind's `agents/sessions.md`.
+- **PAT leak in chat:** Fixed. Both protocol editions now have the
+  "Never echo the PAT value in chat output" rule (in the PAT section
+  for cloud; in the secrets rule for local) and Pitfall #29.

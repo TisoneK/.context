@@ -6,7 +6,9 @@ user changes the rules; note the change in your session entry.
 
 <!-- TEMPLATE — replace everything below this comment:
 - **Protocol:** <ai-engineering-protocol.md (cloud) | ai-engineering-protocol-local.md (local) | both, by agent type>
-- **Protocol source:** <URL or path where the agent fetches the protocol file if it's not in the working directory — e.g. https://github.com/TisoneK/.context/blob/main/ai-engineering-protocol.md>
+- **Protocol source (raw — for agent fetch):** <https://raw.githubusercontent.com/TisoneK/.context/main/ai-engineering-protocol.md (cloud) | https://raw.githubusercontent.com/TisoneK/.context/main/ai-engineering-protocol-local.md (local)>
+- **Protocol source (blob — for human browsing):** <https://github.com/TisoneK/.context/blob/main/ai-engineering-protocol.md (cloud) | https://github.com/TisoneK/.context/blob/main/ai-engineering-protocol-local.md (local)>
+- **Fallback:** if the raw URL 404s, clone `TisoneK/.context` with `--depth 1` and read the file locally — this is the reliable fallback.
 - **Since:** YYYY-MM-DD
 - **Default role:** <e.g., engineer — unless a session says otherwise; see the protocol package's roles/>
 - **Scope:** <e.g., discovery + review + fix all safe issues>

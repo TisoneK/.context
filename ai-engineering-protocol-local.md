@@ -104,6 +104,7 @@ You are running locally on the developer's machine. This means:
 - **Do not install global packages** — if a tool is missing, tell the user and let them install it. Local project deps via the package manager are fine.
 - **Do not modify global config** — `.gitconfig`, shell profiles, global npm packages — unless explicitly asked.
 - **Do not read or echo secrets** — if you encounter `.env.local`, API keys, or credentials in the codebase, note that they exist and move on. Never print them in your output. Exception: `.context/secrets/` exists precisely for agent use — read and use those values silently, per its README. **Never write secret values into tracked `.context/` files — values go only in `.context/secrets/`.**
+- **Never echo secret values in chat output** — this includes rotation reminders, error messages, "for your reference" notes, and session summaries. If you need to reference a secret (e.g., "rotate the API key"), use its name or last 4 characters at most — never the full value. The chat transcript is not a secure channel; it may be logged, shared, or screenshotted.
 
 ---
 
@@ -822,6 +823,7 @@ Save to `.context/reviews/YYYY-MM-DD-review.md`. Commit and push it.
 26. **Don't skip the Exit checklist** — a session is not done until every box in the Session Lifecycle → EXIT section is checked. If the user has to remind you to commit or push, the protocol failed. Log it as a flaw.
 27. **Don't treat `workflows/active.md` as documentation** — it's a binding instruction. After reading it, immediately load the protocol it references. Don't proceed with other tool use until the protocol is loaded.
 28. **Don't treat any task as "too small for Phase 1"** — even a one-line `.context/` edit requires Steps 1–8 first. Skipping Phase 1 is the most common protocol violation.
+29. **Don't include secret values in "rotate this" reminders or session summaries** — if you need to remind the user to rotate a key, reference it by name or last 4 characters, never the full value. The chat transcript is not a secure channel. This applies to all secrets — API keys, DB passwords, tokens — not just the PAT (which the local edition doesn't handle anyway).
 
 ---
 

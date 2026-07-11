@@ -84,6 +84,14 @@ model, and what went wrong before.
 >
 > The agent will use it as a transient env var and never write it to any
 > file. **Rotate the PAT after the session ends.**
+>
+> **Never echo the PAT value in chat output.** This includes rotation
+> reminders, error messages, and "for your reference" notes. The user
+> pasted it; they know it. Your reminder should say "Rotate the PAT" —
+> not "Rotate the PAT: `github_pat_...`". If you need to reference which
+> token, use the last 4 characters: "Rotate the PAT ending in `5KV`."
+> The full value must never appear in your output, in any form — not in
+> chat, not in reports, not in commit messages, not in error output.
 
 ---
 
@@ -826,6 +834,7 @@ Append-only. Never overwrite. Start each section with `---`.
 26. **Don't skip the Exit checklist** — a session is not done until every box in the Session Lifecycle → EXIT section is checked. If the user has to remind you to commit or push, the protocol failed. Log it as a flaw.
 27. **Don't treat `workflows/active.md` as documentation** — it's a binding instruction. After reading it, immediately load the protocol it references. Don't proceed with other tool use until the protocol is loaded.
 28. **Don't treat any task as "too small for Phase 1"** — even a one-line `.context/` edit requires Steps 1–8 first. Skipping Phase 1 is the most common protocol violation.
+29. **Don't include secret values in "rotate this" reminders** — the Exit checklist says to remind the user to rotate the PAT. The reminder is a nudge ("Rotate the PAT"), not a re-display ("Rotate the PAT: `github_pat_...`"). Including the value leaks it into the chat transcript, which may be logged or shared. Reference the token by its last 4 characters at most, never the full value. This applies to all secrets, not just the PAT.
 
 ---
 
