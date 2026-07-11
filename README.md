@@ -12,7 +12,7 @@ agent did, what's open, what's decided, and what went wrong before.
 |---|---|
 | [`ai-engineering-protocol.md`](ai-engineering-protocol.md) | **Cloud/sandbox edition** — for agents that clone the repo themselves and authenticate with a PAT. Currently instantiated for the LocalMind project. |
 | [`ai-engineering-protocol-local.md`](ai-engineering-protocol-local.md) | **Local agent edition** — for IDE-integrated agents (Claude Code, Cursor, Copilot) working on an already-cloned repo with the user's own git credentials. Generic template. |
-| [`context-skeleton/`](context-skeleton/) | The 12-file stub tree for bootstrapping `.context/` in a target repo. Every file carries its entry template in an HTML comment. |
+| [`context-skeleton/`](context-skeleton/) | The 14-file stub tree for bootstrapping `.context/` in a target repo. Every file carries its entry template in an HTML comment. Includes the self-gitignored `secrets/` module. |
 | [`roles/`](roles/) | **Role overlays** — small files that re-scope a base edition to a mission: reviewer (read-only), security-auditor, docs-agent. Engineer (full-scope) is the default, no overlay needed. |
 | [`localmind-review.md`](localmind-review.md) | Example session deliverable — a real review report produced by an agent following the protocol (LocalMind, Session 2). |
 
@@ -36,7 +36,9 @@ agent did, what's open, what's decided, and what went wrong before.
 
 - **Append-only logs stay append-only** — `sessions.md`, `inefficiencies/log.md`,
   `tasks/backlog.md`, `plans/decisions.md`. Corrections are appended, never edited in.
-- **No secrets in `.context/`** — it's committed to git. Names and locations only.
+- **No secrets in tracked files** — `.context/` is committed to git; names and
+  locations only. Values agents need live in `.context/secrets/`, a local-only
+  module whose own `.gitignore` keeps it out of the repo — it never travels.
 - **`chore(context):` commit prefix** for memory updates; review reports commit
   as `docs(review):`.
 - **Inefficiency logging is mandatory** — friction you absorb silently is

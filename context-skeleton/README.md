@@ -30,8 +30,11 @@ This directory describes the **process**.
 │   └── backlog.md       # append-only open items for future sessions
 ├── plans/
 │   └── decisions.md     # append-only ADR-style architectural decisions
-└── inefficiencies/
-    └── log.md           # append-only problems agents faced — mandatory honesty
+├── inefficiencies/
+│   └── log.md           # append-only problems agents faced — mandatory honesty
+└── secrets/             # LOCAL-ONLY — self-gitignored, never tracked, never travels
+    ├── .gitignore       # ignores everything here except itself + the README
+    └── <slug>           # one secret per file: line 1 = value, lines 2+ = notes
 ```
 
 Every file in this directory carries its own entry template in an HTML
@@ -49,8 +52,10 @@ its template. Don't invent formats.
 3. **Overwrite files are current-state only.** `tasks/current.md`,
    `workflows/active.md`, and the `system/` + `user/` files describe *now*;
    update them in place. History lives in the append-only logs.
-4. **No secrets — ever.** This directory is committed to git. Env var
-   *names* and where secrets live are fine; values never are.
+4. **No secrets in tracked files — ever.** This directory is committed
+   to git. Env var *names* and where secrets live are fine in shared
+   files; values belong only in `secrets/`, whose own `.gitignore` keeps
+   everything but its README out of git (rules in `secrets/README.md`).
 5. **Commit with `chore(context):`.** Context updates are process, not
    product — keep them out of the changelog. One exception: review
    reports in `reviews/` commit as `docs(review):` — they're a
@@ -75,3 +80,4 @@ its template. Don't invent formats.
 | `system/ai-models.md` | update in place |
 | `user/identity.md` | update in place |
 | `user/preferences.md` | update in place |
+| `secrets/<slug>` | local-only — never committed, never travels |

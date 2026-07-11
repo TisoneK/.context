@@ -96,7 +96,7 @@ model, and what went wrong before.
 - Check the user's first chat message for a PAT (`github_pat_...` or `ghp_...`).
 - If the repo is private AND no PAT is found, STOP and report: "Private repo requires a PAT. Please paste it in chat."
 - If the repo is public, skip — clone directly.
-- Export the PAT as `GIT_TOKEN` env var. Never write it to any file.
+- Export the PAT as `GIT_TOKEN` env var. Never write it to any tracked file. After Step 2's clone you may store it at `.context/secrets/github-pat` (line 1 = token; rules in the secrets README) — that directory is never tracked and dies with the sandbox.
 
 **Step 2 — Clone the repo**
 ```bash
@@ -127,6 +127,7 @@ git config user.email "tisonkironget@gmail.com"
   7. `.context/system/environments.md` + `.context/system/ai-models.md` — environments and agents seen before
   8. `.context/user/identity.md` + `.context/user/preferences.md` — who the user is and how they like things done
   9. `.context/workflows/active.md` — the workflow currently in force
+  10. `.context/secrets/` — local-only secret values available on this machine (never tracked; empty on a fresh clone). Note what's available — never print values.
 - If `.context/` does NOT exist, bootstrap it now (see Bootstrap in the `.context/` section) and commit it: `chore(context): bootstrap .context/ directory`.
 - **Migration:** if `docs/report/` contains prior reviews, move them: `git mv docs/report/*.md .context/reviews/` in the same bootstrap commit. Leave a `docs/report/README.md` pointer saying reviews now live in `.context/reviews/`.
 - Set `.context/tasks/current.md` to this session's task before starting work (overwrite — it holds one task at a time).
@@ -316,8 +317,11 @@ unset GIT_TOKEN
 │   └── backlog.md       # append-only open items for future sessions
 ├── plans/
 │   └── decisions.md     # append-only ADR-style architectural decisions
-└── inefficiencies/
-    └── log.md           # append-only problems agents faced — mandatory honesty
+├── inefficiencies/
+│   └── log.md           # append-only problems agents faced — mandatory honesty
+└── secrets/             # LOCAL-ONLY — self-gitignored, never tracked, never travels
+    ├── .gitignore       # ignores everything here except itself + the README
+    └── <slug>           # one secret per file: line 1 = value, lines 2+ = notes
 ```
 
 Every `.context/` file carries its own entry template in an HTML comment
@@ -337,12 +341,13 @@ at the top — follow it, don't invent formats.
 | Which agent + model you are | `.context/system/ai-models.md` | update |
 | Something you learned about the user | `.context/user/preferences.md` | update |
 | A change to the workflow itself | `.context/workflows/active.md` | update |
+| A secret value the agent needs on this machine | `.context/secrets/<slug>` | local-only — never committed |
 | A learning about this protocol file | this protocol file | edit + note in session entry |
 
 ### Rules
 
 1. **Append-only logs are append-only.** `sessions.md`, `inefficiencies/log.md`, `backlog.md`, and `decisions.md` never lose entries. If a past entry was wrong, append a correction referencing it — don't erase history.
-2. **No secrets.** `.context/` is committed to git. Record env var *names* and where secrets live — never values. No PATs, no API keys, no connection strings.
+2. **No secrets in tracked files.** `.context/` is committed to git. Record env var *names* and where secrets live in shared files — never values. Values the agent needs live only in `.context/secrets/`, whose own `.gitignore` keeps them out of the repo (rules in its README). No PATs, API keys, or connection strings anywhere else.
 3. **`chore(context):` commit prefix.** Context updates are not features or fixes. Keep them out of the changelog. One exception: review reports in `.context/reviews/` commit as `docs(review):` (Step 13) — they're a deliverable, not bookkeeping.
 4. **Inefficiency logging is mandatory.** Every session appends to `inefficiencies/log.md` — honestly. This is how the protocol and the next agent's session improve. Wasted time you don't log is time the next agent wastes again.
 5. **Verify before trusting.** `.context/` reflects what was true when written. If it contradicts the codebase, the codebase wins — fix the `.context/` entry (append a correction).
@@ -385,7 +390,7 @@ at the top — follow it, don't invent formats.
 
 ### Bootstrap (first session in a repo without `.context/`)
 
-1. **If the protocol package's `context-skeleton/` folder is available** (it ships alongside this file), copy it in: `cp -r context-skeleton <repo>/.context` — it contains all 12 stub files with their entry templates.
+1. **If the protocol package's `context-skeleton/` folder is available** (it ships alongside this file), copy it in: `cp -r context-skeleton <repo>/.context` — it contains all 14 stub files with their entry templates (including the self-gitignored `secrets/` module).
 2. **Otherwise create the tree by hand:** every file starts with a title, a one-line purpose (including whether it's append-only or overwrite), and its entry template inside an HTML comment. Use the Entry templates above for the logs; overwrite files (`tasks/current.md`, `workflows/active.md`, `user/*`) get current-state field lists; `reviews/` gets a `README.md` stating the `YYYY-MM-DD-review.md` naming and report structure.
 3. Write `.context/README.md` from the Structure + What-goes-where + Rules sections above (the skeleton already includes it).
 4. Fill `user/identity.md` and `user/preferences.md` from Pre-Flight, `workflows/active.md` from Session Parameters, and add your row to `system/ai-models.md`.
@@ -600,7 +605,7 @@ Evaluate:
 - API security (rate limiting on auth, upload, mutation routes)
 - File uploads (content-type allowlist, max size, URL protocol validation)
 - **SSRF protection** (if the project fetches URLs: check for redirect-following bypass, private IP filtering, metadata endpoint blocking)
-- Secrets management (PAT in env var only; `.env*` in `.gitignore`; API keys stored with `0600` perms; **no secret values anywhere in `.context/`**)
+- Secrets management (PAT in env var only; `.env*` in `.gitignore`; API keys stored with `0600` perms; **no secret values in tracked `.context/` files — values only in `.context/secrets/`**)
 - Session handling
 - Dependency vulnerabilities (check audit tools — verify against actual installed versions)
 
@@ -706,7 +711,7 @@ Append-only. Never overwrite. Start each section with `---`.
 - [ ] If behavior changed: devlog/report entry added
 - [ ] If behavior changed: version bumped (if the project versions that way)
 - [ ] Commit message follows the project's commit style (`chore(context):` for `.context/` updates)
-- [ ] No secrets in the diff (scan `git diff` — no PAT, API keys, passwords; doubly so for `.context/` files)
+- [ ] No secrets in the diff (scan `git diff` — no PAT, API keys, passwords; doubly so for `.context/` files); `git status` must show nothing from `.context/secrets/`
 - [ ] Pushed to origin (per push policy)
 
 ### End-of-session gates (before Step 19 unsets the PAT)
@@ -740,7 +745,7 @@ Append-only. Never overwrite. Start each section with `---`.
 18. **Don't read huge files in one shot** — files >500 lines get truncated. Use `Read` with `offset`/`limit`, or `Grep` to find the relevant section first.
 19. **Don't forget to strip the token after push** — the push workflow re-adds the token to the remote URL; strip it immediately after so it's not persisted in `.git/config`.
 20. **Don't skip reading `.context/` (Step 3)** — rediscovering what a prior agent already documented is the #1 logged inefficiency. Read first, verify second, work third.
-21. **Don't put secret values in `.context/`** — it's committed to git. Env var names and locations only.
+21. **Don't put secret values in tracked `.context/` files** — the directory is committed to git. Values belong only in `.context/secrets/` (self-gitignored — verify with `git check-ignore` before writing); everywhere else, names and locations only.
 22. **Don't edit append-only logs** — `sessions.md`, `inefficiencies/log.md`, `backlog.md`, `decisions.md` grow by appending. Wrong entries get appended corrections, not deletions.
 23. **Don't unset the PAT before the `.context/` updates are pushed** — Steps 15–17 need one final push; Step 19 comes last.
 24. **Don't skip the inefficiency log because the session went "fine"** — friction you absorbed silently is friction the next agent hits blind.
