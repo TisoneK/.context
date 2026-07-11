@@ -219,6 +219,7 @@ git pull --ff-only
   10. `.context/workflows/active.md` — the workflow currently in force
   11. `.context/secrets/` — local-only secret values available on this machine (never tracked; empty on a fresh clone). Note what's available — never print values.
 - If `.context/` does NOT exist, bootstrap it now (see Bootstrap in the `.context/` section) and commit it: `chore(context): bootstrap .context/ directory`.
+- **Sync structural files from the package (when `.context/` already exists and the skeleton is on disk).** Before reading, reconcile `.context/`'s *structural* files against `context-skeleton/`: any skeleton file whose basename is `README.md` or `.gitignore` is package-owned structure — add it if missing, update it if it differs. **Never touch data files** (the append-only logs, `tasks/`, `system/`, `user/`, `workflows/active.md`, `reviews/*`, `secrets/`) — they hold the project's memory; overwriting them destroys it. See `.context/SYNC.md` for the rule, the full lists, and any non-README structural exceptions. Commit drift as `chore(context): sync structure from package`. If the package/skeleton isn't on disk, skip this and note it — don't fail.
 - **Migration:** if `docs/report/` contains prior reviews, move them: `git mv docs/report/*.md .context/reviews/` in the same bootstrap commit. Leave a `docs/report/README.md` pointer saying reviews now live in `.context/reviews/`.
 - Set `.context/tasks/current.md` to this session's task before starting work (overwrite — it holds one task at a time).
 
@@ -395,6 +396,7 @@ git push origin main  # uses the user's existing credentials
 ```text
 .context/
 ├── README.md            # what this directory is, rules, for humans + agents
+├── SYNC.md              # structural-vs-data split + how sync from the package works
 ├── system/
 │   ├── environments.md  # machines/sandboxes agents have run on (OS, toolchain versions, quirks)
 │   └── ai-models.md     # registry: which agents + models have worked on this repo
@@ -501,7 +503,7 @@ README (`reviews/`, `secrets/`). Follow it, don't invent formats.
 
 ### Bootstrap (first session in a repo without `.context/`)
 
-1. **If the protocol package's `context-skeleton/` folder is available** (it ships alongside this file), copy it in: `cp -r context-skeleton <repo>/.context` — it contains all 16 stub files with their entry templates (including the self-gitignored `secrets/` module and the `flaws/` workflow-friction log).
+1. **If the protocol package's `context-skeleton/` folder is available** (it ships alongside this file), copy it in: `cp -r context-skeleton <repo>/.context` — it contains all 17 stub files with their entry templates (including the self-gitignored `secrets/` module, the `flaws/` workflow-friction log, and `SYNC.md`, the structural-vs-data sync manifest).
 2. **Otherwise create the tree by hand:** every file starts with a title, a one-line purpose (including whether it's append-only or overwrite), and its entry template inside an HTML comment. Use the Entry templates above for the logs; overwrite files (`tasks/current.md`, `workflows/active.md`, `user/*`) get current-state field lists; `reviews/` gets a `README.md` stating the `YYYY-MM-DD-review.md` naming and report structure; `secrets/` gets its self-ignoring `.gitignore` (`*` + `!.gitignore` + `!README.md`) and a README with the hard rules — create these two before anything else in that directory; `flaws/` mirrors `inefficiencies/` — an append-only log plus a README stating the flaws-vs-inefficiencies split.
 3. Write `.context/README.md` from the Structure + What-goes-where + Rules sections above (the skeleton already includes it).
 4. Fill `user/identity.md` and `user/preferences.md` from Pre-Flight, `workflows/active.md` from Session Parameters, and add your row to `system/ai-models.md`.
@@ -860,6 +862,7 @@ Save to `.context/reviews/YYYY-MM-DD-review.md`. Commit and push it.
 30. **Don't ask for permission on the default next step** — if the proposed action is what the protocol already prescribes (commit after edits, push after commit, log a flaw you found, fix a gap you identified), do it and report — don't ask "Want me to...?" The Zero-Interruption Principle covers this, but agents often draw a false distinction between "clarification" (which they know not to ask) and "permission" (which they think is polite). Both are interruptions. Only ask when there's genuine ambiguity: which of two approaches to take, whether to proceed despite risk, or permission for a broad-scope change the protocol doesn't already authorize. If the user has already said "fix everything" or equivalent, that authorization covers all safe fixes — don't re-ask for each one.
 31. **Don't apply a review finding without reproducing it** — verify the claim against the file it cites (grep the referenced section) before editing. A review once claimed "the editions have 4 phases, not 5" — both have six — and the applied "fix" broke a correct Phase 5 reference. A confident wrong claim in a review propagates faster than a bug.
 32. **Don't inspect stale local state** — if the user references another agent's work or asks you to "check what the session did," fetch first. Your local is stale the moment another agent pushes. Running `git show` or `git log` on a local that's behind remote gives you wrong information. See Git Workflow rule 7.
+33. **Don't sync structure by copying the whole skeleton over `.context/`** — that overwrites project-owned *data* (session logs, tasks, decisions, user prefs, reviews). Sync only *structural* files: those named `README.md` or `.gitignore` in `context-skeleton/`, plus `SYNC.md`. Everything else is data — never touch it during a sync. See `.context/SYNC.md` and the Step 3 sync sub-step.
 
 ---
 

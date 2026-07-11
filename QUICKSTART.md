@@ -18,7 +18,7 @@ protocol package, and how the two work together.
 ~/Code/ai-engineering-protocol     ← the package (TisoneK/.context)
 ├── ai-engineering-protocol.md        cloud/sandbox edition
 ├── ai-engineering-protocol-local.md  local/IDE edition
-├── context-skeleton/                 16-file stub tree
+├── context-skeleton/                 17-file stub tree (incl. SYNC.md)
 └── roles/                            reviewer / security-auditor / docs-agent
 
 ~/Code/myproject                   ← any parent repo

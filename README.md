@@ -13,7 +13,7 @@ agent did, what's open, what's decided, and what went wrong before.
 | [`universal-kickoff.md`](universal-kickoff.md) | **Session entry point — hand this to the agent.** Fill its Pre-Flight and it walks any agent through the door: get both repos on disk, bootstrap or sync `.context/`, load the matching edition, run the protocol. Step 0 branches on agent type (local IDE vs cloud/sandbox), so a local agent never re-clones the repo or touches a PAT. Start here. |
 | [`ai-engineering-protocol.md`](ai-engineering-protocol.md) | **Cloud/sandbox edition** — for agents that clone the repo themselves and authenticate with a PAT. Generic template — fill Pre-Flight per project. |
 | [`ai-engineering-protocol-local.md`](ai-engineering-protocol-local.md) | **Local agent edition** — for IDE-integrated agents (Claude Code, Cursor, Copilot) working on an already-cloned repo with the user's own git credentials. Generic template. |
-| [`context-skeleton/`](context-skeleton/) | The 16-file stub tree for bootstrapping `.context/` in a target repo. Every file carries its entry template in an HTML comment. Includes the self-gitignored `secrets/` module and the `flaws/` workflow-friction log. |
+| [`context-skeleton/`](context-skeleton/) | The 17-file stub tree for bootstrapping `.context/` in a target repo. Every file carries its entry template in an HTML comment. Includes the self-gitignored `secrets/` module, the `flaws/` workflow-friction log, and `SYNC.md` (the structural-vs-data sync manifest). |
 | [`roles/`](roles/) | **Role overlays** — small files that re-scope a base edition to a mission: reviewer (read-only), security-auditor, docs-agent. Engineer (full-scope) is the default, no overlay needed. |
 | [`flaws/`](flaws/) | **Consolidated workflow flaws** — friction agents hit with the protocol/`.context/` system itself, back-ported from all projects using this package. The source of truth for protocol improvements. |
 | [`examples/localmind-review.md`](examples/localmind-review.md) | Example session deliverable — a real review report produced by an agent following the protocol (LocalMind, Session 2). |
@@ -53,3 +53,7 @@ agent did, what's open, what's decided, and what went wrong before.
   correction twice.
 - **Verify before trusting** — if `.context/` contradicts the codebase, the
   codebase wins; append a correction.
+- **Structure syncs from the package; data never does** — `README.md`/`.gitignore`
+  files (and `SYNC.md`) are package-owned structure an agent reconciles against
+  `context-skeleton/` at session start; every other `.context/` file is
+  project-owned data that sync never overwrites. See `context-skeleton/SYNC.md`.

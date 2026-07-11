@@ -244,7 +244,7 @@ You should see:
 - the project repo — its code (and `.context/` if it already exists)
 - `.context-package/ai-engineering-protocol.md` — cloud/sandbox edition
 - `.context-package/ai-engineering-protocol-local.md` — local agent edition
-- `.context-package/context-skeleton/` — the 16-file stub tree
+- `.context-package/context-skeleton/` — the 17-file stub tree
 - `.context-package/roles/` — role overlays
 - `.context-package/QUICKSTART.md` — the two-repo mental model
 
@@ -275,12 +275,12 @@ the initial data, commit, and push — BEFORE starting the protocol phases.
 cp -r ../.context-package/context-skeleton .context
 ```
 
-Verify the skeleton landed (16 files including the self-gitignored `secrets/`):
+Verify the skeleton landed (17 files including the self-gitignored `secrets/`):
 ```bash
 find .context -type f | sort
-# Should include: README.md, agents/sessions.md, flaws/, inefficiencies/,
-# plans/, reviews/, secrets/.gitignore, secrets/README.md, system/,
-# tasks/, user/, workflows/
+# Should include: README.md, SYNC.md, agents/sessions.md, flaws/,
+# inefficiencies/, plans/, reviews/, secrets/.gitignore, secrets/README.md,
+# system/, tasks/, user/, workflows/
 ```
 
 #### 1b. Fill in the initial `.context/` data
