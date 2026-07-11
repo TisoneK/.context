@@ -197,6 +197,7 @@ git log --oneline -20
 - Record the baseline: test count, lint error count, typecheck pass/fail.
 - If the baseline is broken (tests failing, build broken), document it before touching anything. The agent is not responsible for pre-existing breakage.
 - If a health-check command fails in a way `.context/inefficiencies/log.md` already documents, follow the logged workaround instead of rediscovering it.
+- Check `.context/system/environments.md` before guessing — a prior agent may have recorded verified commands for this machine.
 
 ### Phase 2: Review (no code changes)
 
@@ -266,8 +267,8 @@ git push origin main  # uses the user's existing credentials
 - If this session completed an existing backlog item, check it off (`- [x]`) and note the session/commit — don't remove the line.
 
 **Step 16 — Update `.context/system/` + `.context/user/` + `.context/plans/`**
-- `.context/system/environments.md`: add/update an entry for this machine (OS + version, runtime versions, package manager, anything machine-specific the next agent should know — e.g., "no psql installed", "port 3000 usually taken").
-- `.context/system/ai-models.md`: add/update your row — agent name, model, first/last seen dates, sessions count.
+- `.context/system/environments.md`: add/update the block for this machine (OS + version, runtime versions, package manager, anything machine-specific the next agent should know — e.g., "no psql installed", "port 3000 usually taken"). Refresh its last-verified date and record the commands you verified work (install / test / lint / dev).
+- `.context/system/ai-models.md`: add/update your row — agent name, model, first/last seen dates, sessions count. Add an Observations bullet for any concrete capability or limit this session demonstrated (yours or a prior agent's).
 - `.context/user/preferences.md`: record every standing preference this session revealed — corrections the user gave, patterns they approved, things they stated — with provenance + date, per the file's learning rules. One-off instructions don't count. Skip if none.
 - `.context/plans/decisions.md`: append an ADR-style entry for every architectural decision made or confirmed this session (context → decision → consequences). Skip if none.
 
