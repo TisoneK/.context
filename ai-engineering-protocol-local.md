@@ -59,6 +59,7 @@ model, and what went wrong before.
 > These shape how the agent approaches the work. Defaults are shown in
 > brackets — leave blank to accept the default.
 
+- **Role:** engineer _[default: engineer — full-scope, this document as-is. Role overlays in `roles/` re-scope the session (reviewer, security-auditor, docs-agent) — hand the agent the role file alongside this edition]_
 - **Scope:** discovery + review + fix all safe issues _[default: discovery + review + fix all safe issues]_
 - **Focus areas:** all _[default: all — security, performance, UX, architecture, testing, docs]_
 - **Findings handling:** fix safe issues; flag architectural changes for next session _[default: fix safe, flag architectural]_
@@ -240,7 +241,7 @@ git push origin main  # uses the user's existing credentials
 ### Phase 4: Report
 
 **Step 13 — Write the report**
-- Save to `.context/reviews/YYYY-MM-DD-review.md` in the repo (use today's date; create the directory if missing). If a report for today already exists, suffix the new one: `YYYY-MM-DD-review-2.md` (per `reviews/README.md`).
+- Save to `.context/reviews/YYYY-MM-DD-review.md` in the repo (use today's date; create the directory if missing). If a report for today already exists, suffix the new one: `YYYY-MM-DD-review-2.md` (per `reviews/README.md`). Role overlays use their own filename (e.g., `YYYY-MM-DD-security-review.md` — see `roles/README.md`).
 - Structure: Executive Summary → Discovery Phase → Baseline Health → Findings (by severity) → Fixes Applied → Open Items → Recommended Next Steps.
 - **Even if no findings:** write a report saying "baseline healthy, no findings" — the next agent needs to know the review happened.
 - Commit (`docs(review): ...` or the project's convention) and push (same push workflow as Step 12).
@@ -360,7 +361,7 @@ at the top — follow it, don't invent formats.
 ```markdown
 ---
 ## 2026-07-11 — Session N
-- **Agent:** <agent name> | **Model:** <model id> | **Platform:** <machine/OS>
+- **Agent:** <agent name> | **Model:** <model id> | **Platform:** <machine/OS> | **Role:** <engineer, or overlay from roles/>
 - **Task:** <what this session set out to do>
 - **Commits:** <count> (<first-sha>..<last-sha>)
 - **Outcome:** <done / partial / blocked — one line>
@@ -645,7 +646,7 @@ Evaluate:
 
 ### Review reports
 
-Place review reports in `.context/reviews/` in the repo (create the directory if it doesn't exist). Naming: `YYYY-MM-DD-review.md` so they sort chronologically. The next agent checks this directory first — don't skip writing one. (Legacy location `docs/report/` — migrate on first session, per the `.context/` Bootstrap rules.)
+Place review reports in `.context/reviews/` in the repo (create the directory if it doesn't exist). Naming: `YYYY-MM-DD-review.md` so they sort chronologically; role overlays use `YYYY-MM-DD-<role>-review.md`. The next agent checks this directory first — don't skip writing one. (Legacy location `docs/report/` — migrate on first session, per the `.context/` Bootstrap rules.)
 
 ---
 

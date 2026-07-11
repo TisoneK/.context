@@ -7,6 +7,7 @@ user changes the rules; note the change in your session entry.
 <!-- TEMPLATE — replace everything below this comment:
 - **Protocol:** <ai-engineering-protocol.md (cloud) | ai-engineering-protocol-local.md (local) | both, by agent type>
 - **Since:** YYYY-MM-DD
+- **Default role:** <e.g., engineer — unless a session says otherwise; see the protocol package's roles/>
 - **Scope:** <e.g., discovery + review + fix all safe issues>
 - **Focus areas:** <e.g., all — security, performance, UX, architecture, testing, docs>
 - **Findings handling:** <e.g., fix safe, flag architectural>
@@ -18,6 +19,7 @@ user changes the rules; note the change in your session entry.
 
 - **Protocol:** —
 - **Since:** —
+- **Default role:** —
 - **Scope:** —
 - **Focus areas:** —
 - **Findings handling:** —

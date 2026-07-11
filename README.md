@@ -13,12 +13,15 @@ agent did, what's open, what's decided, and what went wrong before.
 | [`ai-engineering-protocol.md`](ai-engineering-protocol.md) | **Cloud/sandbox edition** — for agents that clone the repo themselves and authenticate with a PAT. Currently instantiated for the LocalMind project. |
 | [`ai-engineering-protocol-local.md`](ai-engineering-protocol-local.md) | **Local agent edition** — for IDE-integrated agents (Claude Code, Cursor, Copilot) working on an already-cloned repo with the user's own git credentials. Generic template. |
 | [`context-skeleton/`](context-skeleton/) | The 12-file stub tree for bootstrapping `.context/` in a target repo. Every file carries its entry template in an HTML comment. |
+| [`roles/`](roles/) | **Role overlays** — small files that re-scope a base edition to a mission: reviewer (read-only), security-auditor, docs-agent. Engineer (full-scope) is the default, no overlay needed. |
 | [`localmind-review.md`](localmind-review.md) | Example session deliverable — a real review report produced by an agent following the protocol (LocalMind, Session 2). |
 
 ## Usage
 
 1. Fill in the **Pre-Flight** section of the edition that matches your agent
-   (cloud or local) and hand the file to the agent as its instructions.
+   (cloud or local) and hand the file to the agent as its instructions. To
+   run a mission-scoped session, add one overlay from `roles/` — where the
+   role file and the edition conflict, the role file wins.
 2. The agent bootstraps the target repo's memory on first session:
 
    ```bash

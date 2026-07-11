@@ -1,10 +1,12 @@
 # Reviews (one file per session)
 
 Session review reports. One file per session, named `YYYY-MM-DD-review.md`
-so they sort chronologically. If two sessions land on the same day, suffix
-the later one: `YYYY-MM-DD-review-2.md`. Never edit a past report — a
-correction goes in the next report (or an appended "Correction" section
-citing the session that found the error).
+so they sort chronologically. Role-overlay sessions (see the protocol
+package's `roles/`) use `YYYY-MM-DD-<role>-review.md`, e.g.
+`2026-07-11-security-review.md`. If two same-named sessions land on the
+same day, suffix the later one: `YYYY-MM-DD-review-2.md`. Never edit a
+past report — a correction goes in the next report (or an appended
+"Correction" section citing the session that found the error).
 
 Report structure:
 1. Executive Summary
