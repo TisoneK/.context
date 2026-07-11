@@ -12,6 +12,7 @@ user changes the rules; note the change in your session entry.
 - **Since:** YYYY-MM-DD
 - **Default role:** <e.g., engineer — unless a session says otherwise; see the protocol package's roles/>
 - **Scope:** <e.g., discovery + review + fix all safe issues>
+- **Target:** <general sweep | refactor <path> | fix <bug> | feature <description> | review <area> | free text>
 - **Focus areas:** <e.g., all — security, performance, UX, architecture, testing, docs>
 - **Findings handling:** <e.g., fix safe, flag architectural>
 - **Push policy:** <e.g., push to main directly after each commit>

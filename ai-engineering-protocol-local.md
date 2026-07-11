@@ -65,6 +65,7 @@ model, and what went wrong before.
 
 - **Role:** engineer _[default: engineer — full-scope, this document as-is. Role overlays in `roles/` re-scope the session (reviewer, security-auditor, docs-agent) — hand the agent the role file alongside this edition]_
 - **Scope:** discovery + review + fix all safe issues _[default: discovery + review + fix all safe issues]_
+- **Target:** general sweep _[default: general sweep — scan everything, fix safe issues. Other values: `refactor <path/module>` — Phase 2 reviews only that area, Phase 3 refactors it; `fix <bug description>` — Phase 2 reproduces, Phase 3 fixes with regression test; `feature <description>` — Phase 2 reviews adjacent code for patterns, Phase 3 implements; `review <area>` — Phase 2 only, scoped to that area, no Phase 3; or free text — agent interprets, asks once if ambiguous. Empty = general sweep.]_
 - **Focus areas:** all _[default: all — security, performance, UX, architecture, testing, docs]_
 - **Findings handling:** fix safe issues; flag architectural changes for next session _[default: fix safe, flag architectural]_
 - **Push policy:** push to main directly after each commit _[default: push to main directly]_
@@ -271,7 +272,13 @@ git log --oneline -20
 ### Phase 2: Review (no code changes)
 
 **Step 9 — Review across focus areas**
-- For each focus area (security, performance, UX, architecture, testing, docs):
+- **If a Target is set** (not "general sweep"), scope Phase 2 to that target:
+  - `refactor <path>` — review only the specified path/module and its callers
+  - `fix <bug>` — reproduce the bug first (run the failing test, trace the code path), then review the surrounding code
+  - `feature <description>` — review adjacent code for patterns to follow, note conventions
+  - `review <area>` — review only the specified area (e.g., "UI only" → frontend components only)
+  - Free text — interpret the target; if ambiguous, ask once in chat before proceeding
+- **If Target is "general sweep"** (default), review across all focus areas (security, performance, UX, architecture, testing, docs):
   - Read the relevant code (use Grep/Glob to find files, Read with offset/limit for large files)
   - Note findings with severity (Critical / High / Medium / Low / Nice to Have)
   - For each finding: Description, Impact, Recommendation
@@ -283,6 +290,13 @@ git log --oneline -20
 ### Phase 3: Fix (code changes)
 
 **Step 10 — Apply fixes per the findings handling policy**
+- **If a Target is set** (not "general sweep"), scope Phase 3 to that target:
+  - `refactor <path>` — refactor only the specified path/module; don't fix unrelated issues found elsewhere (backlog them)
+  - `fix <bug>` — fix the bug AND ship a regression test; don't fix unrelated issues found nearby (backlog them)
+  - `feature <description>` — implement the feature following patterns noted in Phase 2; run tests after each logical change
+  - `review <area>` — no Phase 3 (review-only target); skip to Step 12 (report)
+  - Free text — fix what the target implies; backlog anything unrelated
+- **If Target is "general sweep"** (default), apply all safe fixes found in Phase 2.
 - "Fix safe issues" = typos, doc mismatches, missing validation, dark-mode gaps, type annotations, DRY refactors, accessibility, SSRF hardening, perf optimizations with no behavior change.
 - "Flag architectural changes" = provider config consolidation, module decomposition, theming strategy, new abstractions. Document these in the report and `.context/tasks/backlog.md` but don't implement without explicit approval.
 - Order fixes by: security first, then bugs, then improvements, then docs.
