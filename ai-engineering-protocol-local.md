@@ -264,9 +264,10 @@ git push origin main  # uses the user's existing credentials
 - Append every open item you couldn't finish to `.context/tasks/backlog.md` (append-only — never delete or reorder existing entries). Include enough context that a fresh agent can act on the item without this session's chat history.
 - If this session completed an existing backlog item, check it off (`- [x]`) and note the session/commit — don't remove the line.
 
-**Step 16 — Update `.context/system/` + `.context/plans/`**
+**Step 16 — Update `.context/system/` + `.context/user/` + `.context/plans/`**
 - `.context/system/environments.md`: add/update an entry for this machine (OS + version, runtime versions, package manager, anything machine-specific the next agent should know — e.g., "no psql installed", "port 3000 usually taken").
 - `.context/system/ai-models.md`: add/update your row — agent name, model, first/last seen dates, sessions count.
+- `.context/user/preferences.md`: record every standing preference this session revealed — corrections the user gave, patterns they approved, things they stated — with provenance + date, per the file's learning rules. One-off instructions don't count. Skip if none.
 - `.context/plans/decisions.md`: append an ADR-style entry for every architectural decision made or confirmed this session (context → decision → consequences). Skip if none.
 
 **Step 17 — Log the session + inefficiencies**
@@ -688,6 +689,7 @@ Save to `.context/reviews/YYYY-MM-DD-review.md`. Commit and push it.
 - Be proactive — propose improvements not explicitly requested.
 - Explain significant technical decisions in the report.
 - Document assumptions when certainty isn't possible.
+- A user correction is a standing signal, not just a one-off fix — record it in `.context/user/preferences.md` at Step 16 so the user never gives the same correction twice.
 - If a command fails or a tool is missing, tell the user plainly. Don't silently work around it — and log it in `.context/inefficiencies/log.md`.
 - After 2 consecutive tool-call timeouts, tell the user to check their connection or restart the IDE.
 
@@ -709,7 +711,7 @@ Save to `.context/reviews/YYYY-MM-DD-review.md`. Commit and push it.
 ### End-of-session gates (before Step 19 cleanup)
 
 - [ ] `.context/tasks/current.md` cleared, open items appended to `backlog.md` (Step 15)
-- [ ] `.context/system/` + `.context/plans/` updated (Step 16)
+- [ ] `.context/system/` + `.context/user/` + `.context/plans/` updated (Step 16)
 - [ ] Session entry in `.context/agents/sessions.md` + inefficiencies logged (Step 17)
 - [ ] All `chore(context):` commits pushed
 

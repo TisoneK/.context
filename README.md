@@ -41,5 +41,8 @@ agent did, what's open, what's decided, and what went wrong before.
   as `docs(review):`.
 - **Inefficiency logging is mandatory** — friction you absorb silently is
   friction the next agent hits blind.
+- **User corrections become memory** — standing preferences are recorded in
+  `user/preferences.md` with provenance, so the user never gives the same
+  correction twice.
 - **Verify before trusting** — if `.context/` contradicts the codebase, the
   codebase wins; append a correction.
