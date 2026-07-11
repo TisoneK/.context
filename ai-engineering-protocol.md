@@ -43,14 +43,18 @@ model, and what went wrong before.
 - **Name:** <GIT_NAME>
 - **Email:** <GIT_EMAIL>
 
-### Agent Identity (AGENT FILLS IN — RECORDED IN `.context/`)
+### Agent Identity (USER FILLS IN — AGENT COPIES, NEVER GUESSES)
 
-> The agent fills these in at session start so `.context/agents/sessions.md`
-> records who used what. If the agent doesn't know its exact model ID, it
-> records its best self-description.
+> The user fills in the model version below. The agent copies it into
+> `.context/agents/sessions.md` and `.context/system/ai-models.md`.
+> **The agent must never guess its own model version.** System prompts
+> often don't state the model version, and guessing produces wrong
+> entries that propagate across sessions. If the user didn't fill this
+> in, the agent asks once in chat, then records the answer. If the user
+> doesn't know, record `unknown` — never fabricate a version number.
 
 - **Agent name:** _(e.g., Claude Code, Cursor, Copilot Workspace, Super Z)_
-- **Model:** _(e.g., claude-fable-5, gpt-5, gemini-2.5-pro)_
+- **Model:** _(user fills in — e.g., glm-5.2, claude-sonnet-4, gpt-5, gemini-2.5-pro. Agent copies this verbatim; does not guess.)_
 - **Platform:** _(e.g., cloud sandbox, CI runner — plus OS if known)_
 
 ### Session Parameters
@@ -83,12 +87,75 @@ model, and what went wrong before.
 
 ---
 
+## Two Surfaces — Know Which One You're On
+
+> **Read this before Step 1.** Every repo managed by this protocol has
+> two surfaces. An agent edits one or the other — never both in the same
+> commit — and must know which one it's on at all times.
+
+1. **The project** — product code, docs, tests, config. Commits use
+   normal prefixes (`fix:`, `feat:`, `docs:`). Friction with the project
+   (its code, toolchain, environment, dependencies) goes in
+   `.context/inefficiencies/log.md`.
+2. **`.context/`** — agent memory. Commits use `chore(context):`. Friction
+   **with the `.context/` system or this protocol itself** (a rule that's
+   ambiguous, a step that's missing, a template that's confusing) goes in
+   `.context/flaws/log.md`.
+
+If you're editing a file under `.context/`, you're in **memory mode**.
+If you're editing anything else, you're in **project mode**. The 19 steps
+below apply to both, but the commit prefix and friction-logging
+destination differ. When in doubt: "Am I editing the project's product,
+or am I editing the agent's memory of the project?"
+
+---
+
+## Session Lifecycle — Entry, Transitions, Exit
+
+> **The protocol must direct the agent at every point.** If you don't
+> know what to do next, the protocol has failed — log it as a flaw. The
+> lifecycle has three markers the agent must recognize:
+
+### ENTRY (before Step 1)
+- **The session starts when the user hands you this file (plus an optional role overlay).**
+- **First action:** Read the Two Surfaces section above, then read Pre-Flight, then begin Step 1.
+- **Do not edit any file until Phase 1 (Steps 1–8) is complete.** No exceptions, no "this task is too small." Phase 1 exists so you work from complete context, not partial context. Skipping it is the most common protocol violation.
+
+### TRANSITIONS (between phases)
+- **Phase 1 → Phase 2:** Setup is complete when baseline health checks pass (or pre-existing breakage is documented). Move to review.
+- **Phase 2 → Phase 3:** Review is complete when all focus areas are scanned. Move to fixing. If no findings, skip to Phase 4 (report "baseline healthy, no findings").
+- **Phase 3 → Phase 4:** Fixing is complete when all safe issues are fixed and committed. Move to reporting.
+- **Between Steps 11 and the next Step:** After every push, pull before the next commit — other agents may have pushed.
+
+### EXIT (Step 19 — the session is not done until ALL of these happen)
+- [ ] All fixes committed AND pushed
+- [ ] Report written, committed, AND pushed (`.context/reviews/`)
+- [ ] CHANGELOG updated, committed, AND pushed (if behavior changed)
+- [ ] `.context/tasks/`, `.context/system/`, `.context/plans/` updated, committed, AND pushed
+- [ ] `.context/agents/sessions.md` + `.context/inefficiencies/log.md` + `.context/flaws/log.md` appended, committed, AND pushed
+- [ ] `tasks/current.md` cleared (set to idle)
+- [ ] PAT unset (Step 19)
+- [ ] Chat summary delivered to user
+
+> **If the user has to remind you to commit or push, the protocol has
+> failed.** Log it as a flaw. The exit checklist above is mandatory — an
+> incomplete exit leaves the repo in an inconsistent state and the next
+> agent starts blind.
+
+---
+
 ## Autonomous Execution Steps (AGENT RUNS THESE IN ORDER)
 
 > The agent executes these steps sequentially. It does not ask the user
 > questions between steps. If a step fails, the agent attempts to
 > resolve it using the Getting Unstuck section. If unresolvable, the
 > agent stops and reports the blocker.
+>
+> **No task is too small for Phase 1.** A one-line `.context/` edit still
+> requires Steps 1–8 (pull, read `.context/`, read docs, discovery,
+> baseline) before any file is modified. Skipping Phase 1 because the
+> task seems small is the most common protocol violation — it causes
+> agents to miss prior work, duplicate effort, and edit out of order.
 
 ### Phase 1: Setup (no code changes)
 
@@ -119,6 +186,7 @@ git config user.email "<GIT_EMAIL>"
 - Verify: `echo "${GIT_TOKEN}"` should show the token (still in env, not in any file).
 
 **Step 3 — Read `.context/` (agent memory)**
+- **Reading `workflows/active.md` is a binding instruction, not passive documentation.** When you read it in step 9 below, immediately fetch and load the protocol file it references before any other tool use. If the protocol file is not in your working directory, fetch it from the URL in the `Protocol source` field. Don't search local paths first — the workflow file tells you where it lives.
 - If `.context/` exists, read it in this order:
   1. `.context/README.md` — orientation
   2. `.context/agents/sessions.md` — who worked here before, with which model, and what they did (read the last 3–5 entries)
@@ -754,6 +822,10 @@ Append-only. Never overwrite. Start each section with `---`.
 22. **Don't edit append-only logs** — `sessions.md`, `inefficiencies/log.md`, `backlog.md`, `decisions.md` grow by appending. Wrong entries get appended corrections, not deletions.
 23. **Don't unset the PAT before the `.context/` updates are pushed** — Steps 15–17 need one final push; Step 19 comes last.
 24. **Don't skip the inefficiency log because the session went "fine"** — friction you absorbed silently is friction the next agent hits blind.
+25. **Don't guess your own model version** — system prompts often don't state it, and guesses propagate across sessions as wrong data. If the user filled in Pre-Flight's Agent Identity, copy it verbatim. If not, ask once in chat. If the user doesn't know, record `unknown` — never fabricate a version number.
+26. **Don't skip the Exit checklist** — a session is not done until every box in the Session Lifecycle → EXIT section is checked. If the user has to remind you to commit or push, the protocol failed. Log it as a flaw.
+27. **Don't treat `workflows/active.md` as documentation** — it's a binding instruction. After reading it, immediately load the protocol it references. Don't proceed with other tool use until the protocol is loaded.
+28. **Don't treat any task as "too small for Phase 1"** — even a one-line `.context/` edit requires Steps 1–8 first. Skipping Phase 1 is the most common protocol violation.
 
 ---
 

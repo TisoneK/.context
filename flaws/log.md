@@ -82,3 +82,40 @@ See `README.md` in this directory for the flow and format.
 - **Suggested fix:** Add explicit cloud-vs-local sub-bullets under the `secrets/github-pat` guidance: cloud = session-only convenience, local = persists across sessions.
 - **Source:** Package review by Super Z / GLM-4.5, Session 4
 - **Status:** fixed in this commit — `ai-engineering-protocol.md` Step 1 now has cloud/local sub-bullets
+
+---
+## 2026-07-11 — Super Z / GLM-5.2 (Session 5) — UPDATE: flaws 1–4 fixed
+
+Flaws 1–4 (consolidated from LocalMind Session 3, GitHub Copilot) are
+now **fixed in this commit**. All four suggested fixes applied to both
+protocol editions:
+
+- **Flaw 1 (binding instruction):** Fixed. Step 3 now says "Reading
+  `workflows/active.md` is a binding instruction, not passive
+  documentation." Added as Pitfall #27 in both editions.
+- **Flaw 2 (protocol source):** Fixed. `workflows/active.md` template
+  now has a `Protocol source` field with the GitHub URL.
+- **Flaw 3 (no-task-too-small):** Fixed. Protocol preamble now says
+  "No task is too small for Phase 1." Added as Pitfall #28.
+- **Flaw 4 (two surfaces):** Fixed. Both editions now have a "Two
+  Surfaces — Know Which One You're On" section before Phase 1.
+
+---
+## 2026-07-11 — Super Z / GLM-5.2 (consolidated from LocalMind, Session 5)
+
+- **Flaw:** Agents are asked to record their model identity in `.context/system/ai-models.md` and `agents/sessions.md`, but the protocol gave them no reliable way to determine it. The system prompt doesn't state the model version, and the protocol's Pre-Flight said "agent fills in — records best self-description." This led the agent to guess "GLM-4.5" in Session 1, which propagated verbatim through Sessions 2–4. The actual model was GLM-5.2.
+- **Symptom:** All `.context/` entries from Sessions 1–4 recorded the wrong model (GLM-4.5 instead of GLM-5.2). The user caught it in Session 5 by asking "why did you say 4.5?"
+- **Root cause:** The protocol treated model identity as something the agent could self-determine. It can't — system prompts don't reliably state the model version. The user knows (they selected it in the UI); the agent doesn't.
+- **Suggested fix:** Move Agent Identity from "agent fills in" to "user fills in — agent copies, never guesses." Add a pitfall: "Never guess your own model version. If it's not in Pre-Flight, ask once. If the user doesn't know, record 'unknown'."
+- **Source:** TisoneK/LocalMind — `.context/flaws/log.md`, Session 5
+- **Status:** fixed in this commit — Agent Identity section rewritten in both editions; Pitfall #25 added.
+
+---
+## 2026-07-11 — Super Z / GLM-5.2 (consolidated from LocalMind, Session 5)
+
+- **Flaw:** The protocol didn't clearly mark session entry, phase transitions, or exit. Agents didn't know where to start (Copilot jumped to editing before reading the workflow), didn't know how to transition between phases, and didn't know how to end (Copilot had to be reminded to commit and push). This is the root cause behind flaws 1–4 — they're all symptoms of missing lifecycle markers. The user explicitly flagged this as "the biggest flaw."
+- **Symptom:** Copilot (Session 3) didn't know where to start (skipped Phase 1), didn't know how to end (user had to remind it to commit/push). The protocol had 19 steps but no explicit "you are done when..." checklist.
+- **Root cause:** The protocol had 19 steps in 4 phases but no explicit ENTRY marker (what to do first), no TRANSITION markers (when to move between phases), and no EXIT checklist (what must be true before the session is done). An agent could finish the work but not realize it hadn't pushed, because there was no checklist saying "push is part of done."
+- **Suggested fix:** Add a "Session Lifecycle — Entry, Transitions, Exit" section to both editions, before Phase 1. ENTRY: read Two Surfaces + Pre-Flight first, don't edit until Phase 1 is done. TRANSITIONS: phase-boundary conditions. EXIT: mandatory checklist (all fixes committed AND pushed, report committed AND pushed, .context/ updated committed AND pushed, PAT unset, chat summary delivered). Add: "If the user has to remind you to commit or push, the protocol failed — log it as a flaw."
+- **Source:** TisoneK/LocalMind — `.context/flaws/log.md`, Session 5
+- **Status:** fixed in this commit — both editions now have the Session Lifecycle section with ENTRY/TRANSITIONS/EXIT. Pitfall #26 added.
