@@ -176,3 +176,13 @@ Flaws consolidated from LocalMind Session 7 are now **fixed in this commit**:
 - **Suggested fix:** Add Pitfall #30: "Don't ask for permission on the default next step. If the action is what the protocol already prescribes, do it and report. Only ask when there's genuine ambiguity."
 - **Source:** TisoneK/LocalMind — `.context/flaws/log.md`, Session 8. Originally logged as a DeepSeek-specific observation in Session 3; graduated to a protocol flaw after GLM-5.2 exhibited the same pattern in Session 8.
 - **Status:** fixed in this commit — Pitfall #30 added to both editions
+
+---
+## 2026-07-11 — Claude Code / claude-fable-5 (package repo session)
+
+- **Flaw:** A review finding was applied without verifying it against the document it cited. The review claimed "the editions have 4 phases, not 5" — both editions have six. The applied fix changed `roles/README.md`'s correct "Phase 5 (Steps 15–17)" to "Phase 4, Steps 15–17", pointing the mandatory memory-update rule at the Report phase (Steps 13–14).
+- **Symptom:** `roles/README.md` carried a wrong phase label until the next session re-verified the phase structure (`grep "^### Phase"` in both editions) and reverted it.
+- **Root cause:** "Verify before trusting" covers `.context/` entries vs the codebase, but no rule required verifying a review's claims against the referenced file before applying its fixes.
+- **Suggested fix:** Pitfall: "Don't apply a review finding without reproducing it — grep the referenced section first."
+- **Source:** TisoneK/.context — package repo session, 2026-07-11
+- **Status:** fixed in this commit — Phase 5 reference restored + Pitfall #31 added to both editions

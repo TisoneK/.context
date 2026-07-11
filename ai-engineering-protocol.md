@@ -202,12 +202,13 @@ git config user.email "<GIT_EMAIL>"
   2. `.context/agents/sessions.md` — who worked here before, with which model, and what they did (read the last 3–5 entries)
   3. `.context/tasks/current.md` — is a task marked in-progress? If a prior session died mid-task, this is where you find out.
   4. `.context/tasks/backlog.md` — open items waiting for a session like this one
-  5. `.context/inefficiencies/log.md` — known traps (tool failures, flaky tests, env quirks). **Don't re-hit a logged trap.**
-  6. `.context/plans/decisions.md` — architectural decisions already made. **Don't relitigate them; don't "fix" code into violating them.**
-  7. `.context/system/environments.md` + `.context/system/ai-models.md` — environments and agents seen before
-  8. `.context/user/identity.md` + `.context/user/preferences.md` — who the user is and how they like things done
-  9. `.context/workflows/active.md` — the workflow currently in force
-  10. `.context/secrets/` — local-only secret values available on this machine (never tracked; empty on a fresh clone). Note what's available — never print values.
+  5. `.context/flaws/log.md` — known workflow/protocol traps — where the `.context` system itself misled a prior agent. **Don't re-hit a logged flaw.**
+  6. `.context/inefficiencies/log.md` — known project traps (tool failures, flaky tests, env quirks). **Don't re-hit a logged trap.**
+  7. `.context/plans/decisions.md` — architectural decisions already made. **Don't relitigate them; don't "fix" code into violating them.**
+  8. `.context/system/environments.md` + `.context/system/ai-models.md` — environments and agents seen before
+  9. `.context/user/identity.md` + `.context/user/preferences.md` — who the user is and how they like things done
+  10. `.context/workflows/active.md` — the workflow currently in force
+  11. `.context/secrets/` — local-only secret values available on this machine (never tracked; empty on a fresh clone). Note what's available — never print values.
 - If `.context/` does NOT exist, bootstrap it now (see Bootstrap in the `.context/` section) and commit it: `chore(context): bootstrap .context/ directory`.
 - **Migration:** if `docs/report/` contains prior reviews, move them: `git mv docs/report/*.md .context/reviews/` in the same bootstrap commit. Leave a `docs/report/README.md` pointer saying reviews now live in `.context/reviews/`.
 - Set `.context/tasks/current.md` to this session's task before starting work (overwrite — it holds one task at a time).
@@ -360,6 +361,7 @@ git log --oneline -20
 **Step 17 — Log the session + inefficiencies**
 - Append a session entry to `.context/agents/sessions.md` (append-only): date, agent, model, platform, task, commits (count + SHA range), outcome, open items.
 - Append every inefficiency you hit to `.context/inefficiencies/log.md` (append-only): tool failures, flaky tests, misleading docs, commands that didn't work as documented, time wasted rediscovering something `.context/` should have told you. **Be honest — this log is how the protocol improves.** An empty inefficiency entry ("none this session") is valid only if literally nothing slowed you down.
+- Append every workflow/protocol flaw to `.context/flaws/log.md` (append-only): ambiguous rules, missing steps, confusing templates — friction caused by the `.context` system itself, not the project. Suggest a concrete package fix in each entry (see `flaws/README.md`).
 - Commit (`chore(context): log session YYYY-MM-DD`) and push.
 
 ### Phase 6: Wrap up
@@ -413,7 +415,10 @@ rm -f .context/secrets/github-pat   # if you stored it there in Step 1
 ├── plans/
 │   └── decisions.md     # append-only ADR-style architectural decisions
 ├── inefficiencies/
-│   └── log.md           # append-only problems agents faced — mandatory honesty
+│   └── log.md           # append-only project-level friction (code, env, deps)
+├── flaws/
+│   ├── README.md        # what goes here vs inefficiencies/ — the two-surfaces rule
+│   └── log.md           # append-only workflow/protocol friction — flows to the package repo
 └── secrets/             # LOCAL-ONLY — self-gitignored, never tracked, never travels
     ├── .gitignore       # ignores everything here except itself + the README
     └── <slug>           # one secret per file: line 1 = value, lines 2+ = notes
@@ -431,7 +436,8 @@ README (`reviews/`, `secrets/`). Follow it, don't invent formats.
 | An open item you can't finish now | `.context/tasks/backlog.md` | append |
 | The task you're starting/finishing | `.context/tasks/current.md` | overwrite |
 | An architectural decision | `.context/plans/decisions.md` | append (ADR) |
-| Friction you hit (tool failure, flaky test, env quirk, protocol gap) | `.context/inefficiencies/log.md` | append |
+| Project friction (tool failure, flaky test, env quirk, dependency pain) | `.context/inefficiencies/log.md` | append |
+| Workflow/protocol friction (ambiguous rule, missing step, confusing template) | `.context/flaws/log.md` | append |
 | Your session summary (who/what/model/commits) | `.context/agents/sessions.md` | append |
 | Facts about the machine/sandbox you ran on | `.context/system/environments.md` | update |
 | Which agent + model you are | `.context/system/ai-models.md` | update |
@@ -445,7 +451,7 @@ README (`reviews/`, `secrets/`). Follow it, don't invent formats.
 1. **Append-only logs are append-only.** `sessions.md`, `inefficiencies/log.md`, `backlog.md`, and `decisions.md` never lose entries. If a past entry was wrong, append a correction referencing it — don't erase history.
 2. **No secrets in tracked files.** `.context/` is committed to git. Record env var *names* and where secrets live in shared files — never values. Values the agent needs live only in `.context/secrets/`, whose own `.gitignore` keeps them out of the repo (rules in its README). No PATs, API keys, or connection strings anywhere else.
 3. **`chore(context):` commit prefix.** Context updates are not features or fixes. Keep them out of the changelog. One exception: review reports in `.context/reviews/` commit as `docs(review):` (Step 13) — they're a deliverable, not bookkeeping.
-4. **Inefficiency logging is mandatory.** Every session appends to `inefficiencies/log.md` — honestly. This is how the protocol and the next agent's session improve. Wasted time you don't log is time the next agent wastes again.
+4. **Friction logging is mandatory — and split by surface.** Project friction goes in `inefficiencies/log.md`; workflow/protocol friction goes in `flaws/log.md` (see `flaws/README.md` for the split, and how flaws flow back to the package repo). Both honest, every session. Wasted time you don't log is time the next agent wastes again.
 5. **Verify before trusting.** `.context/` reflects what was true when written. If it contradicts the codebase, the codebase wins — fix the `.context/` entry (append a correction).
 6. **Small and current beats big and stale.** Session entries are ~10 lines, not transcripts. Reports carry the detail.
 
@@ -474,6 +480,17 @@ README (`reviews/`, `secrets/`). Follow it, don't invent formats.
 - **Prevent next time:** <protocol/context change that would have avoided it>
 ```
 
+**`.context/flaws/log.md`** (append when the protocol/`.context` system itself caused friction):
+```markdown
+---
+## 2026-07-11 — <agent name> / <model> (Session N)
+- **Flaw:** <what in the protocol or .context/ system didn't work>
+- **Symptom:** <what happened to the agent — the observable friction>
+- **Root cause:** <why the protocol/.context/ let this happen>
+- **Suggested fix:** <concrete change to the package — a step, a pitfall, a template, a rule>
+- **Status:** open | fixed in package <commit-sha or date>
+```
+
 **`.context/plans/decisions.md`** (append one per decision, ADR-style):
 ```markdown
 ---
@@ -486,8 +503,8 @@ README (`reviews/`, `secrets/`). Follow it, don't invent formats.
 
 ### Bootstrap (first session in a repo without `.context/`)
 
-1. **If the protocol package's `context-skeleton/` folder is available** (it ships alongside this file), copy it in: `cp -r context-skeleton <repo>/.context` — it contains all 14 stub files with their entry templates (including the self-gitignored `secrets/` module).
-2. **Otherwise create the tree by hand:** every file starts with a title, a one-line purpose (including whether it's append-only or overwrite), and its entry template inside an HTML comment. Use the Entry templates above for the logs; overwrite files (`tasks/current.md`, `workflows/active.md`, `user/*`) get current-state field lists; `reviews/` gets a `README.md` stating the `YYYY-MM-DD-review.md` naming and report structure; `secrets/` gets its self-ignoring `.gitignore` (`*` + `!.gitignore` + `!README.md`) and a README with the hard rules — create these two before anything else in that directory.
+1. **If the protocol package's `context-skeleton/` folder is available** (it ships alongside this file), copy it in: `cp -r context-skeleton <repo>/.context` — it contains all 16 stub files with their entry templates (including the self-gitignored `secrets/` module and the `flaws/` workflow-friction log).
+2. **Otherwise create the tree by hand:** every file starts with a title, a one-line purpose (including whether it's append-only or overwrite), and its entry template inside an HTML comment. Use the Entry templates above for the logs; overwrite files (`tasks/current.md`, `workflows/active.md`, `user/*`) get current-state field lists; `reviews/` gets a `README.md` stating the `YYYY-MM-DD-review.md` naming and report structure; `secrets/` gets its self-ignoring `.gitignore` (`*` + `!.gitignore` + `!README.md`) and a README with the hard rules — create these two before anything else in that directory; `flaws/` mirrors `inefficiencies/` — an append-only log plus a README stating the flaws-vs-inefficiencies split.
 3. Write `.context/README.md` from the Structure + What-goes-where + Rules sections above (the skeleton already includes it).
 4. Fill `user/identity.md` and `user/preferences.md` from Pre-Flight, `workflows/active.md` from Session Parameters, and add your row to `system/ai-models.md`.
 5. **Migrate:** `git mv docs/report/*.md .context/reviews/` if prior reviews exist; leave a pointer README behind.
@@ -852,6 +869,7 @@ Append-only. Never overwrite. Start each section with `---`.
 28. **Don't treat any task as "too small for Phase 1"** — even a one-line `.context/` edit requires Steps 1–8 first. Skipping Phase 1 is the most common protocol violation.
 29. **Don't include secret values in "rotate this" reminders** — the Exit checklist says to remind the user to rotate the PAT. The reminder is a nudge ("Rotate the PAT"), not a re-display ("Rotate the PAT: `github_pat_...`"). Including the value leaks it into the chat transcript, which may be logged or shared. Reference the token by its last 4 characters at most, never the full value. This applies to all secrets, not just the PAT.
 30. **Don't ask for permission on the default next step** — if the proposed action is what the protocol already prescribes (commit after edits, push after commit, log a flaw you found, fix a gap you identified), do it and report — don't ask "Want me to...?" The Zero-Interruption Principle covers this, but agents often draw a false distinction between "clarification" (which they know not to ask) and "permission" (which they think is polite). Both are interruptions. Only ask when there's genuine ambiguity: which of two approaches to take, whether to proceed despite risk, or permission for a broad-scope change the protocol doesn't already authorize. If the user has already said "fix everything" or equivalent, that authorization covers all safe fixes — don't re-ask for each one.
+31. **Don't apply a review finding without reproducing it** — verify the claim against the file it cites (grep the referenced section) before editing. A review once claimed "the editions have 4 phases, not 5" — both have six — and the applied "fix" broke a correct Phase 5 reference. A confident wrong claim in a review propagates faster than a bug.
 31. **Don't inspect stale local state** — if the user references another agent's work or asks you to "check what the session did," fetch first. Your local is stale the moment another agent pushes. Running `git show` or `git log` on a local that's behind remote gives you wrong information. See Git Workflow rule 7.
 
 ---
@@ -897,6 +915,6 @@ This protocol is a living document. When you discover a new workflow rule, pitfa
 > **Learnings about the project** go in `.context/reviews/` in the repo.
 > **Open work** goes in `.context/tasks/backlog.md`.
 > **Decisions** go in `.context/plans/decisions.md`.
-> **Friction** goes in `.context/inefficiencies/log.md` — always, honestly.
+> **Project friction** goes in `.context/inefficiencies/log.md`; **workflow/protocol friction** goes in `.context/flaws/log.md` — always, honestly.
 > **Learnings about this protocol** (like the PAT redaction issue) go back into this file.
 > **Agent process within this sandbox** goes in `/home/z/my-project/worklog.md`; the durable cross-machine record is `.context/agents/sessions.md`.
