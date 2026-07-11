@@ -543,6 +543,7 @@ README (`reviews/`, `secrets/`). Follow it, don't invent formats.
 4. **Follow Conventional Commits** with scope if the project uses one: `fix(auth):`, `feat(api):`, `docs:`. Context updates use `chore(context):`.
 5. **Always pull before pushing** — `git pull --ff-only`. Other agents may have pushed.
 6. **Never force-push without `--force-with-lease`.**
+7. **Pull before inspecting another agent's work.** If the user references work you haven't seen ("check what the session did," "pull the changes," "look at what Copilot did"), fetch first: `git fetch origin`. If remote is ahead, pull before inspecting. Your local state is stale the moment another agent pushes — don't `git show` or `git log` on commits you didn't make until you've confirmed local matches remote.
 
 ### Push workflow (PAT-protected repos)
 
@@ -835,6 +836,8 @@ Append-only. Never overwrite. Start each section with `---`.
 27. **Don't treat `workflows/active.md` as documentation** — it's a binding instruction. After reading it, immediately load the protocol it references. Don't proceed with other tool use until the protocol is loaded.
 28. **Don't treat any task as "too small for Phase 1"** — even a one-line `.context/` edit requires Steps 1–8 first. Skipping Phase 1 is the most common protocol violation.
 29. **Don't include secret values in "rotate this" reminders** — the Exit checklist says to remind the user to rotate the PAT. The reminder is a nudge ("Rotate the PAT"), not a re-display ("Rotate the PAT: `github_pat_...`"). Including the value leaks it into the chat transcript, which may be logged or shared. Reference the token by its last 4 characters at most, never the full value. This applies to all secrets, not just the PAT.
+30. **Don't ask for permission on the default next step** — if the proposed action is what the protocol already prescribes (commit after edits, push after commit, log a flaw you found, fix a gap you identified), do it and report — don't ask "Want me to...?" The Zero-Interruption Principle covers this, but agents often draw a false distinction between "clarification" (which they know not to ask) and "permission" (which they think is polite). Both are interruptions. Only ask when there's genuine ambiguity: which of two approaches to take, whether to proceed despite risk, or permission for a broad-scope change the protocol doesn't already authorize. If the user has already said "fix everything" or equivalent, that authorization covers all safe fixes — don't re-ask for each one.
+31. **Don't inspect stale local state** — if the user references another agent's work or asks you to "check what the session did," fetch first. Your local is stale the moment another agent pushes. Running `git show` or `git log` on a local that's behind remote gives you wrong information. See Git Workflow rule 7.
 
 ---
 
