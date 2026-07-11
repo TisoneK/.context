@@ -33,15 +33,15 @@ model, and what went wrong before.
 
 ### Project
 
-- **Project Name:** LocalMind
-- **Repository URL:** https://github.com/TisoneK/LocalMind.git
+- **Project Name:** <PROJECT_NAME>
+- **Repository URL:** https://github.com/<OWNER>/<REPO>.git
 - **Live Application (if available):** N/A
-- **Is the repo private?** Yes _(if Yes, paste the PAT in your first chat message — see PAT section below)_
+- **Is the repo private?** <Yes / No> _(if Yes, paste the PAT in your first chat message — see PAT section below)_
 
 ### Git Identity
 
-- **Name:** Tisone Kironget
-- **Email:** tisonkironget@gmail.com
+- **Name:** <GIT_NAME>
+- **Email:** <GIT_EMAIL>
 
 ### Agent Identity (AGENT FILLS IN — RECORDED IN `.context/`)
 
@@ -60,7 +60,7 @@ model, and what went wrong before.
 
 - **Role:** engineer _[default: engineer — full-scope, this document as-is. Role overlays in `roles/` re-scope the session (reviewer, security-auditor, docs-agent) — hand the agent the role file alongside this edition]_
 - **Scope:** discovery + review + fix all safe issues _[default: discovery + review + fix all safe issues]_
-- **Workspace path:** /home/z/my-project/LocalMind _[default: /home/z/my-project/<repo-name>]_
+- **Workspace path:** _(leave blank for default)_ _[default: /home/z/my-project/<repo-name>]_
 - **Focus areas:** all _[default: all — security, performance, UX, architecture, testing, docs]_
 - **Findings handling:** fix safe issues; flag architectural changes for next session _[default: fix safe, flag architectural]_
 - **Push policy:** push to main directly after each commit _[default: push to main directly]_
@@ -102,13 +102,13 @@ model, and what went wrong before.
 ```bash
 export GIT_TOKEN='<paste-the-actual-token-from-chat-here>'
 cd /home/z/my-project
-git clone "https://x-access-token:${GIT_TOKEN}@github.com/TisoneK/LocalMind.git" LocalMind
-cd LocalMind
+git clone "https://x-access-token:${GIT_TOKEN}@github.com/<OWNER>/<REPO>.git" <REPO>
+cd <REPO>
 # IMMEDIATELY strip the token from .git/config so it's not persisted to disk
-git remote set-url origin https://github.com/TisoneK/LocalMind.git
-# Configure git identity
-git config user.name "Tisone Kironget"
-git config user.email "tisonkironget@gmail.com"
+git remote set-url origin https://github.com/<OWNER>/<REPO>.git
+# Configure git identity (from Pre-Flight)
+git config user.name "<GIT_NAME>"
+git config user.email "<GIT_EMAIL>"
 # DO NOT unset GIT_TOKEN yet — it's needed for all pushes (fixes, report,
 # changelog, .context updates). It stays as an env var for the entire
 # session and is unset in Step 19.
@@ -223,11 +223,11 @@ git log --oneline -20
 - The remote URL was stripped of the token in Step 2. To push, temporarily re-add it:
   ```bash
   # Re-set URL with token for push
-  git remote set-url origin "https://x-access-token:${GIT_TOKEN}@github.com/TisoneK/LocalMind.git"
+  git remote set-url origin "https://x-access-token:${GIT_TOKEN}@github.com/<OWNER>/<REPO>.git"
   git pull --ff-only  # in case another agent pushed
   git push origin main
   # IMMEDIATELY strip the token again so it's not in .git/config between pushes
-  git remote set-url origin https://github.com/TisoneK/LocalMind.git
+  git remote set-url origin https://github.com/<OWNER>/<REPO>.git
   ```
 - If push is rejected (non-fast-forward), pull, resolve conflicts, and push again. `.context/` append-only files merge trivially — keep both sides' entries.
 - **If a fix breaks tests:** either fix the test or revert the change. Do NOT push broken tests. If you can't resolve it in 2 attempts, revert and document the issue in the report and `.context/inefficiencies/log.md`.
@@ -474,11 +474,11 @@ README (`reviews/`, `secrets/`). Follow it, don't invent formats.
 
 ```bash
 # Before push: re-add token to URL
-git remote set-url origin "https://x-access-token:${GIT_TOKEN}@github.com/TisoneK/LocalMind.git"
+git remote set-url origin "https://x-access-token:${GIT_TOKEN}@github.com/<OWNER>/<REPO>.git"
 git pull --ff-only
 git push origin main
 # After push: strip token from URL
-git remote set-url origin https://github.com/TisoneK/LocalMind.git
+git remote set-url origin https://github.com/<OWNER>/<REPO>.git
 ```
 
 ### When you make a mistake
