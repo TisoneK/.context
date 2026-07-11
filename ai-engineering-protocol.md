@@ -96,7 +96,9 @@ model, and what went wrong before.
 - Check the user's first chat message for a PAT (`github_pat_...` or `ghp_...`).
 - If the repo is private AND no PAT is found, STOP and report: "Private repo requires a PAT. Please paste it in chat."
 - If the repo is public, skip — clone directly.
-- Export the PAT as `GIT_TOKEN` env var. Never write it to any tracked file. After Step 2's clone you may store it at `.context/secrets/github-pat` (line 1 = token; rules in the secrets README) — that directory is never tracked and dies with the sandbox.
+- Export the PAT as `GIT_TOKEN` env var. Never write it to any tracked file. After Step 2's clone you may store it at `.context/secrets/github-pat` (line 1 = token; rules in the secrets README) — that directory is never tracked.
+  - **Cloud/sandbox agents:** `.context/` is cloned fresh each session, so the secret file is useful only within that session (avoids re-pasting the PAT for multiple pushes). It dies with the sandbox. The `GIT_TOKEN` env var is the primary store; the file is a convenience.
+  - **Local agents:** `.context/secrets/` persists across sessions, so the file survives between sessions. Still refer to it by filename (`secrets/github-pat`), never by value.
 
 **Step 2 — Clone the repo**
 ```bash

@@ -43,7 +43,7 @@ a role file is ~80 lines, not another 790-line document to keep aligned.
 
 - **The `.context/` rules** — append-only logs, no secrets, entry
   templates, `chore(context):` prefix.
-- **Phase 5 (Steps 15–17)** — the memory update is mandatory for every
+- **Phase 4, Steps 15–17** — the memory update is mandatory for every
   role, every session, including sessions with no findings.
 - **Quality gates** — gates that concern code changes are simply vacuous
   for roles that don't change code; the rest still apply.

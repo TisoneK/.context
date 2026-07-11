@@ -15,7 +15,8 @@ agent did, what's open, what's decided, and what went wrong before.
 | [`context-skeleton/`](context-skeleton/) | The 16-file stub tree for bootstrapping `.context/` in a target repo. Every file carries its entry template in an HTML comment. Includes the self-gitignored `secrets/` module and the `flaws/` workflow-friction log. |
 | [`roles/`](roles/) | **Role overlays** — small files that re-scope a base edition to a mission: reviewer (read-only), security-auditor, docs-agent. Engineer (full-scope) is the default, no overlay needed. |
 | [`flaws/`](flaws/) | **Consolidated workflow flaws** — friction agents hit with the protocol/`.context/` system itself, back-ported from all projects using this package. The source of truth for protocol improvements. |
-| [`localmind-review.md`](localmind-review.md) | Example session deliverable — a real review report produced by an agent following the protocol (LocalMind, Session 2). |
+| [`examples/localmind-review.md`](examples/localmind-review.md) | Example session deliverable — a real review report produced by an agent following the protocol (LocalMind, Session 2). |
+| [`QUICKSTART.md`](QUICKSTART.md) | The two-repo mental model + bootstrap steps — how to initialize a project with `.context/` memory from this package. Start here if you're new. |
 
 ## Usage
 
