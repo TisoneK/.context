@@ -69,9 +69,10 @@ Notes:
    - `ai-engineering-protocol-local.md` — Claude Code / Cursor / Copilot
      on your machine (uses your git credentials; no PAT).
    - `ai-engineering-protocol.md` — cloud/sandbox agents that clone the
-     repos themselves (privacy is per-repo: paste a PAT in chat for each
-     private repo, naming which is which — never in the file; rotate
-     them after the session).
+     repos themselves (privacy is per-repo: paste PAT access in chat for
+     every private repo — recommended: one fine-grained PAT scoped to
+     all of the workflow's private repos — never in the file; rotate
+     after the session).
 2. **Optionally add one role overlay** from `roles/` for a
    mission-scoped session — reviewer (read-only), security-auditor,
    docs-agent. No overlay = full-scope engineer. Where the role file

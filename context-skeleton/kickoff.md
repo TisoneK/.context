@@ -28,10 +28,11 @@ Generation rules for the bootstrapping agent:
 >   and follow it."* Add a target description in the same message if you
 >   have one.
 > - **Cloud/sandbox agent** (empty workspace): *"Clone
->   `<PROJECT_REPO_URL>`, read `.context/kickoff.md`, follow it."* For
->   **each** repo marked private in Project Facts below, paste its PAT in
->   that same chat message, naming which repo it's for — never into any
->   file.
+>   `<PROJECT_REPO_URL>`, read `.context/kickoff.md`, follow it."* Paste
+>   PAT access for every repo marked private in Project Facts below in
+>   that same chat message — recommended: **one fine-grained PAT scoped
+>   to all of this workflow's private repos** (say "covers both");
+>   separate per-repo PATs work too, named. Never into any file.
 
 ---
 
@@ -39,8 +40,11 @@ Generation rules for the bootstrapping agent:
 
 > **Privacy is per-repo.** Each repo below carries its own privacy mode —
 > never infer one from the other. A public project with a private package
-> (or the reverse) is a normal setup. Cloud/sandbox agents need a PAT for
-> every repo marked private; local agents need none.
+> (or the reverse) is a normal setup. Cloud/sandbox agents need PAT
+> access for every repo marked private — recommended as **one
+> fine-grained PAT scoped to all of them** (Contents: Read and write for
+> the project; Read-only suffices for the package). Local agents need
+> none.
 
 - **Project name:** <PROJECT_NAME>
 - **Project repository URL:** <PROJECT_REPO_URL>
@@ -101,10 +105,12 @@ git clone <PACKAGE_REPO_URL_WITH_TOKEN_IF_PRIVATE> ../.context
 git -C ../.context remote set-url origin <PACKAGE_REPO_URL>
 ```
 
-If a repo is marked private and no PAT for it arrived in chat, stop and
-ask for that repo's PAT by name. Keep the **project** repo's `GIT_TOKEN`
-as an env var for the session's pushes — unset it only at the protocol's
-final step. Never write any token to any file.
+If a repo is marked private and no PAT covering it arrived in chat, stop
+and ask for one by repo name. When one shared fine-grained PAT covers
+both, `PKG_TOKEN` is just `GIT_TOKEN` — still drop `PKG_TOKEN` after the
+package clone, and keep `GIT_TOKEN` as an env var for the session's
+pushes, unset only at the protocol's final step. Never write any token
+to any file.
 
 ### Step 1 — Sync
 
