@@ -29,7 +29,7 @@ model, and what went wrong before.
 > the most. If you can hold only ten things, hold these:
 
 1. **Read `.context/` before touching anything; update it before ending.** (Steps 3, 15–17)
-2. **Two `.context` names:** `../.context` is the **package** (read-only reference); `./.context` is this project's **memory**. Bootstrapping copies only `context-skeleton/` — never the whole package.
+2. **Two directories:** `../context` is the **package** (read-only reference — identify it by remote URL `TisoneK/.context`, never by name; legacy clones may be named `../.context`); `./.context` is this project's **memory**. Bootstrapping copies only `context-skeleton/` — never the whole package.
 3. **Two surfaces, never one commit:** project code and `.context/` memory are staged and committed separately — `git add .context/` for memory, explicit paths for project. Never `git add -A` with both dirty.
 4. **Append-only logs only grow.** Before committing one, its `git diff` must show no removed lines.
 5. **No secret values in any tracked file** — including inside recorded commands (`x-access-token:...` never lands in `environments.md`).

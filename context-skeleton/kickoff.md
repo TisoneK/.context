@@ -86,18 +86,35 @@ Every session is a **sync** session.
 ### Step 0 — Get both repos on disk
 
 **Local agent** — the project repo is your cwd (never re-clone it). Get
-the package as a sibling:
+the package as a sibling. **Identify the package by its REMOTE URL,
+never by directory name** — local clones exist under different names
+(`../context` is canonical; legacy `../.context` occurs):
 
 ```bash
 git remote get-url origin        # confirm it matches the Project repository URL
-# Package repo — clone as a sibling, or freshen if already there:
-[ -d ../.context ] && git -C ../.context pull --ff-only \
-  || git clone https://github.com/TisoneK/.context.git ../.context
+
+# Find an existing package clone among the siblings:
+PKG=""
+for d in ../context ../.context; do
+  git -C "$d" remote get-url origin 2>/dev/null | grep -q "TisoneK/.context" \
+    && PKG="$d" && break
+done
+
+if [ -n "$PKG" ]; then
+  # Found — freshen it. A FAILED PULL IS NOT A MISSING PACKAGE:
+  # use the on-disk copy as-is and note the stale pull in your session log.
+  git -C "$PKG" pull --ff-only || echo "pull failed — continuing with on-disk copy at $PKG"
+else
+  git clone https://github.com/TisoneK/.context.git ../context && PKG=../context
+fi
+echo "package clone: $PKG"
 ```
 
-No PAT, ever — clones and pushes both use the user's existing
-credentials, whatever either repo's privacy mode. If one fails with an
-auth error, stop and tell the user.
+**Never clone when a package clone already exists** — cloning into an
+existing directory fails, and retrying that failure loops forever. One
+find → one decision → move on. No PAT, ever — clones and pushes both
+use the user's existing credentials, whatever either repo's privacy
+mode. If one fails with an auth error, stop and tell the user.
 
 **Cloud/sandbox agent** — clone both into the workspace. Each repo's
 clone follows **its own** privacy field in Project Facts above:
@@ -110,8 +127,8 @@ git config user.name "<GIT_NAME>" && git config user.email "<GIT_EMAIL>"
 
 # Package repo (if private: same dance with ITS OWN PAT, then drop that token —
 # the package is read-only reference, never pushed to):
-git clone <PACKAGE_REPO_URL_WITH_TOKEN_IF_PRIVATE> ../.context
-git -C ../.context remote set-url origin <PACKAGE_REPO_URL>
+git clone <PACKAGE_REPO_URL_WITH_TOKEN_IF_PRIVATE> ../context
+git -C ../context remote set-url origin <PACKAGE_REPO_URL>
 ```
 
 Ask for PATs **up front, before any clone** — you need one for every
@@ -145,9 +162,10 @@ In order: `README.md` → `workflows/active.md` → `agents/sessions.md`
 ### Step 3 — Load the protocol
 
 Read the edition named in `workflows/active.md` from the package clone
-on disk — `../.context/ai-engineering-protocol-local.md` (local) or
-`../.context/ai-engineering-protocol.md` (cloud/sandbox) — plus any role
-overlay from `../.context/roles/`. Read it in full; it is the instruction
+found in Step 0 (`$PKG`, canonically `../context`) —
+`$PKG/ai-engineering-protocol-local.md` (local) or
+`$PKG/ai-engineering-protocol.md` (cloud/sandbox) — plus any role
+overlay from `$PKG/roles/`. Read it in full; it is the instruction
 set for this session.
 
 ### Step 4 — Follow the protocol

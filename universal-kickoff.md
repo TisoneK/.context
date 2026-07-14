@@ -128,7 +128,7 @@ codebase and its `.context/` memory in a better state.
 | Repo | What it holds | Cloned where |
 |------|---------------|--------------|
 | **Project repo** (the "root repo") | The product code + its `.context/` memory | `<workspace>/<REPO>` |
-| **Package repo** (`TisoneK/.context`) | The protocol editions + skeleton + roles + consolidated flaws | `<workspace>/.context` |
+| **Package repo** (`TisoneK/.context`) | The protocol editions + skeleton + roles + consolidated flaws | `<workspace>/context` |
 
 The package repo is a **reference** — the agent reads the protocol from
 it and copies the skeleton to bootstrap `.context/` in the project repo.
@@ -207,22 +207,40 @@ git status                   # tree should be clean before you start
 - **Don't set git identity** unless `git config user.name` returns empty. If it
   is empty, set it from Pre-Flight; otherwise leave the user's config untouched.
 
-**0-L.2 — Clone ONLY the package repo, as a sibling of the project repo.**
+**0-L.2 — Get the package repo as a sibling of the project repo.**
+
+**Identify the package by its REMOTE URL, never by directory name.**
+Local clones exist under different names (`../context` is canonical;
+legacy `../.context` occurs — the canon dropped the dot because
+dot-directories are hidden from `ls` and IDE workspace pickers):
+
 ```bash
-cd ..                                                        # parent of the project repo
-git clone https://github.com/TisoneK/.context.git .context
-cd -                                                         # back into the project repo
+# Find an existing package clone among the siblings:
+PKG=""
+for d in ../context ../.context; do
+  git -C "$d" remote get-url origin 2>/dev/null | grep -q "TisoneK/.context" \
+    && PKG="$d" && break
+done
+
+if [ -n "$PKG" ]; then
+  # Found — freshen it. A FAILED PULL IS NOT A MISSING PACKAGE:
+  # continue with the on-disk copy and note the stale pull in the session log.
+  git -C "$PKG" pull --ff-only || echo "pull failed — continuing with on-disk copy at $PKG"
+else
+  git clone https://github.com/TisoneK/.context.git ../context && PKG=../context
+fi
+echo "package clone: $PKG"
 ```
-- If `.context` already exists beside the repo, don't re-clone —
-  freshen it: `git -C ../.context pull --ff-only`.
+
+- **Never clone when a package clone already exists.** Cloning into an
+  existing directory fails, and retrying that failure loops forever.
+  One find → one decision → move on.
 - A **private** package repo changes nothing here — the clone runs with
   the user's existing credentials, same as everything else on a local
   machine. If it fails with an auth error, stop and tell the user.
-- **Heads-up on the name:** this clones the package one level **above** the
-  project as `../.context` (matching the remote repo `TisoneK/.context`). That
-  is a different directory from the project's own in-repo `.context/` memory
-  dir — same basename, different location. Package = `../.context` (sibling);
-  memory = `./.context` (inside the repo).
+- **Naming:** the package clones as `../context` (a sibling, visible in
+  file pickers) — deliberately distinct from the project's in-repo
+  `.context/` memory dir. Package = `../context`; memory = `./.context`.
 
 → Go to **0c. Verify**.
 
@@ -276,13 +294,13 @@ cd <workspace>
 
 # If private (default — the canonical TisoneK/.context is private) — use the
 # PAT that covers it, then strip it:
-git clone "https://x-access-token:${PKG_TOKEN}@github.com/TisoneK/.context.git" .context
-git -C .context remote set-url origin https://github.com/TisoneK/.context.git
+git clone "https://x-access-token:${PKG_TOKEN}@github.com/TisoneK/.context.git" context
+git -C context remote set-url origin https://github.com/TisoneK/.context.git
 unset PKG_TOKEN   # safe to drop now — the package is read-only reference; you never push to it
                   # (GIT_TOKEN stays even if it's the same shared PAT — the project still needs it)
 
 # If public (a public fork/mirror, or if the canonical repo goes public later):
-git clone https://github.com/<PKG_OWNER>/<PKG_REPO>.git .context
+git clone https://github.com/<PKG_OWNER>/<PKG_REPO>.git context
 ```
 
 > **DO NOT unset `GIT_TOKEN` yet** — it's needed for every push to the
@@ -298,34 +316,34 @@ git clone https://github.com/<PKG_OWNER>/<PKG_REPO>.git .context
 ### 0c. Verify both repos are present
 
 ```bash
-# Local agent — project repo is the cwd; package is a sibling:
+# Local agent — project repo is the cwd; package is the sibling found in 0-L.2:
 ls .                       # project repo (your working dir)
-ls ../.context     # package repo with protocol + skeleton
+ls "$PKG"                  # package repo with protocol + skeleton (../context)
 
 # Cloud/sandbox agent — both live under the workspace:
 ls <workspace>/<REPO>
-ls <workspace>/.context
+ls <workspace>/context
 ```
 
 You should see:
 - the project repo — its code (and `.context/` if it already exists)
-- `.context/ai-engineering-protocol.md` — cloud/sandbox edition
-- `.context/ai-engineering-protocol-local.md` — local agent edition
-- `.context/context-skeleton/` — the 18-file stub tree
-- `.context/roles/` — role overlays
-- `.context/QUICKSTART.md` — the two-repo mental model
+- `context/ai-engineering-protocol.md` — cloud/sandbox edition
+- `context/ai-engineering-protocol-local.md` — local agent edition
+- `context/context-skeleton/` — the 18-file stub tree
+- `context/roles/` — role overlays
+- `context/QUICKSTART.md` — the two-repo mental model
 
 > **Paths from here on.** After Step 0 your cwd is the **project repo root**
 > for both agent types, and the package repo is a **sibling** of it. So
 > wherever the steps below write `<workspace>/<REPO>`, read "the repo root
-> (your cwd)", and wherever they write `<workspace>/.context`, read
-> **`../.context`** — that relative path is correct for local and
-> cloud/sandbox agents alike.
+> (your cwd)", and wherever they write `../context`, read "the package
+> clone found in Step 0" (`$PKG` for local agents — same place, possibly
+> the legacy `../.context` name on older machines).
 >
-> **Two `.context` names, don't conflate them:** `../.context` (one level
-> **up**, a sibling of the project) is the **package clone**; `./.context`
-> (**inside** the project) is that project's **memory dir**. Package paths in
-> the steps below are always `../.context/...`; memory paths are always
+> **Two directories, don't conflate them:** `../context` (one level **up**,
+> a sibling of the project) is the **package clone**; `./.context`
+> (**inside** the project) is that project's **memory dir**. Package paths
+> in the steps below are always `../context/...`; memory paths are always
 > `.context/...`.
 
 ---
@@ -344,8 +362,8 @@ the initial data, commit, and push — BEFORE starting the protocol phases.
 
 ```bash
 # From the project repo root (your cwd). The package is a sibling, so
-# ../.context works for both local and cloud/sandbox agents.
-cp -r ../.context/context-skeleton .context
+# ../context works for both local and cloud/sandbox agents.
+cp -r ../context/context-skeleton .context
 ```
 
 Verify the skeleton landed (18 files including the self-gitignored `secrets/`):
@@ -359,8 +377,8 @@ find .context -type f | sort
 **Guard against the classic wrong copy** — both of these must NOT exist:
 ```bash
 ls .context/.git .context/ai-engineering-protocol.md 2>/dev/null
-# ANY output = you copied the whole package (../.context) instead of the
-# skeleton. Fix: rm -rf .context && cp -r ../.context/context-skeleton .context
+# ANY output = you copied the whole package (../context) instead of the
+# skeleton. Fix: rm -rf .context && cp -r ../context/context-skeleton .context
 ```
 Copying the package wholesale nests a second git repo inside the project
 and drags the protocol editions, roles, and consolidated flaws into every
@@ -471,7 +489,7 @@ STOP and report — don't stash or discard someone else's work.
 before the kickoff-inheritance feature have `.context/` but no
 `.context/kickoff.md`. If that's the case, generate it now exactly as
 Step 1c (Path A) describes — copy the template from
-`../.context/context-skeleton/kickoff.md`, fill **Project Facts** from
+`../context/context-skeleton/kickoff.md`, fill **Project Facts** from
 this project's existing memory (`user/identity.md`,
 `workflows/active.md`, `git remote get-url origin`), and commit as
 `chore(context): backfill kickoff.md — inbound entry point`. From the
@@ -512,15 +530,15 @@ don't need to fetch it from GitHub — read it from disk:
 
 ```bash
 # Cloud/sandbox agent:
-cat <workspace>/.context/ai-engineering-protocol.md
+cat <workspace>/context/ai-engineering-protocol.md
 
 # Local agent:
-cat <workspace>/.context/ai-engineering-protocol-local.md
+cat <workspace>/context/ai-engineering-protocol-local.md
 ```
 
 If `workflows/active.md` says to use a role overlay, also read:
 ```bash
-cat <workspace>/.context/roles/<role>.md
+cat <workspace>/context/roles/<role>.md
 ```
 
 **Read the full protocol before proceeding.** It's ~800 lines. Take the
@@ -592,10 +610,10 @@ If you're editing anything else, you're in **project mode**.
 | If you need... | Look in... |
 |---|---|
 | The entry point for future sessions | `<REPO>/.context/kickoff.md` (generated at bootstrap — supersedes this file) |
-| The protocol file | `<workspace>/.context/ai-engineering-protocol.md` (or `-local.md`) |
-| The skeleton (for bootstrapping) | `<workspace>/.context/context-skeleton/` |
-| Role overlays | `<workspace>/.context/roles/` |
-| The two-repo mental model | `<workspace>/.context/QUICKSTART.md` |
+| The protocol file | `<workspace>/context/ai-engineering-protocol.md` (or `-local.md`) |
+| The skeleton (for bootstrapping) | `<workspace>/context/context-skeleton/` |
+| Role overlays | `<workspace>/context/roles/` |
+| The two-repo mental model | `<workspace>/context/QUICKSTART.md` |
 | Prior agent sessions | `<REPO>/.context/agents/sessions.md` |
 | Open tasks | `<REPO>/.context/tasks/backlog.md` |
 | Known traps | `<REPO>/.context/inefficiencies/log.md` |

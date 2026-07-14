@@ -6,7 +6,7 @@ protocol package, and how the two work together.
 ## The mental model
 
 - **One protocol package repo** — `TisoneK/.context`, cloned at
-  `~/Code/.context`. Holds the two protocol editions,
+  `~/Code/context`. Holds the two protocol editions,
   the `context-skeleton/`, and the `roles/` overlays. You improve it
   once, over time.
 - **Each project gets a `.context/` directory** committed inside it —
@@ -15,7 +15,7 @@ protocol package, and how the two work together.
   project's own pushes.
 
 ```text
-~/Code/.context     ← the package (TisoneK/.context)
+~/Code/context     ← the package (TisoneK/.context)
 ├── ai-engineering-protocol.md        cloud/sandbox edition
 ├── ai-engineering-protocol-local.md  local/IDE edition
 ├── context-skeleton/                 18-file stub tree (incl. SYNC.md + kickoff.md)
@@ -28,7 +28,7 @@ protocol package, and how the two work together.
 ## One-time, per machine
 
 ```bash
-git clone https://github.com/TisoneK/.context.git ~/Code/.context
+git clone https://github.com/TisoneK/.context.git ~/Code/context
 ```
 
 The package repo is **private** — your GitHub account needs access. On
@@ -43,7 +43,7 @@ cd ~/Code && mkdir myproject && cd myproject && git init -b main
 # (or just cd into an existing repo)
 
 # 2. Bootstrap its memory from the package skeleton
-cp -r ~/Code/.context/context-skeleton .context
+cp -r ~/Code/context/context-skeleton .context
 
 # 3. Commit — .context/ is part of the project now
 git add .context && git commit -m "chore(context): bootstrap .context/ directory"

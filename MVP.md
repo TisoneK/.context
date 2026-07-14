@@ -21,7 +21,7 @@ the protocol at all (see `flaws/log.md`, task2sms Sessions 1–2).
 **The MVP replaces the clone with a versioned archive:**
 
 ```text
-context-0.1.0.zip  →  unpacks to  ../.context/
+context-0.1.0.zip  →  unpacks to  ../context/
 ```
 
 - **Semver-tracked releases** — `context-<MAJOR.MINOR.PATCH>.zip`.
@@ -33,7 +33,7 @@ context-0.1.0.zip  →  unpacks to  ../.context/
   the agent (or drops beside the project) one file. The git repo remains
   the *development* home of the package; the zip is its *distribution*.
 - **`VERSION` file inside the package root** — agents and kickoffs read
-  `../.context/VERSION` and record it in `workflows/active.md` and their
+  `../context/VERSION` and record it in `workflows/active.md` and their
   session entries, so every project's memory says which protocol version
   produced it.
 - **`CHANGELOG.md` inside the package** — one entry per release, so an
@@ -75,7 +75,7 @@ bootstrap guards state in words:
   cleared, session entry present for today
 
 Open question: portability — POSIX shell + a Python fallback, since
-sandboxes vary. The protocol gains one line: "run `../.context/bin/check`
+sandboxes vary. The protocol gains one line: "run `../context/bin/check`
 before each commit; a failing check blocks the commit."
 
 ### 3. Single-source editions — `mvp`
@@ -88,11 +88,11 @@ by explicit "read core, then your platform file" instructions. Build-time
 generation preferred — zero change to what agents consume.
 
 ### 4. Baked protocol — offline entry per project — `mvp`
-With the archive model, `../.context/` is already the offline source, so
+With the archive model, `../context/` is already the offline source, so
 the earlier "commit PROTOCOL.md into every project" idea shrinks to:
 record in `workflows/active.md` **both** the package version the project
 last synced against and the archive filename, so a session that finds no
-`../.context/` on disk can say precisely which file to ask the user for
+`../context/` on disk can say precisely which file to ask the user for
 — instead of improvising from memory (task2sms Session 2's failure).
 
 ### 5. Session concurrency convention — `mvp` (convention), `future` (tooling)
