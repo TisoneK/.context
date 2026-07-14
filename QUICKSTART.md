@@ -18,7 +18,7 @@ protocol package, and how the two work together.
 ~/Code/.context     ← the package (TisoneK/.context)
 ├── ai-engineering-protocol.md        cloud/sandbox edition
 ├── ai-engineering-protocol-local.md  local/IDE edition
-├── context-skeleton/                 17-file stub tree (incl. SYNC.md)
+├── context-skeleton/                 18-file stub tree (incl. SYNC.md + kickoff.md)
 └── roles/                            reviewer / security-auditor / docs-agent
 
 ~/Code/myproject                   ← any parent repo
@@ -56,6 +56,13 @@ Notes:
   from Pre-Flight.
 
 ## Per session — running an agent on the project
+
+> **Already bootstrapped?** The first session generates
+> `.context/kickoff.md` inside the project — the **inbound kickoff**,
+> pre-filled with the project's facts. From then on you skip the
+> Pre-Flight dance entirely: tell the agent *"Read `.context/kickoff.md`
+> and follow it"* (plus a target, if you have one). The steps below are
+> for the first session, or for agents you'd rather hand a file to.
 
 1. **Pick the edition** that matches the agent and fill its Pre-Flight
    for this project:

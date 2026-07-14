@@ -397,6 +397,7 @@ git push origin main  # uses the user's existing credentials
 .context/
 ├── README.md            # what this directory is, rules, for humans + agents
 ├── SYNC.md              # structural-vs-data split + how sync from the package works
+├── kickoff.md           # inbound kickoff — generated at bootstrap, entry point for every future session
 ├── system/
 │   ├── environments.md  # machines/sandboxes agents have run on (OS, toolchain versions, quirks)
 │   └── ai-models.md     # registry: which agents + models have worked on this repo
@@ -503,10 +504,10 @@ README (`reviews/`, `secrets/`). Follow it, don't invent formats.
 
 ### Bootstrap (first session in a repo without `.context/`)
 
-1. **If the protocol package's `context-skeleton/` folder is available** (it ships alongside this file), copy it in: `cp -r context-skeleton <repo>/.context` — it contains all 17 stub files with their entry templates (including the self-gitignored `secrets/` module, the `flaws/` workflow-friction log, and `SYNC.md`, the structural-vs-data sync manifest).
+1. **If the protocol package's `context-skeleton/` folder is available** (it ships alongside this file), copy it in: `cp -r context-skeleton <repo>/.context` — it contains all 18 stub files with their entry templates (including the self-gitignored `secrets/` module, the `flaws/` workflow-friction log, `SYNC.md`, the structural-vs-data sync manifest, and `kickoff.md`, the inbound-kickoff template).
 2. **Otherwise create the tree by hand:** every file starts with a title, a one-line purpose (including whether it's append-only or overwrite), and its entry template inside an HTML comment. Use the Entry templates above for the logs; overwrite files (`tasks/current.md`, `workflows/active.md`, `user/*`) get current-state field lists; `reviews/` gets a `README.md` stating the `YYYY-MM-DD-review.md` naming and report structure; `secrets/` gets its self-ignoring `.gitignore` (`*` + `!.gitignore` + `!README.md`) and a README with the hard rules — create these two before anything else in that directory; `flaws/` mirrors `inefficiencies/` — an append-only log plus a README stating the flaws-vs-inefficiencies split.
 3. Write `.context/README.md` from the Structure + What-goes-where + Rules sections above (the skeleton already includes it).
-4. Fill `user/identity.md` and `user/preferences.md` from Pre-Flight, `workflows/active.md` from Session Parameters, and add your row to `system/ai-models.md`.
+4. Fill `user/identity.md` and `user/preferences.md` from Pre-Flight, `workflows/active.md` from Session Parameters, and add your row to `system/ai-models.md`. Then generate the **inbound kickoff**: fill `kickoff.md`'s Project Facts placeholders per its HTML-comment rules (verified facts beat Pre-Flight; no session parameters; no secrets) — it becomes the entry point for every future session on this repo.
 5. **Migrate:** `git mv docs/report/*.md .context/reviews/` if prior reviews exist; leave a pointer README behind.
 6. Commit everything as one `chore(context): bootstrap .context/ directory` and push.
 

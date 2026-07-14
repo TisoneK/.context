@@ -8,6 +8,14 @@
 > a **cloud/sandbox** agent clones both), bootstrap or sync `.context/`,
 > push the initial state, then hand off to the protocol's phases.
 
+> **Already bootstrapped? Use the inbound kickoff instead.** This external
+> file is only needed for a project's **first-ever** `.context/` session.
+> That first session generates `.context/kickoff.md` **inside the project
+> repo** (Step 1c below) — pre-filled with the project's real facts — and
+> from then on THAT file is the entry point: no more carrying this one
+> around. If you're an agent reading this and the project repo already
+> contains `.context/kickoff.md`, switch to it now and follow it instead.
+
 You are joining a project as a senior software engineer. Your objective:
 understand the project, follow the protocol, do good work, leave the
 codebase and its `.context/` memory in a better state.
@@ -249,7 +257,7 @@ You should see:
 - the project repo — its code (and `.context/` if it already exists)
 - `.context/ai-engineering-protocol.md` — cloud/sandbox edition
 - `.context/ai-engineering-protocol-local.md` — local agent edition
-- `.context/context-skeleton/` — the 17-file stub tree
+- `.context/context-skeleton/` — the 18-file stub tree
 - `.context/roles/` — role overlays
 - `.context/QUICKSTART.md` — the two-repo mental model
 
@@ -286,10 +294,10 @@ the initial data, commit, and push — BEFORE starting the protocol phases.
 cp -r ../.context/context-skeleton .context
 ```
 
-Verify the skeleton landed (17 files including the self-gitignored `secrets/`):
+Verify the skeleton landed (18 files including the self-gitignored `secrets/`):
 ```bash
 find .context -type f | sort
-# Should include: README.md, SYNC.md, agents/sessions.md, flaws/,
+# Should include: README.md, SYNC.md, kickoff.md, agents/sessions.md, flaws/,
 # inefficiencies/, plans/, reviews/, secrets/.gitignore, secrets/README.md,
 # system/, tasks/, user/, workflows/
 ```
@@ -314,7 +322,27 @@ For the **protocol source** field in `workflows/active.md`, use:
 Read each file's HTML-comment template before filling it in — don't
 invent formats.
 
-#### 1c. Commit and push the bootstrap
+#### 1c. Generate the inbound kickoff (`.context/kickoff.md`)
+
+The skeleton copied in 1a includes `kickoff.md` — a template whose
+**Project Facts** placeholders you now fill in, following the generation
+rules in its HTML comment. This is the **kickoff inheritance**: the
+external file you're reading right now gets you through the first
+session; the generated in-repo file — pre-filled with the project's
+verified facts (repo URL from `git remote get-url origin`, default
+branch, git identity) — is the entry point for **every future session**.
+The user never carries this external file again for this project.
+
+Rules:
+- Facts you **verified on disk** beat facts typed in Pre-Flight — record
+  what's true, and note any mismatch in chat.
+- Session parameters do NOT go in it — they live in
+  `workflows/active.md`; the kickoff only points there.
+- Never put a PAT or any secret in it.
+- Leave its pre-written Entry Steps untouched — they're correct for
+  every post-bootstrap session.
+
+#### 1d. Commit and push the bootstrap
 
 ```bash
 cd <workspace>/<REPO>
@@ -326,6 +354,7 @@ Bootstrapped from TisoneK/.context context-skeleton. Filled in:
 - workflows/active.md (protocol edition + source URL)
 - system/environments.md, system/ai-models.md
 - tasks/current.md, agents/sessions.md
+- kickoff.md (inbound kickoff — entry point for future sessions)
 
 First agent session on this repo."
 ```
@@ -348,7 +377,7 @@ git push origin main
 Phase 1, the `.context/` memory is already on remote — the next agent
 picks up where this one left off, not from scratch.
 
-#### 1d. Proceed to Step 2
+#### 1e. Proceed to Step 2
 
 ### Path B: `.context/` already exists (subsequent session)
 
@@ -365,6 +394,16 @@ diverged from remote. Please sync manually before I start."
 
 If the working tree has unexpected changes (files you didn't touch),
 STOP and report — don't stash or discard someone else's work.
+
+**Backfill the inbound kickoff if it's missing.** Projects bootstrapped
+before the kickoff-inheritance feature have `.context/` but no
+`.context/kickoff.md`. If that's the case, generate it now exactly as
+Step 1c (Path A) describes — copy the template from
+`../.context/context-skeleton/kickoff.md`, fill **Project Facts** from
+this project's existing memory (`user/identity.md`,
+`workflows/active.md`, `git remote get-url origin`), and commit as
+`chore(context): backfill kickoff.md — inbound entry point`. From the
+next session on, that file replaces this one.
 
 **Proceed to Step 2.**
 
@@ -480,6 +519,7 @@ If you're editing anything else, you're in **project mode**.
 
 | If you need... | Look in... |
 |---|---|
+| The entry point for future sessions | `<REPO>/.context/kickoff.md` (generated at bootstrap — supersedes this file) |
 | The protocol file | `<workspace>/.context/ai-engineering-protocol.md` (or `-local.md`) |
 | The skeleton (for bootstrapping) | `<workspace>/.context/context-skeleton/` |
 | Role overlays | `<workspace>/.context/roles/` |
@@ -498,8 +538,12 @@ If you're editing anything else, you're in **project mode**.
 
 ## Final Note
 
-This file is a **universal pointer**. It works for any project using the
-`.context/` protocol — fill in the Pre-Flight, hand it to the agent, and
-the agent will clone both repos, bootstrap or sync `.context/`, load the
-protocol, and follow it. The real protocol is 800+ lines and lives in
-`TisoneK/.context`. This file just gets the agent through the door.
+This file is a **universal pointer** — and a **one-time** one per
+project. It works for any project using the `.context/` protocol: fill
+in the Pre-Flight, hand it to the agent, and the agent will clone both
+repos, bootstrap `.context/`, load the protocol, and follow it. During
+that first session the agent generates `.context/kickoff.md` inside the
+project repo — pre-filled with the project's verified facts — and every
+future session starts from there instead: *"Read `.context/kickoff.md`
+and follow it."* The real protocol is 800+ lines and lives in
+`TisoneK/.context`. This file just gets the agent through the door once.
