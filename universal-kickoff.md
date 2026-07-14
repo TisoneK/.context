@@ -69,24 +69,34 @@ codebase and its `.context/` memory in a better state.
 - **Deliverable:** report in `.context/reviews/` + chat summary _[default]_
 - **Commit granularity:** one logical change per commit _[default]_
 
-### GitHub PAT (PRIVATE REPOS ONLY)
+### GitHub PATs (ONE PER PRIVATE REPO)
 
-> **⚠️ DO NOT PUT THE PAT IN THIS FILE.** The file upload pipeline redacts
-> secrets — if you paste it here, the agent receives `[REDACTED:github_token]`
-> and cannot clone.
+> **Privacy is per-repo.** The project repo and the package repo each
+> declare their own mode — project above, package below — and the agent
+> handles each on its own declaration. A public project with a private
+> package, or the reverse, is a normal setup, not a contradiction: never
+> assume one repo's privacy from the other's. Cloud/sandbox agents need a
+> PAT for **every** repo marked private; local agents need none (the
+> user's credentials cover both).
 >
-> **Instead:** Paste the PAT directly in your first chat message after
-> uploading this file. Say:
+> **⚠️ DO NOT PUT PATs IN THIS FILE.** The file upload pipeline redacts
+> secrets — if you paste one here, the agent receives
+> `[REDACTED:github_token]` and cannot clone.
 >
-> > "Here's the PAT for the repo: `github_pat_...`"
+> **Instead:** Paste the PAT(s) directly in your first chat message after
+> uploading this file, **naming which repo each one is for**:
 >
-> The agent will use it as a transient env var and never write it to any
-> file. **Rotate the PAT after the session ends.**
+> > "Project PAT: `github_pat_...` Package PAT: `github_pat_...`"
+>
+> If one PAT can read both private repos (same account), say so:
+> "this PAT covers both." The agent uses them as transient env vars and
+> never writes them to any file. **Rotate the PAT(s) after the session
+> ends.**
 
 ### Package Repository (where the protocol lives)
 
-- **Package repo URL:** https://github.com/TisoneK/.context.git
-- **Is the package repo private?** No — it's public. Clone directly, no PAT needed.
+- **Package repo URL:** https://github.com/TisoneK/.context.git _[default — change if you use a fork/mirror]_
+- **Is the package repo private?** <Yes / No> _[default No — the canonical `TisoneK/.context` is public. A private fork/mirror needs its own PAT; see the PAT section above.]_
 
 ---
 
@@ -187,6 +197,9 @@ cd -                                                         # back into the pro
 ```
 - If `.context` already exists beside the repo, don't re-clone —
   freshen it: `git -C ../.context pull --ff-only`.
+- A **private** package repo changes nothing here — the clone runs with
+  the user's existing credentials, same as everything else on a local
+  machine. If it fails with an auth error, stop and tell the user.
 - **Heads-up on the name:** this clones the package one level **above** the
   project as `../.context` (matching the remote repo `TisoneK/.context`). That
   is a different directory from the project's own in-repo `.context/` memory
@@ -199,12 +212,19 @@ cd -                                                         # back into the pro
 
 ### Cloud/sandbox — Step 0
 
-**0-C.1 — Set up the PAT (if the project repo is private).**
+**0-C.1 — Set up the PAT(s) — one per repo marked private in Pre-Flight.**
 ```bash
-# Get the PAT from the user's first chat message. Export as env var.
-# Never write it to any file. Never echo it.
-export GIT_TOKEN='<from-chat>'
+# Get the PAT(s) from the user's first chat message. Export as env vars.
+# Never write them to any file. Never echo them.
+export GIT_TOKEN='<from-chat>'   # project repo PAT — if the project repo is private
+export PKG_TOKEN='<from-chat>'   # package repo PAT — if the package repo is private
+# If the user said one PAT covers both:  export PKG_TOKEN="$GIT_TOKEN"
 ```
+
+Check each repo's **own** Pre-Flight privacy field — never infer one
+repo's mode from the other's. If a repo is marked private and no PAT for
+it arrived in chat, STOP and report: "The <project|package> repo is
+private — please paste its PAT in chat."
 
 **0-C.2 — Clone the project repo (the "root repo").**
 ```bash
@@ -227,15 +247,24 @@ git config user.name "<GIT_NAME>"
 git config user.email "<GIT_EMAIL>"
 ```
 
-**0-C.3 — Clone the package repo (public — no PAT).**
+**0-C.3 — Clone the package repo (per ITS OWN privacy field, not the project's).**
 ```bash
 cd <workspace>
+
+# If public (default):
 git clone https://github.com/TisoneK/.context.git .context
+
+# If private (a private fork/mirror) — use ITS PAT, then strip it:
+git clone "https://x-access-token:${PKG_TOKEN}@github.com/<PKG_OWNER>/<PKG_REPO>.git" .context
+git -C .context remote set-url origin https://github.com/<PKG_OWNER>/<PKG_REPO>.git
+unset PKG_TOKEN   # safe to drop now — the package is read-only reference; you never push to it
 ```
 
-> **DO NOT unset `GIT_TOKEN` yet** — it's needed for every push this session.
-> It stays an env var for the whole session and is unset at the very end
-> (protocol Step 19). *(Cloud/sandbox only — local agents have no token.)*
+> **DO NOT unset `GIT_TOKEN` yet** — it's needed for every push to the
+> project repo this session. It stays an env var for the whole session and
+> is unset at the very end (protocol Step 19). `PKG_TOKEN` is different:
+> the package repo is never pushed to, so its token dies right after the
+> clone, above. *(Cloud/sandbox only — local agents have no tokens.)*
 
 → Go to **0c. Verify**.
 

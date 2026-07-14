@@ -7,6 +7,8 @@ Generation rules for the bootstrapping agent:
 1. Fill every <PLACEHOLDER> in "Project Facts" from the external kickoff's
    Pre-Flight + what you verified on disk (git remote, default branch).
    Facts you verified beat facts the user typed — record what's true.
+   Record each repo's privacy mode SEPARATELY — project and package each
+   get their own field; never copy one repo's mode onto the other.
 2. Do NOT copy session parameters here — they live in workflows/active.md
    (single source of truth). This file only points at them.
 3. Do NOT put secrets, PATs, or tokens anywhere in this file. Ever.
@@ -26,21 +28,28 @@ Generation rules for the bootstrapping agent:
 >   and follow it."* Add a target description in the same message if you
 >   have one.
 > - **Cloud/sandbox agent** (empty workspace): *"Clone
->   `<PROJECT_REPO_URL>`, read `.context/kickoff.md`, follow it."* If the
->   repo is private, paste the PAT in that same chat message — never into
->   any file.
+>   `<PROJECT_REPO_URL>`, read `.context/kickoff.md`, follow it."* For
+>   **each** repo marked private in Project Facts below, paste its PAT in
+>   that same chat message, naming which repo it's for — never into any
+>   file.
 
 ---
 
 ## Project Facts (generated — keep current)
 
+> **Privacy is per-repo.** Each repo below carries its own privacy mode —
+> never infer one from the other. A public project with a private package
+> (or the reverse) is a normal setup. Cloud/sandbox agents need a PAT for
+> every repo marked private; local agents need none.
+
 - **Project name:** <PROJECT_NAME>
 - **Project repository URL:** <PROJECT_REPO_URL>
-- **Private repo:** <Yes / No>
+- **Project repo privacy:** <Public / Private>
 - **Default branch:** <main>
 - **Live application:** <LIVE_URL or N/A>
 - **Git identity:** <GIT_NAME> `<GIT_EMAIL>`
-- **Package repo (the protocol):** https://github.com/TisoneK/.context.git — public, no PAT
+- **Package repo (the protocol):** <https://github.com/TisoneK/.context.git or fork/mirror URL>
+- **Package repo privacy:** <Public / Private> _[the canonical `TisoneK/.context` is public]_
 - **Protocol edition:** local agents → `ai-engineering-protocol-local.md`; cloud/sandbox agents → `ai-engineering-protocol.md`
 
 ## Session Parameters
@@ -73,22 +82,29 @@ git remote get-url origin        # confirm it matches the Project repository URL
   || git clone https://github.com/TisoneK/.context.git ../.context
 ```
 
-No PAT, ever — your pushes use the user's existing credentials. If a push
-fails with an auth error, stop and tell the user.
+No PAT, ever — clones and pushes both use the user's existing
+credentials, whatever either repo's privacy mode. If one fails with an
+auth error, stop and tell the user.
 
-**Cloud/sandbox agent** — clone both into the workspace:
+**Cloud/sandbox agent** — clone both into the workspace. Each repo's
+clone follows **its own** privacy field in Project Facts above:
 
 ```bash
-# Project repo (PAT from chat if private — strip it from .git/config right after):
+# Project repo (if private: PAT from chat — strip it from .git/config right after):
 git clone <PROJECT_REPO_URL_WITH_TOKEN_IF_PRIVATE> <REPO> && cd <REPO>
 git remote set-url origin <PROJECT_REPO_URL>
 git config user.name "<GIT_NAME>" && git config user.email "<GIT_EMAIL>"
-# Package repo (public):
-git clone https://github.com/TisoneK/.context.git ../.context
+
+# Package repo (if private: same dance with ITS OWN PAT, then drop that token —
+# the package is read-only reference, never pushed to):
+git clone <PACKAGE_REPO_URL_WITH_TOKEN_IF_PRIVATE> ../.context
+git -C ../.context remote set-url origin <PACKAGE_REPO_URL>
 ```
 
-Keep `GIT_TOKEN` as an env var for the session's pushes; unset it only at
-the protocol's final step. Never write it to any file.
+If a repo is marked private and no PAT for it arrived in chat, stop and
+ask for that repo's PAT by name. Keep the **project** repo's `GIT_TOKEN`
+as an env var for the session's pushes — unset it only at the protocol's
+final step. Never write any token to any file.
 
 ### Step 1 — Sync
 
