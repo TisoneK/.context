@@ -53,6 +53,16 @@ standing workflow, and "if the user has to remind you to commit or push,
 the protocol failed" applies here too. Friction with the protocol found
 while doing package work goes straight into [`flaws/log.md`](flaws/log.md).
 
+**The boundary: a package session's output stops at the package push.**
+When a package fix affects files that live inside projects (the inbound
+`kickoff.md`, structural READMEs), the fix reaches those projects through
+**their own** next sessions — structural files via the SYNC rule, data
+files like `kickoff.md` via regeneration — or through the user relaying
+it. The maintainer session never commits into another project's
+`.context/`, however obvious the fix: those repos have their own agents,
+their own session logs, and their own locks. Fix the source; let the
+instances pull.
+
 ## Design rules (the short version)
 
 - **Append-only logs stay append-only** — `sessions.md`, `inefficiencies/log.md`,
