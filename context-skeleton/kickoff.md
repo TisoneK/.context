@@ -4,16 +4,24 @@
 This file is DATA (project-owned, never overwritten by structural sync).
 
 Generation rules for the bootstrapping agent:
-1. Fill every <PLACEHOLDER> in "Project Facts" from the external kickoff's
-   Pre-Flight + what you verified on disk (git remote, default branch).
-   Facts you verified beat facts the user typed — record what's true.
-   Record each repo's privacy mode SEPARATELY — project and package each
-   get their own field; never copy one repo's mode onto the other.
+1. Fill every fact <PLACEHOLDER> OUTSIDE this HTML comment — in "Project
+   Facts", in the intro blockquote (the clone URL), AND in the Entry
+   Steps code blocks (repo URLs, git identity) — from the external
+   kickoff's Pre-Flight + what you verified on disk (git remote, default
+   branch). Facts you verified beat facts the user typed — record what's
+   true. Record each repo's privacy mode SEPARATELY — project and
+   package each get their own field; never copy one repo's mode onto the
+   other. The ONLY placeholders that stay symbolic are the token forms
+   (`<..._WITH_TOKEN_IF_PRIVATE>`, `${GIT_TOKEN}`, `${PKG_TOKEN}`) —
+   never a real token. After filling, scan:
+   `grep -n "<PROJECT\|<GIT_\|<LIVE_\|<REPO>" .context/kickoff.md` —
+   hits are allowed only inside this comment and in the token forms.
 2. Do NOT copy session parameters here — they live in workflows/active.md
    (single source of truth). This file only points at them.
 3. Do NOT put secrets, PATs, or tokens anywhere in this file. Ever.
-4. Delete nothing else — the Entry Steps below are pre-written and correct
-   for every post-bootstrap session. They are not placeholders.
+4. Delete nothing else — the Entry Steps below are pre-written and
+   correct for every post-bootstrap session. Fill their fact
+   placeholders (rule 1) but change no step logic.
 5. Keep facts current in later sessions: if a fact changes (repo renamed,
    new default branch, live URL added), update it in place and note the
    change in your session entry.

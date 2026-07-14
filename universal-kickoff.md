@@ -356,6 +356,16 @@ find .context -type f | sort
 # system/, tasks/, user/, workflows/
 ```
 
+**Guard against the classic wrong copy** — both of these must NOT exist:
+```bash
+ls .context/.git .context/ai-engineering-protocol.md 2>/dev/null
+# ANY output = you copied the whole package (../.context) instead of the
+# skeleton. Fix: rm -rf .context && cp -r ../.context/context-skeleton .context
+```
+Copying the package wholesale nests a second git repo inside the project
+and drags the protocol editions, roles, and consolidated flaws into every
+clone of the project — it is not a bootstrap, it's a mess.
+
 #### 1b. Fill in the initial `.context/` data
 
 Using the Pre-Flight values above, fill in these files (overwrite the
@@ -393,8 +403,16 @@ Rules:
 - Session parameters do NOT go in it — they live in
   `workflows/active.md`; the kickoff only points there.
 - Never put a PAT or any secret in it.
-- Leave its pre-written Entry Steps untouched — they're correct for
-  every post-bootstrap session.
+- Leave its pre-written Entry Steps' logic untouched — they're correct
+  for every post-bootstrap session. Fill their fact placeholders (repo
+  URLs, git identity); only the symbolic token placeholders stay.
+- After generating, scan for placeholders you missed:
+  ```bash
+  grep -rn "<PROJECT_NAME>\|<PROJECT_REPO_URL>\|<GIT_NAME>\|<GIT_EMAIL>\|<LIVE_URL" .context/
+  # Hits are allowed ONLY inside HTML template comments and as symbolic
+  # token placeholders. A hit in rendered content = a field you forgot.
+  ```
+  This scan covers the 1b files too — run it before committing.
 
 #### 1d. Commit and push the bootstrap
 
