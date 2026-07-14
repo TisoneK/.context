@@ -37,6 +37,21 @@ agent did, what's open, what's decided, and what went wrong before.
    last (Steps 15–17). The two editions share the same `.context/` spec, so
    cloud and local agents can alternate on the same repo coherently.
 
+## Working on this repo (the package as the session's target)
+
+When a session's task is to change the **package itself** — a new feature,
+a protocol fix, a flaw back-port — the package IS that session's project
+repo, and the normal session defaults apply in full: one logical change
+per commit, push after each commit, no confirmation prompts on default
+next steps. The kickoff's "never push to the package repo" rule guards
+sessions targeting **other** projects against stray package pushes — it
+is not a reason to sit on finished package work or to ask permission to
+commit it. This applies even when the session was started with a direct
+task in chat rather than a kickoff file: this repo's own docs are the
+standing workflow, and "if the user has to remind you to commit or push,
+the protocol failed" applies here too. Friction with the protocol found
+while doing package work goes straight into [`flaws/log.md`](flaws/log.md).
+
 ## Design rules (the short version)
 
 - **Append-only logs stay append-only** — `sessions.md`, `inefficiencies/log.md`,
