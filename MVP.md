@@ -128,6 +128,36 @@ is `future`.
   card is the floor for weak models; a profile system ("strict mode":
   check runs mandatory, smaller step budget, no improvisation clauses)
   could adapt the protocol's freedom to the model driving it.
+- **Multi-agent (parallel) processing** — `future`, design constraints
+  decided now — today the workflow assumes one agent processes every
+  phase serially; capable platforms can dispatch sub-agents ("deep-scan
+  backend and frontend in parallel while the main agent reviews
+  security"). The design that preserves the protocol's invariants:
+  **orchestrator–worker, inside one session.**
+  - **One session, one writer.** The orchestrator is the session: the
+    sole author of git commits and every `.context/` write. Workers are
+    **read-only explorers** — they scan, review, and report findings
+    back; they never commit, push, or touch memory. This keeps
+    append-only logs single-writer, session numbering linear, and the
+    two-surfaces rule intact.
+  - **Where parallelism pays:** the read-only phases — discovery
+    (Step 7) and review (Step 9) — fan out by area (backend / frontend /
+    security / docs). Phase 3 (writes) stays serialized through the
+    orchestrator.
+  - **Findings merge through Pitfall #31:** the orchestrator reproduces
+    a worker's finding before acting on it — a sub-agent's report is a
+    claim, not a verified fact.
+  - **Capability-gated, never required:** the protocol must remain
+    fully executable single-agent; parallel dispatch is an optimization
+    for platforms that have it (ties into model-capability profiles).
+    The session entry records that workers were used, for which areas,
+    on which model.
+  - **Not cross-session concurrency:** the one-agent-per-repo rule
+    (MVP #5) is untouched — workers live inside the orchestrator's
+    session and hold no lock of their own.
+  - Likely landing shape: a short "Parallel discovery/review" sub-step
+    in the core protocol + a `roles/orchestrator.md` overlay once
+    single-source editions (MVP #3) exist — write it once, not twice.
 - **Windows-native paths** — `future` — the docs are POSIX-flavored;
   `check` and the kickoff commands need PowerShell equivalents before a
   general public release.
