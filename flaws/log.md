@@ -227,3 +227,40 @@ Flaws consolidated from LocalMind Session 7 are now **fixed in this commit**:
 - **Source:** TisoneK/.context — package repo session, 2026-07-13 (inbound-kickoff + per-repo-privacy feature work)
 - **Status:** open
 - **Fixed in package:** 2026-07-13, same session — README gained a "Working on this repo" section stating that package-as-target sessions inherit the full session defaults (commit per logical change, push after each, no permission prompts) and that the "never push to the package" rule guards only sessions targeting other projects.
+
+---
+## 2026-07-13 — Super Z / glm-5.2 + unknown (consolidated from task2sms, Sessions 1–2)
+
+- **Flaw:** The kickoff claimed the package repo (`TisoneK/.context`) is "public — clone directly, no PAT needed." It is private: unauthenticated requests 404 (re-verified from the maintainer's machine, 2026-07-13). Session 1 lost ~3 min to a failed clone; Session 2 (no PAT provided) couldn't reach the 800-line protocol at all and ran on a reconstructed skeleton of it. A follow-up entry correctly reframed part of the root cause as agent-side: the kickoff already said cloud agents "authenticate via a PAT," so the agent should have asked for one at Step 0 before any clone — the stale visibility claim compounded the failure but didn't cause the not-asking.
+- **Symptom:** `fatal: could not read Username` on the package clone; Session 2 proceeded without the actual protocol text and framed it as a workaround.
+- **Root cause:** Repo visibility changed after the kickoff was written, and the claim was hard-coded prose nothing re-validates; separately, agents waited for clone failures instead of securing credentials up front.
+- **Suggested fix:** Correct the claim; flip the Pre-Flight default to private with a "verify, don't trust" note; lead Step 0-C.3 with the authenticated clone; tell cloud agents at Step 0a to ask for PATs before any clone (needed for every push, even to public repos). The inbound kickoff template now instructs verifying visibility at generation time instead of copying a claim.
+- **Source:** TisoneK/task2sms — `.context/flaws/log.md`, Sessions 1–2 + second follow-up (2026-07-13)
+- **Status:** fixed in package 245ed98 (2026-07-13)
+
+---
+## 2026-07-13 — Super Z / glm-5.2 (consolidated from task2sms, Session 2 self-audits)
+
+- **Flaw:** Pitfall #30 ("don't ask permission on the default next step") was misapplied twice, in opposite directions: (1) cited as justification for NOT asking for a missing PAT, leaving 4 finished commits unpushed — but a missing credential is a missing input, not a permission question; (2) violated in a follow-up turn with "would you like me to implement the validator, or just backlog it?" — after the main work looked done, as if follow-up turns weren't bound. The same sessions also shipped a path-traversal vulnerability the agent noticed while writing it (exploit worked first try), an invalid `railway.toml` written from memory (nonexistent `[[volume]]` block, wrong enum casing), and backlogged a confirmed one-line fix.
+- **Symptom:** User had to intervene four separate times: provide the PAT unprompted, call out the permission question, catch the security bug, and name the pattern ("the questions you are asking are against context rules").
+- **Root cause:** #30 stated the rule but not its boundary (inputs vs permission) nor its temporal scope (follow-up turns); no pitfall covered traversal testing, IaC schema validation, or the backlog-as-deferral anti-pattern.
+- **Suggested fix:** Strengthen #30 (follow-up turns bound; "fix or log?" is never genuine ambiguity; inverse boundary stated). Add #34 (missing credential = missing input, ask up front), #35 (traversal test before shipping any user-input→path join, encoded forms included), #36 (validate IaC against its official schema, never from memory), #37 (fix safe one-liners on the spot; the backlog is for design/migration work).
+- **Source:** TisoneK/task2sms — `.context/flaws/log.md`, Session 1 follow-up + Session 2 self-audit (2026-07-13)
+- **Status:** fixed in package 513de7c (2026-07-13)
+
+---
+## 2026-07-13 — Super Z / glm-5.2 (consolidated from task2sms, Session 2)
+
+- **Flaw:** The protocol is sweep-shaped (discover → review → fix); a feature-request Target ("Add Railway hosting support") has nothing to review — it has decisions to design and code to build. The agent had to reinterpret the phases ad hoc.
+- **Symptom:** The session worked, but as an improvisation the protocol neither prescribed nor could hold the agent to — design decisions weren't systematically captured as ADRs, and scope boundaries were the agent's guess.
+- **Root cause:** No feature mode: Phase 2 assumed "review," Phase 3 assumed "fix findings."
+- **Suggested fix:** A `roles/feature-engineer.md` overlay making feature sessions first-class — Phase 2 = design (ADRs in `plans/decisions.md` before code, one-ADR minimum), Phase 3 = implement (all quality gates binding), Step 13 = feature report with an explicit verified / NOT-verified split, plus scope guards (touched-code fixes yes, general sweep no).
+- **Source:** TisoneK/task2sms — `.context/flaws/log.md`, Session 2 (2026-07-13)
+- **Status:** fixed in package 33cfd8d (2026-07-13)
+
+---
+## 2026-07-13 — maintainer decision (task2sms back-port triage)
+
+- **Note (not a flaw):** Two task2sms Session-1 flaws were deliberately NOT back-ported: the pre-provisioned sandbox venv (`/home/z/.venv`, `pip3`-not-`pip`) and the sandbox scaffold `.env` leaking `DATABASE_URL` into the project's process. Maintainer ruling: system-specific flows don't belong in the universal protocol — they are exactly what each project's `.context/system/environments.md` and `inefficiencies/log.md` exist to capture, and the protocol already binds agents to read both before guessing (Step 8). The agent identifies and learns these per environment; the package stays universal.
+- **Source:** package maintainer, back-port session 2026-07-13
+- **Status:** closed by design — no package change
