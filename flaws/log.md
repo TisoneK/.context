@@ -284,3 +284,13 @@ Flaws consolidated from LocalMind Session 7 are now **fixed in this commit**:
 - **Suggested fix:** State the boundary in the package README's "Working on this repo" section: a package-targeted session's output stops at the package push. Project-side instances of the fix are adopted by each project's own next session (structural files via SYNC; data files like kickoff.md via regeneration), or relayed by the user — the maintainer session does not commit into other projects' `.context/`, especially ones with active agents. The 1798261 commit stands (content correct, history transparent), but the pattern must not repeat.
 - **Source:** TisoneK/.context — package repo session, 2026-07-14
 - **Status:** fixed in package (this commit) — README boundary added
+
+---
+## 2026-07-14 — user observation (cross-agent-type memory contamination)
+
+- **Flaw:** A repo bootstrapped by a cloud agent "infects" subsequent local sessions: after the user pulls the codebase locally, the local agent misbehaves — it picks up the cloud agent's characteristics (PAT dances, token env vars, re-cloning, sandbox commands).
+- **Symptom:** Local agent on a cloud-bootstrapped repo follows the cloud edition and cloud environment records as if they were its own instructions.
+- **Root cause:** `.context/` memory conflates per-project facts with per-agent-type facts. The bootstrapping agent records ITS edition as `workflows/active.md`'s "Protocol in force," and the inbound kickoff's Step 3 said "read the edition named in workflows/active.md" — so the next agent of the other type reads the first agent's platform binding as the project's binding. Same conflation risk with `environments.md` verified commands (machine-specific) read as universal.
+- **Suggested fix:** Make edition choice belong to the agent's TYPE at session start, never to the memory file: `workflows/active.md` template now hard-codes "Protocol: by agent type — naming BOTH editions" with a comment forbidding recording just your own; the inbound kickoff's Step 3 picks by the agent's own type and explicitly distrusts a single-edition record; universal kickoff Step 1b instructs recording both editions keyed by type; Pitfall #43 states the general rule (edition by type, environment blocks only by "Identify by" match, PAT steps never for locals).
+- **Source:** user observation across cloud-bootstrap → local-pull sessions, 2026-07-14
+- **Status:** fixed in package (this commit)

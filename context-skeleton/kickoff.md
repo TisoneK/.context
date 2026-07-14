@@ -161,11 +161,17 @@ In order: `README.md` → `workflows/active.md` → `agents/sessions.md`
 
 ### Step 3 — Load the protocol
 
-Read the edition named in `workflows/active.md` from the package clone
-found in Step 0 (`$PKG`, canonically `../context`) —
-`$PKG/ai-engineering-protocol-local.md` (local) or
-`$PKG/ai-engineering-protocol.md` (cloud/sandbox) — plus any role
-overlay from `$PKG/roles/`. Read it in full; it is the instruction
+Pick the edition by **YOUR agent type** (identified in Step 0), from the
+package clone found there (`$PKG`, canonically `../context`):
+- **Local agent** → `$PKG/ai-engineering-protocol-local.md`
+- **Cloud/sandbox agent** → `$PKG/ai-engineering-protocol.md`
+
+`workflows/active.md` gives you the protocol *source/version* and any
+role overlay — it does **not** choose your edition. If it names a single
+edition, that's whichever agent type wrote it last; ignore that and
+follow your own type (a local agent must never run the cloud edition's
+PAT/clone steps, whatever the memory says). Also read any role overlay
+from `$PKG/roles/`. Read your edition in full; it is the instruction
 set for this session.
 
 ### Step 4 — Follow the protocol

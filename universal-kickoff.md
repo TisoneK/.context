@@ -419,15 +419,23 @@ placeholder content):
 
 - **`.context/user/identity.md`** — name, git identity, GitHub username, role, timezone
 - **`.context/user/preferences.md`** — workflow, communication, code style, review depth, risk & approvals (seeded from Pre-Flight session parameters)
-- **`.context/workflows/active.md`** — protocol edition (cloud vs local), protocol source URL, scope, focus areas, push policy, commit style, deliverable
+- **`.context/workflows/active.md`** — protocol ("by agent type", naming BOTH editions — never just your own; see the template's comment), protocol source URLs, scope, focus areas, push policy, commit style, deliverable
 - **`.context/system/environments.md`** — this machine/sandbox: OS, runtimes, package manager, verified commands, quirks
 - **`.context/system/ai-models.md`** — this agent + model: first row in the registry
 - **`.context/tasks/current.md`** — set to this session's task (or "idle" if just bootstrapping)
 - **`.context/agents/sessions.md`** — first session entry
 
-For the **protocol source** field in `workflows/active.md`, use:
-- Cloud/sandbox agent: `https://github.com/TisoneK/.context/blob/main/ai-engineering-protocol.md`
-- Local agent: `https://github.com/TisoneK/.context/blob/main/ai-engineering-protocol-local.md`
+For the **protocol** and **protocol source** fields in
+`workflows/active.md`, record **both editions, keyed by agent type** —
+never just the edition you happen to be running:
+- Local agents → `https://github.com/TisoneK/.context/blob/main/ai-engineering-protocol-local.md`
+- Cloud/sandbox agents → `https://github.com/TisoneK/.context/blob/main/ai-engineering-protocol.md`
+
+The project's memory serves BOTH agent types. If you record only your
+own edition, the next agent of the other type reads it as binding and
+inherits your platform's behavior — a local agent on a cloud-bootstrapped
+repo starts doing PAT dances and re-cloning. Edition choice belongs to
+the agent's type at session start, never to the file.
 
 Read each file's HTML-comment template before filling it in — don't
 invent formats.
