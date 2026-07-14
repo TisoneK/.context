@@ -18,6 +18,7 @@ agent did, what's open, what's decided, and what went wrong before.
 | [`flaws/`](flaws/) | **Consolidated workflow flaws** — friction agents hit with the protocol/`.context/` system itself, back-ported from all projects using this package. The source of truth for protocol improvements. |
 | [`examples/localmind-review.md`](examples/localmind-review.md) | Example session deliverable — a real review report produced by an agent following the protocol (LocalMind, Session 2). |
 | [`QUICKSTART.md`](QUICKSTART.md) | The two-repo mental model + bootstrap steps — how to initialize a project with `.context/` memory from this package. Start here if you're new. |
+| [`MVP.md`](MVP.md) | **Public-release plan + feature roadmap** — the versioned-archive distribution model (`context-X.Y.Z.zip` → `../.context/`), the MVP feature set (check script, single-source editions, concurrency convention), and the single home for advanced/future feature ideas. |
 
 ## Usage
 
