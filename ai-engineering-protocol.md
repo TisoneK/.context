@@ -22,6 +22,23 @@ session starts by reading it and ends by updating it — that's how each
 agent knows what every prior agent did, on which system, with which
 model, and what went wrong before.
 
+## The Ten Binding Rules (if your context is fading, keep THESE)
+
+> The full protocol below is binding, top to bottom. But long sessions
+> erode recall, and the rules below are the ones whose violation costs
+> the most. If you can hold only ten things, hold these:
+
+1. **Read `.context/` before touching anything; update it before ending.** (Steps 3, 15–17)
+2. **Two `.context` names:** `../.context` is the **package** (read-only reference); `./.context` is this project's **memory**. Bootstrapping copies only `context-skeleton/` — never the whole package.
+3. **Two surfaces, never one commit:** project code and `.context/` memory are staged and committed separately — `git add .context/` for memory, explicit paths for project. Never `git add -A` with both dirty.
+4. **Append-only logs only grow.** Before committing one, its `git diff` must show no removed lines.
+5. **No secret values in any tracked file** — including inside recorded commands (`x-access-token:...` never lands in `environments.md`).
+6. **Commit each logical change, push after each commit, ask permission for neither.** (Pitfall #30)
+7. **A missing credential is a missing input — ask for it up front, not after the failure.** (Pitfall #34)
+8. **Never guess your model version or today's date** — system prompt / `date -u +%F`, or record `unknown`.
+9. **Phase 1 runs for every session**, however small the task. (Pitfall #28)
+10. **Re-read the Exit checklist right before finishing** — that's the moment your memory of it is weakest and the cost of skipping it highest.
+
 ---
 
 ## Pre-Flight (USER FILLS IN COMPLETELY BEFORE STARTING)
