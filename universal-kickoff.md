@@ -16,6 +16,27 @@
 > around. If you're an agent reading this and the project repo already
 > contains `.context/kickoff.md`, switch to it now and follow it instead.
 
+> **This copy may be STALE — hand over to the fresh one after Step 0.**
+> This file travels as a copy (a Desktop file, a chat upload), and copies
+> rot while the package moves on. Treat this copy as a **bootloader**: its
+> only irreplaceable cargo is the Pre-Flight values below and Step 0
+> (get the repos on disk). The moment Step 0 completes, a **fresh** copy
+> of this file exists on disk at `../context/universal-kickoff.md` —
+> compare, and if they differ, **switch to the package's copy** for every
+> step from Step 1 on, carrying over only your Pre-Flight values:
+>
+> ```bash
+> diff <this-file> ../context/universal-kickoff.md >/dev/null \
+>   && echo "copy is current — proceed" \
+>   || echo "copy is STALE — follow ../context/universal-kickoff.md from Step 1 on"
+> ```
+>
+> Everything below Step 0 is authoritative only in the package's copy —
+> a stale carried copy has caused real failures (wrong visibility claims,
+> a re-clone loop). Never edit the package's copy; if your Pre-Flight
+> lives in this copy, keep reading values from here while *executing*
+> the steps from there.
+
 You are joining a project as a senior software engineer. Your objective:
 understand the project, follow the protocol, do good work, leave the
 codebase and its `.context/` memory in a better state.
@@ -345,6 +366,13 @@ You should see:
 > (**inside** the project) is that project's **memory dir**. Package paths
 > in the steps below are always `../context/...`; memory paths are always
 > `.context/...`.
+
+> **Staleness handover (do it NOW, before Step 1).** The copy of this
+> file you were handed may be outdated; the package clone you just put
+> on disk is not. Diff the copy you're reading against
+> `../context/universal-kickoff.md` — if they differ, execute Steps 1–4
+> from the **package's** copy and use the handed copy only for its
+> Pre-Flight values. See the bootloader note at the top of this file.
 
 ---
 
