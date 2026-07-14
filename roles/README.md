@@ -21,6 +21,7 @@ a role file is ~80 lines, not another 790-line document to keep aligned.
 | Role | File | Mission | Writes code? |
 |---|---|---|---|
 | **Engineer** (default) | *(none — run the base edition as-is)* | discovery + review + fix all safe issues | yes |
+| **Feature engineer** | [`feature-engineer.md`](feature-engineer.md) | design + build a requested feature (Phase 2 = design/ADRs, Phase 3 = implement) | yes |
 | **Reviewer** | [`reviewer.md`](reviewer.md) | audit and report; change nothing | no |
 | **Security auditor** | [`security-auditor.md`](security-auditor.md) | security-only deep audit | security fixes only |
 | **Docs agent** | [`docs-agent.md`](docs-agent.md) | make the docs match the code | docs only |
