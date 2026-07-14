@@ -41,10 +41,11 @@ Generation rules for the bootstrapping agent:
 > **Privacy is per-repo.** Each repo below carries its own privacy mode —
 > never infer one from the other. A public project with a private package
 > (or the reverse) is a normal setup. Cloud/sandbox agents need PAT
-> access for every repo marked private — recommended as **one
-> fine-grained PAT scoped to all of them** (Contents: Read and write for
-> the project; Read-only suffices for the package). Local agents need
-> none.
+> access for every repo marked private — and for **every push, even to a
+> public project repo** — recommended as **one fine-grained PAT scoped
+> to all of them** (Contents: Read and write for the project; Read-only
+> suffices for the package). Ask for it up front, before any clone.
+> Local agents need none.
 
 - **Project name:** <PROJECT_NAME>
 - **Project repository URL:** <PROJECT_REPO_URL>
@@ -53,7 +54,7 @@ Generation rules for the bootstrapping agent:
 - **Live application:** <LIVE_URL or N/A>
 - **Git identity:** <GIT_NAME> `<GIT_EMAIL>`
 - **Package repo (the protocol):** <https://github.com/TisoneK/.context.git or fork/mirror URL>
-- **Package repo privacy:** <Public / Private> _[the canonical `TisoneK/.context` is public]_
+- **Package repo privacy:** <Public / Private> _[verify at generation — don't assume: the canonical `TisoneK/.context` is private as of 2026-07-13, and its visibility has changed before]_
 - **Protocol edition:** local agents → `ai-engineering-protocol-local.md`; cloud/sandbox agents → `ai-engineering-protocol.md`
 
 ## Session Parameters
@@ -105,7 +106,10 @@ git clone <PACKAGE_REPO_URL_WITH_TOKEN_IF_PRIVATE> ../.context
 git -C ../.context remote set-url origin <PACKAGE_REPO_URL>
 ```
 
-If a repo is marked private and no PAT covering it arrived in chat, stop
+Ask for PATs **up front, before any clone** — you need one for every
+push (even to a public project repo) and for every private clone; a
+missing credential is a missing input, not a permission question. If a
+repo is marked private and no PAT covering it arrived in chat, stop
 and ask for one by repo name. When one shared fine-grained PAT covers
 both, `PKG_TOKEN` is just `GIT_TOKEN` — still drop `PKG_TOKEN` after the
 package clone, and keep `GIT_TOKEN` as an env var for the session's

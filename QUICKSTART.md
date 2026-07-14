@@ -31,6 +31,10 @@ protocol package, and how the two work together.
 git clone https://github.com/TisoneK/.context.git ~/Code/.context
 ```
 
+The package repo is **private** — your GitHub account needs access. On
+your own machine your normal git credentials handle it; cloud/sandbox
+agents need it covered by their PAT.
+
 ## Per project — initialize the parent repo + its memory
 
 ```bash

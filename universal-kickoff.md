@@ -76,14 +76,15 @@ codebase and its `.context/` memory in a better state.
 > handles each on its own declaration. A public project with a private
 > package, or the reverse, is a normal setup, not a contradiction: never
 > assume one repo's privacy from the other's. Cloud/sandbox agents need
-> PAT access for **every** repo marked private; local agents need none
-> (the user's credentials cover both).
+> PAT access for **every** repo marked private — and for **every push,
+> even to a public project repo**; local agents need none (the user's
+> credentials cover both).
 >
 > **Recommended: ONE fine-grained PAT scoped to all of this workflow's
 > private repos.** GitHub's fine-grained tokens let you select multiple
 > repositories under a single token — create one scoped to exactly the
-> repos this workflow touches (the project repo, plus the package
-> fork/mirror if private), with **Contents: Read and write** for the
+> repos this workflow touches (the project repo, plus the package repo —
+> the canonical `TisoneK/.context` is private), with **Contents: Read and write** for the
 > project and **Contents: Read-only** sufficing for the package (it's
 > never pushed to). One token to paste, one to rotate, and related repos
 > share the same credential. Separate per-repo PATs still work if you
@@ -108,7 +109,7 @@ codebase and its `.context/` memory in a better state.
 ### Package Repository (where the protocol lives)
 
 - **Package repo URL:** https://github.com/TisoneK/.context.git _[default — change if you use a fork/mirror]_
-- **Is the package repo private?** <Yes / No> _[default No — the canonical `TisoneK/.context` is public. A private fork/mirror needs PAT access — recommended: add it to the same fine-grained PAT as the project repo; see the PAT section above.]_
+- **Is the package repo private?** <Yes / No> _[default **Yes** — the canonical `TisoneK/.context` is **private**: unauthenticated clones 404 (verified 2026-07-13). Cloud/sandbox agents need PAT access — recommended: select it under the same fine-grained PAT as the project repo (see the PAT section above). Local agents: the user's credentials cover it. Don't trust this default blindly — visibility has changed before; the clone commands in Step 0 handle either case.]_
 
 ---
 
@@ -174,7 +175,12 @@ overrides.
   → Do **Local — Step 0** below. **Ignore every PAT / `GIT_TOKEN` instruction
   in this whole file** — they never apply to you.
 - **Cloud/sandbox agent** — runs in an ephemeral sandbox (Z.ai, a CI runner,
-  …), starts with **no repo on disk**, authenticates via a PAT.
+  …), starts with **no repo on disk**, authenticates via a PAT. You need a
+  PAT for **every push** (even to a public project repo) and for **every
+  private clone** — if no PAT covering those arrived in chat, **ask for it
+  now, before any clone attempt**. A missing credential is a missing
+  input, not a permission question; don't wait for a 404 or a failed push
+  to discover you needed it.
   → Do **Cloud/sandbox — Step 0** below.
 
 > **Unsure which you are?** Run `git remote get-url origin`. If it returns the
@@ -231,7 +237,7 @@ cd -                                                         # back into the pro
 
 # Recommended setup — ONE fine-grained PAT covering all private repos:
 export GIT_TOKEN='<from-chat>'
-export PKG_TOKEN="$GIT_TOKEN"    # only needed if the package repo is private too
+export PKG_TOKEN="$GIT_TOKEN"    # the package repo is private by default — the shared PAT covers it
 
 # Separate per-repo PATs (if the user supplied them that way):
 export GIT_TOKEN='<project PAT from chat>'
@@ -268,14 +274,15 @@ git config user.email "<GIT_EMAIL>"
 ```bash
 cd <workspace>
 
-# If public (default):
-git clone https://github.com/TisoneK/.context.git .context
-
-# If private (a private fork/mirror) — use the PAT that covers it, then strip it:
-git clone "https://x-access-token:${PKG_TOKEN}@github.com/<PKG_OWNER>/<PKG_REPO>.git" .context
-git -C .context remote set-url origin https://github.com/<PKG_OWNER>/<PKG_REPO>.git
+# If private (default — the canonical TisoneK/.context is private) — use the
+# PAT that covers it, then strip it:
+git clone "https://x-access-token:${PKG_TOKEN}@github.com/TisoneK/.context.git" .context
+git -C .context remote set-url origin https://github.com/TisoneK/.context.git
 unset PKG_TOKEN   # safe to drop now — the package is read-only reference; you never push to it
                   # (GIT_TOKEN stays even if it's the same shared PAT — the project still needs it)
+
+# If public (a public fork/mirror, or if the canonical repo goes public later):
+git clone https://github.com/<PKG_OWNER>/<PKG_REPO>.git .context
 ```
 
 > **DO NOT unset `GIT_TOKEN` yet** — it's needed for every push to the
