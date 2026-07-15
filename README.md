@@ -1,85 +1,101 @@
 # .context — AI Engineering Protocol
 
-A reusable protocol package for running AI agents against a codebase, built
-around a **`.context/` directory** — portable agent memory that is committed
-to git and travels with the repo. Every session starts by reading it and ends
-by updating it, so any agent (any model, any machine) knows what every prior
-agent did, what's open, what's decided, and what went wrong before.
+A reusable protocol package for running AI agents against a codebase,
+built around a **two-zone `.context/` directory** committed to every
+project:
+
+- **`.context/core/`** — this package's `core/` tree, **vendored** into
+  the project: the protocol editions, roles, schemas, templates, and the
+  `context-sync` tool. Read-only, version-stamped, checksummed. The
+  protocol travels with the repo — after bootstrap, no session (local or
+  cloud) needs this package, a clone, or a package PAT.
+- **`.context/memory/`** — the project's living memory: sessions, tasks,
+  decisions, friction logs, user preferences, machine records. Writable,
+  project-owned, never touched by sync.
+
+Every session starts by reading `.context/` and ends by updating
+`memory/`, so any agent — any model, any machine — knows what every
+prior agent did, what's open, what's decided, and what went wrong before.
 
 ## Contents
 
 | Path | What it is |
 |---|---|
-| [`universal-kickoff.md`](universal-kickoff.md) | **First-session entry point — hand this to the agent once per project.** Fill its Pre-Flight and it walks any agent through the door: get both repos on disk, bootstrap `.context/`, load the matching edition, run the protocol. Step 0 branches on agent type (local IDE vs cloud/sandbox), so a local agent never re-clones the repo or touches a PAT. The first session generates `.context/kickoff.md` **inside the project** (the inbound kickoff, pre-filled with the project's facts) — every later session starts from that file instead. Start here. |
-| [`ai-engineering-protocol.md`](ai-engineering-protocol.md) | **Cloud/sandbox edition** — for agents that clone the repo themselves and authenticate with a PAT. Generic template — fill Pre-Flight per project. |
-| [`ai-engineering-protocol-local.md`](ai-engineering-protocol-local.md) | **Local agent edition** — for IDE-integrated agents (Claude Code, Cursor, Copilot) working on an already-cloned repo with the user's own git credentials. Generic template. |
-| [`context-skeleton/`](context-skeleton/) | The 18-file stub tree for bootstrapping `.context/` in a target repo. Every file carries its entry template in an HTML comment. Includes the self-gitignored `secrets/` module, the `flaws/` workflow-friction log, `SYNC.md` (the structural-vs-data sync manifest), and `kickoff.md` (the inbound-kickoff template — filled at bootstrap, entry point for all future sessions). |
-| [`roles/`](roles/) | **Role overlays** — small files that re-scope a base edition to a mission: reviewer (read-only), security-auditor, docs-agent. Engineer (full-scope) is the default, no overlay needed. |
-| [`flaws/`](flaws/) | **Consolidated workflow flaws** — friction agents hit with the protocol/`.context/` system itself, back-ported from all projects using this package. The source of truth for protocol improvements. |
-| [`examples/localmind-review.md`](examples/localmind-review.md) | Example session deliverable — a real review report produced by an agent following the protocol (LocalMind, Session 2). |
-| [`QUICKSTART.md`](QUICKSTART.md) | The two-repo mental model + bootstrap steps — how to initialize a project with `.context/` memory from this package. Start here if you're new. |
-| [`MVP.md`](MVP.md) | **Public-release plan + feature roadmap** — the versioned-archive distribution model (`context-X.Y.Z.zip` → `../context/`), the MVP feature set (check script, single-source editions, concurrency convention), and the single home for advanced/future feature ideas. |
+| [`core/`](core/) | **The vendorable tree** — exactly what lands in each project as `.context/core/`. |
+| [`core/rules/`](core/rules/) | The two protocol editions: [`ai-engineering-protocol-local.md`](core/rules/ai-engineering-protocol-local.md) (IDE agents — user's git credentials, no PAT) and [`ai-engineering-protocol.md`](core/rules/ai-engineering-protocol.md) (cloud/sandbox agents — clone + PAT). Selection is **by agent type at session start, never by memory** (Pitfall #43). |
+| [`core/schemas/`](core/schemas/) | [`context-schema.md`](core/schemas/context-schema.md) — the **single source of truth** on every `.context/` file: zone, write mode, fact scope (project / agent-type / machine / agent-model / user), the overrides contract, the weak-agent translation layer, and the sync/fallback model. Plus a machine-readable [`context.schema.json`](core/schemas/context.schema.json). |
+| [`core/templates/`](core/templates/) | What projects are generated from: the `memory/` skeleton, [`kickoff.md`](core/templates/kickoff.md) (the in-repo front door), [`context-README.md`](core/templates/context-README.md) (zone map), [`AGENTS.md`](core/templates/AGENTS.md) (root discovery digest for agents that never read a 900-line edition). |
+| [`core/roles/`](core/roles/) | Role overlays — reviewer (read-only), security-auditor, docs-agent, feature-engineer. Engineer (full-scope) is the default, no overlay needed. |
+| [`core/bin/context-sync`](core/bin/context-sync) | POSIX-sh tool: `status` (startup change detection), `verify` (checksums vs `MANIFEST.sha256`), `update` (semver-gated whole-tree core replacement — memory untouched), `rollback` (restore the last-known-good core from git history), `bootstrap` (initialize a project), `manifest` (release tool). |
+| [`core/VERSION`](core/VERSION) + [`core/CHANGELOG.md`](core/CHANGELOG.md) | Core semver + one entry per release with migration notes. |
+| [`universal-kickoff.md`](universal-kickoff.md) | **One-time bootstrap bootloader** — hand to the agent for a project's first-ever session. It vendors core into the project and generates the real entry points; every later session starts from the project's own `.context/kickoff.md`. |
+| [`MIGRATION.md`](MIGRATION.md) | Moving pre-0.2.0 projects (flat `.context/`, sibling-clone protocol) to the two-zone layout — one commit, zero data loss. |
+| [`flaws/`](flaws/) | **Consolidated workflow flaws** — friction agents hit with the protocol/`.context/` system itself, back-ported from all projects. The source of truth for protocol improvements. |
+| [`examples/localmind-review.md`](examples/localmind-review.md) | Example session deliverable — a real review report produced under the protocol. |
+| [`QUICKSTART.md`](QUICKSTART.md) | The mental model + bootstrap steps. Start here if you're new. |
+| [`MVP.md`](MVP.md) | Public-release plan + feature roadmap — the single home for advanced/future feature ideas. |
 
 ## Usage
 
-1. Fill in the **Pre-Flight** section of [`universal-kickoff.md`](universal-kickoff.md)
-   (the recommended entry point — it routes local vs cloud/sandbox agents and
-   hands off to the right edition), or of the specific edition that matches
-   your agent, and hand the file to the agent as its instructions. To run a
-   mission-scoped session, add one overlay from `roles/` — where the role file
-   and the edition conflict, the role file wins.
-2. The agent bootstraps the target repo's memory on first session:
-
+1. **Bootstrap (once per project):** fill [`universal-kickoff.md`](universal-kickoff.md)'s
+   Pre-Flight and hand it to any agent — or run it yourself:
    ```bash
-   cp -r context-skeleton <repo>/.context
+   sh core/bin/context-sync bootstrap <path-to-project-repo>
    ```
-
-3. Every session thereafter reads `.context/` first (Step 3) and updates it
-   last (Steps 15–17). The two editions share the same `.context/` spec, so
-   cloud and local agents can alternate on the same repo coherently.
+2. **Every session after that:** tell any agent
+   *"Read `.context/kickoff.md` and follow it."* It routes by agent
+   type to the right edition inside the vendored core. Optionally add
+   one role overlay from `core/roles/` — where the role file and the
+   edition conflict, the role file wins.
+3. **Core updates (optional, any later session):**
+   `sh .context/core/bin/context-sync status` at session start reports
+   drift; same-MAJOR updates apply with `update` (memory is never
+   touched), MAJOR bumps wait for the user. Corrupt or hand-edited
+   core? `verify` catches it, `rollback` restores the version recorded
+   in `memory/core.lock`.
 
 ## Working on this repo (the package as the session's target)
 
-When a session's task is to change the **package itself** — a new feature,
-a protocol fix, a flaw back-port — the package IS that session's project
-repo, and the normal session defaults apply in full: one logical change
-per commit, push after each commit, no confirmation prompts on default
-next steps. The kickoff's "never push to the package repo" rule guards
-sessions targeting **other** projects against stray package pushes — it
-is not a reason to sit on finished package work or to ask permission to
-commit it. This applies even when the session was started with a direct
-task in chat rather than a kickoff file: this repo's own docs are the
-standing workflow, and "if the user has to remind you to commit or push,
-the protocol failed" applies here too. Friction with the protocol found
-while doing package work goes straight into [`flaws/log.md`](flaws/log.md).
+When a session's task is to change the **package itself** — a new
+feature, a protocol fix, a flaw back-port — the package IS that
+session's project repo, and the normal session defaults apply in full:
+one logical change per commit, push after each commit, no confirmation
+prompts on default next steps. This applies even when the session was
+started with a direct task in chat rather than a kickoff file. Friction
+with the protocol found while doing package work goes straight into
+[`flaws/log.md`](flaws/log.md).
+
+**Maintainer discipline:** any change under `core/` must regenerate the
+manifest in the same commit — `sh core/bin/context-sync manifest` — and
+release-worthy changes bump `core/VERSION` + add a `core/CHANGELOG.md`
+entry (semver: spec/layout breaks = MAJOR, features = MINOR, wording =
+PATCH).
 
 **The boundary: a package session's output stops at the package push.**
-When a package fix affects files that live inside projects (the inbound
-`kickoff.md`, structural READMEs), the fix reaches those projects through
-**their own** next sessions — structural files via the SYNC rule, data
-files like `kickoff.md` via regeneration — or through the user relaying
-it. The maintainer session never commits into another project's
-`.context/`, however obvious the fix: those repos have their own agents,
-their own session logs, and their own locks. Fix the source; let the
-instances pull.
+Fixes reach projects through **their own** next sessions —
+`context-sync update` for core, regeneration for generated files — or
+through the user relaying it. The maintainer session never commits into
+another project's `.context/`, however obvious the fix: those repos
+have their own agents, their own session logs, and their own locks.
+Fix the source; let the instances pull.
 
 ## Design rules (the short version)
 
-- **Append-only logs stay append-only** — `sessions.md`, `inefficiencies/log.md`,
-  `tasks/backlog.md`, `plans/decisions.md`. Corrections are appended, never edited in.
-- **No secrets in tracked files** — `.context/` is committed to git; names and
-  locations only. Values agents need live in `.context/secrets/`, a local-only
-  module whose own `.gitignore` keeps it out of the repo — it never travels.
-- **`chore(context):` commit prefix** for memory updates; review reports commit
-  as `docs(review):`.
-- **Inefficiency logging is mandatory** — friction you absorb silently is
-  friction the next agent hits blind.
-- **User corrections become memory** — standing preferences are recorded in
-  `user/preferences.md` with provenance, so the user never gives the same
-  correction twice.
-- **Verify before trusting** — if `.context/` contradicts the codebase, the
-  codebase wins; append a correction.
-- **Structure syncs from the package; data never does** — `README.md`/`.gitignore`
-  files (and `SYNC.md`) are package-owned structure an agent reconciles against
-  `context-skeleton/` at session start; every other `.context/` file is
-  project-owned data that sync never overwrites. See `context-skeleton/SYNC.md`.
+- **Two zones, one direction:** core is replaced whole from the package
+  and never hand-edited in a project; memory is project-owned and never
+  synced. Protocol learnings flow project → `memory/flaws/log.md` →
+  this repo → the next core release.
+- **Append-only logs stay append-only** — `sessions.md`, both friction
+  logs, `backlog.md`, `decisions.md`. Corrections are appended, never
+  edited in.
+- **No secrets in tracked files** — values live only in
+  `memory/secrets/`, a self-gitignored local-only module.
+- **Fact scoping beats contamination** — edition by agent type,
+  environment blocks by "Identify by" match, credential flows
+  cloud-only. The schema states the rules; Pitfall #43 enforces them.
+- **`chore(context):`** for memory commits; **`docs(review):`** for
+  reports.
+- **Inefficiency logging is mandatory** — friction you absorb silently
+  is friction the next agent hits blind.
+- **Verify before trusting** — if `.context/` contradicts the codebase,
+  the codebase wins; append a correction.

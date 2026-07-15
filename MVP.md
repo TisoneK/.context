@@ -6,55 +6,46 @@ This file is the **single home for advanced/future feature ideas** — when
 a session or a flaw entry suggests a feature that's out of scope for a
 doc fix, it gets captured here, not lost in chat history.
 
-**Status legend:** `mvp` (ships in the first public release) ·
+**Status legend:** `shipped 0.2.0` (landed with the vendored-core
+release, 2026-07-14) · `mvp` (ships in the first public release) ·
 `future` (after MVP) · `exploring` (direction agreed, design open)
 
 ---
 
-## The distribution model (the MVP's spine)
+## The distribution model (the MVP's spine) — `shipped 0.2.0`, evolved
 
-**Today** the package is a private git repo (`TisoneK/.context`) that
-every session must clone — which created a whole flaw class: visibility
-claims going stale, PAT confusion, cloud sessions that couldn't reach
-the protocol at all (see `flaws/log.md`, task2sms Sessions 1–2).
+The original plan replaced the per-session clone with a versioned
+archive (`context-0.1.0.zip → ../context/`). **Core 0.2.0 went one step
+further: the protocol is *vendored into every project* as
+`.context/core/`** — versioned (`core/VERSION`), checksummed
+(`core/MANIFEST.sha256`), documented per release (`core/CHANGELOG.md`),
+managed by `core/bin/context-sync`. Sessions need no GitHub account, no
+PAT, no clone, no network: the protocol is already in the repo.
 
-**The MVP replaces the clone with a versioned archive:**
+What remains of the archive idea: **the release artifact for core
+updates.** A `context-X.Y.Z.zip` that unpacks to a core tree is exactly
+what `context-sync update <path>` accepts as a source — useful for
+users who don't clone the package repo at all. Still `mvp`: the release
+script that builds, stamps, and names that artifact (the `manifest`
+subcommand already exists; zipping + naming doesn't yet).
 
-```text
-context-0.1.0.zip  →  unpacks to  ../context/
-```
-
-- **Semver-tracked releases** — `context-<MAJOR.MINOR.PATCH>.zip`.
-  Breaking changes to the `.context/` spec or skeleton bump MAJOR;
-  new features (roles, pitfalls, skeleton files) bump MINOR; wording
-  and fixes bump PATCH.
-- **The archive is the offline source of truth.** No GitHub account, no
-  PAT, no clone, no network needed to run a session — the user hands
-  the agent (or drops beside the project) one file. The git repo remains
-  the *development* home of the package; the zip is its *distribution*.
-- **`VERSION` file inside the package root** — agents and kickoffs read
-  `../context/VERSION` and record it in `workflows/active.md` and their
-  session entries, so every project's memory says which protocol version
-  produced it.
-- **`CHANGELOG.md` inside the package** — one entry per release, so an
-  agent syncing a project bootstrapped on 0.1.0 against a 0.3.0 package
-  can see exactly what changed in between.
-
-**Flaws this retires by design:** the package-visibility claim going
-stale (nothing to clone), PAT-for-the-package entirely, the "protocol
-unreachable mid-session" failure, and the `.context` vs `.context-package`
-clone-name confusion (an unzip has exactly one destination).
+**Flaws retired by design in 0.2.0:** the package-visibility claim
+going stale mid-session, PAT-for-the-package after bootstrap, the
+"protocol unreachable mid-session" failure, the endless re-clone loop
+(nothing to find or clone), and the structural-vs-data sync ambiguity
+(zone ownership replaced the basename rule).
 
 ---
 
 ## MVP features
 
-### 1. Versioned archive distribution — `mvp`
-As above. Build step: a release script that zips the package (excluding
-`.git/`, dev-only files), stamps `VERSION`, appends `CHANGELOG.md`, and
-names the artifact. Open question: distribution channel (GitHub Releases
-on a public repo vs. direct share) — decoupled from the repo's own
-visibility either way.
+### 1. Versioned archive distribution — `mvp` (release script only)
+The versioning, changelog, manifest, and update tooling shipped in
+0.2.0 (see above). What's left: a release script that zips `core/`
+(excluding dev-only files), names the artifact
+`context-<VERSION>.zip`, and publishes it. Open question: distribution
+channel (GitHub Releases on a public repo vs. direct share) — decoupled
+from the repo's own visibility either way.
 
 ### 2. `check` — the mechanical verifier — `mvp`
 The protocol's rules are prose; a weak model needs a command. One script
@@ -75,8 +66,11 @@ bootstrap guards state in words:
   cleared, session entry present for today
 
 Open question: portability — POSIX shell + a Python fallback, since
-sandboxes vary. The protocol gains one line: "run `../context/bin/check`
-before each commit; a failing check blocks the commit."
+sandboxes vary. The protocol gains one line: "run
+`.context/core/bin/check` before each commit; a failing check blocks
+the commit." (Distinct from `context-sync`, which manages the vendored
+core itself — `check` guards *session output*. It ships inside `core/bin/`
+so it, too, travels with every project.)
 
 ### 3. Single-source editions — `mvp`
 The two editions duplicate ~90% of their text (all 42 pitfalls, the Ten
@@ -87,13 +81,12 @@ zip ships the familiar two files, built from core + delta) or replaced
 by explicit "read core, then your platform file" instructions. Build-time
 generation preferred — zero change to what agents consume.
 
-### 4. Baked protocol — offline entry per project — `mvp`
-With the archive model, `../context/` is already the offline source, so
-the earlier "commit PROTOCOL.md into every project" idea shrinks to:
-record in `workflows/active.md` **both** the package version the project
-last synced against and the archive filename, so a session that finds no
-`../context/` on disk can say precisely which file to ask the user for
-— instead of improvising from memory (task2sms Session 2's failure).
+### 4. Baked protocol — offline entry per project — `shipped 0.2.0`
+Shipped, maximally: the whole core is committed into every project as
+`.context/core/` — editions, schemas, templates, tool. A session can
+never find the protocol missing (task2sms Session 2's failure is
+impossible by construction), and `memory/core.lock` +
+`workflows/active.md` record exactly which core version is in force.
 
 ### 5. Session concurrency convention — `mvp` (convention), `future` (tooling)
 The protocol implicitly assumes serialized sessions; two concurrent
@@ -108,11 +101,13 @@ is `future`.
 
 ## Future / advanced (post-MVP)
 
-- **Upgrade flow between package versions** — `future` — when a project
-  bootstrapped on 0.1.0 meets a 0.4.0 package, structural sync (SYNC.md)
-  covers READMEs, but skeleton *shape* changes (new files, renamed dirs)
-  need migration notes per release in `CHANGELOG.md` ("0.3.0: add
-  `kickoff.md` via the Path B backfill").
+- **Upgrade flow between package versions** — `shipped 0.2.0` (core),
+  `future` (memory-shape migrations) — `context-sync update` handles
+  core upgrades (semver-gated, verified, memory untouched), and
+  `core/CHANGELOG.md` carries per-release migration notes. Still open:
+  *memory*-shape changes (a renamed module, a new mandatory memory
+  file) need per-release migration steps a session can execute — the
+  0.1.x→0.2.0 `MIGRATION.md` is the hand-written prototype of that.
 - **Flaw feedback loop for external users** — `exploring` — today flaws
   flow back because the maintainer runs the projects. Public users need
   a path: a `FLAWS-UPSTREAM.md` template they can share, or a public
@@ -171,5 +166,6 @@ is `future`.
   project's `system/environments.md` / `inefficiencies/log.md`; agents
   identify and learn them per environment (maintainer ruling, 2026-07-13,
   `flaws/log.md`).
-- **The package as a submodule** — the sibling/archive model stands;
-  submodules re-couple every project clone to package availability.
+- **The package as a submodule** — the vendored-core model stands;
+  submodules re-couple every project clone to package availability,
+  which is exactly the failure class vendoring eliminated.
