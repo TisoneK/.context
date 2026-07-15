@@ -1,41 +1,34 @@
-# Universal Agent Kickoff — `.context/` Protocol Entry Point
+# Universal Agent Kickoff — `.context/` Protocol Entry Point (Bootstrap)
 
-> **Hand this file to the agent at the start of a chat session.** It's the
-> universal entry point to the `.context/` agent-memory protocol. The full
-> protocol lives in the `TisoneK/.context` package on GitHub — this file
-> gets the agent through the door: get both repos on disk (a **local**
-> IDE agent is already inside the project repo and clones only the package;
-> a **cloud/sandbox** agent clones both), bootstrap or sync `.context/`,
-> push the initial state, then hand off to the protocol's phases.
+> **Hand this file to the agent for a project's FIRST-EVER `.context/`
+> session — and only that one.** It walks any agent through the
+> bootstrap: get the protocol package on disk once, vendor it into the
+> project as `.context/core/`, create the project's memory in
+> `.context/memory/`, generate the in-repo entry points, push. After
+> this session the project is **self-contained**: the protocol travels
+> inside the repo, and no future session — local or cloud — needs the
+> package, a package PAT, or this file.
 
-> **Already bootstrapped? Use the inbound kickoff instead.** This external
-> file is only needed for a project's **first-ever** `.context/` session.
-> That first session generates `.context/kickoff.md` **inside the project
-> repo** (Step 1c below) — pre-filled with the project's real facts — and
-> from then on THAT file is the entry point: no more carrying this one
-> around. If you're an agent reading this and the project repo already
-> contains `.context/kickoff.md`, switch to it now and follow it instead.
+> **Already bootstrapped? STOP — use the inbound kickoff instead.** If
+> the project repo already contains `.context/kickoff.md`, switch to it
+> now and follow it. If it contains `.context/` but no `kickoff.md` (or
+> a flat pre-0.2.0 layout), this is a **migration**, not a bootstrap —
+> follow `MIGRATION.md` in the package instead.
 
 > **This copy may be STALE — hand over to the fresh one after Step 0.**
-> This file travels as a copy (a Desktop file, a chat upload), and copies
-> rot while the package moves on. Treat this copy as a **bootloader**: its
-> only irreplaceable cargo is the Pre-Flight values below and Step 0
-> (get the repos on disk). The moment Step 0 completes, a **fresh** copy
-> of this file exists on disk at `../context/universal-kickoff.md` —
-> compare, and if they differ, **switch to the package's copy** for every
-> step from Step 1 on, carrying over only your Pre-Flight values:
+> This file travels as a copy (a Desktop file, a chat upload), and
+> copies rot while the package moves on. Treat this copy as a
+> **bootloader**: its only irreplaceable cargo is the Pre-Flight values
+> below and Step 0 (get the package on disk). The moment Step 0
+> completes, a fresh copy exists at `../context/universal-kickoff.md` —
+> compare, and if they differ, **switch to the package's copy** for
+> every step from Step 1 on, carrying over only your Pre-Flight values:
 >
 > ```bash
 > diff <this-file> ../context/universal-kickoff.md >/dev/null \
 >   && echo "copy is current — proceed" \
 >   || echo "copy is STALE — follow ../context/universal-kickoff.md from Step 1 on"
 > ```
->
-> Everything below Step 0 is authoritative only in the package's copy —
-> a stale carried copy has caused real failures (wrong visibility claims,
-> a re-clone loop). Never edit the package's copy; if your Pre-Flight
-> lives in this copy, keep reading values from here while *executing*
-> the steps from there.
 
 You are joining a project as a senior software engineer. Your objective:
 understand the project, follow the protocol, do good work, leave the
@@ -87,29 +80,22 @@ codebase and its `.context/` memory in a better state.
 - **Focus areas:** all _[default]_
 - **Findings handling:** fix safe issues; flag architectural changes _[default]_
 - **Push policy:** push to main directly after each commit _[default]_
-- **Deliverable:** report in `.context/reviews/` + chat summary _[default]_
+- **Deliverable:** report in `.context/memory/reviews/` + chat summary _[default]_
 - **Commit granularity:** one logical change per commit _[default]_
 
-### GitHub PAT (FINE-GRAINED — COVERS EVERY PRIVATE REPO IN THE WORKFLOW)
+### GitHub PAT (CLOUD/SANDBOX AGENTS ONLY)
 
 > **Privacy is per-repo.** The project repo and the package repo each
-> declare their own mode — project above, package below — and the agent
-> handles each on its own declaration. A public project with a private
-> package, or the reverse, is a normal setup, not a contradiction: never
-> assume one repo's privacy from the other's. Cloud/sandbox agents need
-> PAT access for **every** repo marked private — and for **every push,
-> even to a public project repo**; local agents need none (the user's
-> credentials cover both).
+> declare their own mode — never assume one from the other. Cloud/sandbox
+> agents need PAT access for **every** repo marked private — and for
+> **every push, even to a public project repo**; local agents need none
+> (the user's credentials cover both).
 >
-> **Recommended: ONE fine-grained PAT scoped to all of this workflow's
-> private repos.** GitHub's fine-grained tokens let you select multiple
-> repositories under a single token — create one scoped to exactly the
-> repos this workflow touches (the project repo, plus the package repo —
-> the canonical `TisoneK/.context` is private), with **Contents: Read and write** for the
-> project and **Contents: Read-only** sufficing for the package (it's
-> never pushed to). One token to paste, one to rotate, and related repos
-> share the same credential. Separate per-repo PATs still work if you
-> prefer — just name which repo each is for.
+> **Recommended: ONE fine-grained PAT scoped to this workflow's private
+> repos** — the project repo (Contents: Read and write), plus the package
+> repo (Contents: Read-only) **for this bootstrap session only**. After
+> bootstrap, the protocol lives inside the project: future cloud sessions
+> need a PAT only for the project repo, never for the package again.
 >
 > **⚠️ DO NOT PUT PATs IN THIS FILE.** The file upload pipeline redacts
 > secrets — if you paste one here, the agent receives
@@ -120,96 +106,68 @@ codebase and its `.context/` memory in a better state.
 >
 > > "PAT (covers project + package): `github_pat_...`"
 >
-> or, with separate per-repo tokens:
->
-> > "Project PAT: `github_pat_...` Package PAT: `github_pat_...`"
->
 > The agent uses them as transient env vars and never writes them to any
 > file. **Rotate the PAT(s) after the session ends.**
 
-### Package Repository (where the protocol lives)
+### Package Repository (where the protocol lives — needed THIS SESSION ONLY)
 
 - **Package repo URL:** https://github.com/TisoneK/.context.git _[default — change if you use a fork/mirror]_
-- **Is the package repo private?** <Yes / No> _[default **Yes** — the canonical `TisoneK/.context` is **private**: unauthenticated clones 404 (verified 2026-07-13). Cloud/sandbox agents need PAT access — recommended: select it under the same fine-grained PAT as the project repo (see the PAT section above). Local agents: the user's credentials cover it. Don't trust this default blindly — visibility has changed before; the clone commands in Step 0 handle either case.]_
+- **Is the package repo private?** <Yes / No> _[default **Yes** — the canonical `TisoneK/.context` is **private**: unauthenticated clones 404 (verified 2026-07-13). Don't trust this default blindly — visibility has changed before; the clone commands in Step 0 handle either case.]_
 
 ---
 
-## The Two-Repo Model
+## The Model: Vendor Once, Self-Contained Forever
 
-> **Read this before Step 0.** This protocol uses two repos. The agent
-> needs both **on disk** before it can start work — but how many it clones
-> depends on the agent type (see Step 0):
->
-> - **Local agent** (IDE-integrated, runs on the developer's machine): the
->   project repo is **already cloned** — you're working inside it. You clone
->   **only** the package repo, as a sibling.
-> - **Cloud/sandbox agent** (ephemeral sandbox, CI runner): you start empty
->   and clone **both**.
+> **Read this before Step 0.** The protocol package is needed **on disk
+> once**, in this bootstrap session. The bootstrap copies its `core/`
+> tree INTO the project as `.context/core/` — versioned, checksummed,
+> read-only — beside the project's own writable memory in
+> `.context/memory/`:
 
-| Repo | What it holds | Cloned where |
-|------|---------------|--------------|
-| **Project repo** (the "root repo") | The product code + its `.context/` memory | `<workspace>/<REPO>` |
-| **Package repo** (`TisoneK/.context`) | The protocol editions + skeleton + roles + consolidated flaws | `<workspace>/context` |
+| | Lives at | Owner | Sync |
+|---|---|---|---|
+| **Vendored protocol** | `<REPO>/.context/core/` | package | whole-tree, via `context-sync update` |
+| **Project memory** | `<REPO>/.context/memory/` | project | never synced — yours forever |
 
-The package repo is a **reference** — the agent reads the protocol from
-it and copies the skeleton to bootstrap `.context/` in the project repo.
-The package repo is NOT a submodule of the project repo; it's a sibling.
-The agent never pushes to the package repo unless explicitly asked.
+After the bootstrap push, every future session — any agent type, any
+machine — starts from `.context/kickoff.md` inside the repo and runs
+entirely from the vendored core. The package repo is touched again only
+to **update** core (`context-sync status/update`, any later session,
+optional) or to back-port flaws. The package is NOT a submodule and is
+never pushed to from a project session.
 
 ---
 
 ## How to use this file (two ways to set the Target)
 
-1. **Pre-fill the Target field below** — set it once in the kickoff file
-   before uploading. Good for repeat sessions where you know the target
-   in advance.
-
-2. **Include a target description in your chat message** — upload the
-   kickoff file as-is (Target = general sweep), then in your first chat
-   message describe what you want: "Fix the file upload 413 error" or
-   "Refactor the agent loop" or "Add a settings export feature." The
-   agent reads your chat message, extracts the target, and uses it as
-   the session's Target — overriding the kickoff file's default. This is
-   the natural flow for ad-hoc sessions where the target changes each
-   time.
-
-**The chat-message target wins.** If the kickoff file says "general
-sweep" but your chat message says "fix the SSRF bug," the agent treats
-the session as `Target: fix SSRF bug`. If the kickoff file says
-"refactor loop.py" and your chat message is just "start," the agent
-uses the kickoff file's Target. If both are set, the chat message
-overrides.
+1. **Pre-fill the Target field above** — set it once before uploading.
+2. **Include a target description in your chat message** — the agent
+   extracts it and it **overrides** the Pre-Flight Target. If the chat
+   message is just "start," the Pre-Flight Target (default: general
+   sweep) applies.
 
 ---
 
-## Step 0 — Get Both Repos on Disk
-
-> **Do this before reading `.context/` or fetching the protocol.** The agent
-> needs both repos on disk to proceed. **How you get there depends on your
-> agent type — pick your branch first, then ignore the other one entirely.**
+## Step 0 — Get What This Session Needs on Disk
 
 ### 0a. Identify your agent type
 
 - **Local agent** — IDE-integrated (Claude Code, Cursor, GitHub Copilot,
   Continue, …). Runs on the developer's machine, uses the user's existing
   git credentials, and the project repo is **already cloned on disk**.
-  → Do **Local — Step 0** below. **Ignore every PAT / `GIT_TOKEN` instruction
+  → Do **Local — Step 0**. **Ignore every PAT / `GIT_TOKEN` instruction
   in this whole file** — they never apply to you.
-- **Cloud/sandbox agent** — runs in an ephemeral sandbox (Z.ai, a CI runner,
-  …), starts with **no repo on disk**, authenticates via a PAT. You need a
-  PAT for **every push** (even to a public project repo) and for **every
-  private clone** — if no PAT covering those arrived in chat, **ask for it
-  now, before any clone attempt**. A missing credential is a missing
-  input, not a permission question; don't wait for a 404 or a failed push
-  to discover you needed it.
-  → Do **Cloud/sandbox — Step 0** below.
+- **Cloud/sandbox agent** — runs in an ephemeral sandbox, starts with
+  **no repo on disk**, authenticates via a PAT. You need a PAT for
+  **every push** (even to a public project repo) and for **every private
+  clone** — if no PAT covering those arrived in chat, **ask for it now,
+  before any clone attempt**. A missing credential is a missing input,
+  not a permission question.
+  → Do **Cloud/sandbox — Step 0**.
 
-> **Unsure which you are?** Run `git remote get-url origin`. If it returns the
-> Project Repository URL, you're already inside the repo — you're **local**,
-> don't clone it again. If there's no repo (empty workspace, command errors),
-> you're **cloud/sandbox**.
-
----
+> **Unsure which you are?** Run `git remote get-url origin`. If it returns
+> the Project Repository URL, you're already inside the repo — you're
+> **local**. If there's no repo (empty workspace), you're **cloud/sandbox**.
 
 ### Local — Step 0
 
@@ -219,24 +177,17 @@ pwd                          # should be <LOCAL_REPO_PATH>; cd there if not
 git remote get-url origin    # should match the Project Repository URL
 git status                   # tree should be clean before you start
 ```
-- The repo is already on disk. **Never re-clone it.** If `pwd` isn't the repo,
-  `cd` to the Pre-Flight **Local repo path**.
-- **No PAT, ever.** `git push` / `git pull` already work with the user's
-  configured credentials (SSH key, credential manager, `gh` CLI). If a push
-  later fails with an auth error, **stop and tell the user** — it's their
-  machine config, not yours to fix. Don't generate tokens or edit `.git/config`.
-- **Don't set git identity** unless `git config user.name` returns empty. If it
-  is empty, set it from Pre-Flight; otherwise leave the user's config untouched.
+- **Never re-clone the project.** No PAT, ever. If a push later fails
+  with an auth error, stop and tell the user — it's their machine
+  config, not yours to fix. Don't set git identity unless
+  `git config user.name` returns empty.
 
-**0-L.2 — Get the package repo as a sibling of the project repo.**
-
-**Identify the package by its REMOTE URL, never by directory name.**
-Local clones exist under different names (`../context` is canonical;
-legacy `../.context` occurs — the canon dropped the dot because
-dot-directories are hidden from `ls` and IDE workspace pickers):
+**0-L.2 — Get the package as a sibling (this session only).**
+**Identify the package by its REMOTE URL, never by directory name** —
+local clones exist under different names (`../context` is canonical;
+legacy `../.context` occurs):
 
 ```bash
-# Find an existing package clone among the siblings:
 PKG=""
 for d in ../context ../.context; do
   git -C "$d" remote get-url origin 2>/dev/null | grep -q "TisoneK/.context" \
@@ -245,7 +196,7 @@ done
 
 if [ -n "$PKG" ]; then
   # Found — freshen it. A FAILED PULL IS NOT A MISSING PACKAGE:
-  # continue with the on-disk copy and note the stale pull in the session log.
+  # use the on-disk copy as-is and note the stale pull in your session log.
   git -C "$PKG" pull --ff-only || echo "pull failed — continuing with on-disk copy at $PKG"
 else
   git clone https://github.com/TisoneK/.context.git ../context && PKG=../context
@@ -253,391 +204,168 @@ fi
 echo "package clone: $PKG"
 ```
 
-- **Never clone when a package clone already exists.** Cloning into an
-  existing directory fails, and retrying that failure loops forever.
-  One find → one decision → move on.
-- A **private** package repo changes nothing here — the clone runs with
-  the user's existing credentials, same as everything else on a local
-  machine. If it fails with an auth error, stop and tell the user.
-- **Naming:** the package clones as `../context` (a sibling, visible in
-  file pickers) — deliberately distinct from the project's in-repo
-  `.context/` memory dir. Package = `../context`; memory = `./.context`.
-
-→ Go to **0c. Verify**.
-
----
+**Never clone when a package clone already exists** — one find → one
+decision → move on.
 
 ### Cloud/sandbox — Step 0
 
-**0-C.1 — Set up the PAT(s) — access for every repo marked private in Pre-Flight.**
+**0-C.1 — PAT(s) from chat, as env vars. Never into any file. Never echoed.**
 ```bash
-# Get the PAT(s) from the user's first chat message. Export as env vars.
-# Never write them to any file. Never echo them.
-
-# Recommended setup — ONE fine-grained PAT covering all private repos:
-export GIT_TOKEN='<from-chat>'
-export PKG_TOKEN="$GIT_TOKEN"    # the package repo is private by default — the shared PAT covers it
-
-# Separate per-repo PATs (if the user supplied them that way):
-export GIT_TOKEN='<project PAT from chat>'
-export PKG_TOKEN='<package PAT from chat>'
+export GIT_TOKEN='<from-chat>'        # project pushes (whole session)
+export PKG_TOKEN="$GIT_TOKEN"         # or the separate package PAT, if provided that way
 ```
 
-Check each repo's **own** Pre-Flight privacy field — never infer one
-repo's mode from the other's. If a repo is marked private and no PAT
-covering it arrived in chat, STOP and report: "The <project|package>
-repo is private — please paste a PAT that covers it in chat."
-
-**0-C.2 — Clone the project repo (the "root repo").**
-```bash
-cd <workspace>  # e.g., /home/z/my-project or C:\Users\tison\Dev
-
-# If private:
-git clone "https://x-access-token:${GIT_TOKEN}@github.com/<OWNER>/<REPO>.git" <REPO>
-cd <REPO>
-# IMMEDIATELY strip the token from .git/config
-git remote set-url origin https://github.com/<OWNER>/<REPO>.git
-
-# If public:
-git clone https://github.com/<OWNER>/<REPO>.git <REPO>
-cd <REPO>
-```
-
-Configure git identity (a fresh sandbox has none):
-```bash
-git config user.name "<GIT_NAME>"
-git config user.email "<GIT_EMAIL>"
-```
-
-**0-C.3 — Clone the package repo (per ITS OWN privacy field, not the project's).**
+**0-C.2 — Clone the project repo.**
 ```bash
 cd <workspace>
+git clone "https://x-access-token:${GIT_TOKEN}@github.com/<OWNER>/<REPO>.git" <REPO>   # private
+# public: git clone https://github.com/<OWNER>/<REPO>.git <REPO>
+cd <REPO>
+git remote set-url origin https://github.com/<OWNER>/<REPO>.git    # strip the token IMMEDIATELY
+git config user.name "<GIT_NAME>" && git config user.email "<GIT_EMAIL>"
+```
 
-# If private (default — the canonical TisoneK/.context is private) — use the
-# PAT that covers it, then strip it:
-git clone "https://x-access-token:${PKG_TOKEN}@github.com/TisoneK/.context.git" context
+**0-C.3 — Clone the package (per ITS OWN privacy field), then drop its token.**
+```bash
+cd <workspace>
+git clone "https://x-access-token:${PKG_TOKEN}@github.com/TisoneK/.context.git" context   # private (default)
+# public fork/mirror: git clone https://github.com/<PKG_OWNER>/<PKG_REPO>.git context
 git -C context remote set-url origin https://github.com/TisoneK/.context.git
-unset PKG_TOKEN   # safe to drop now — the package is read-only reference; you never push to it
-                  # (GIT_TOKEN stays even if it's the same shared PAT — the project still needs it)
-
-# If public (a public fork/mirror, or if the canonical repo goes public later):
-git clone https://github.com/<PKG_OWNER>/<PKG_REPO>.git context
+unset PKG_TOKEN   # the package is read-only reference; after this bootstrap no session needs it again
+                  # (GIT_TOKEN stays for the project's pushes — unset only at the protocol's final step)
+cd <REPO>         # work from the project repo root from here on
 ```
 
-> **DO NOT unset `GIT_TOKEN` yet** — it's needed for every push to the
-> project repo this session. It stays an env var for the whole session and
-> is unset at the very end (protocol Step 19). `PKG_TOKEN` is different:
-> the package repo is never pushed to, so its token dies right after the
-> clone, above. *(Cloud/sandbox only — local agents have no tokens.)*
+### 0c. Verify + staleness handover
 
-→ Go to **0c. Verify**.
+```bash
+ls "$PKG"/core 2>/dev/null || ls ../context/core    # VERSION, rules/, schemas/, templates/, bin/
+```
+
+Diff the copy of this file you were handed against
+`../context/universal-kickoff.md` (see the bootloader note at the top)
+— if they differ, execute Steps 1–4 from the **package's** copy.
+
+> **Two directories, don't conflate them:** `../context` (a sibling) is
+> the package clone — this session's source; `./.context` (inside the
+> project) is what you're about to create. After this session only the
+> second one matters.
 
 ---
 
-### 0c. Verify both repos are present
+## Step 1 — Bootstrap `.context/` (Path A) or Hand Over (Path B)
+
+### Path B first: `.context/` already exists
+
+- Has `.context/kickoff.md` → **you're in the wrong file**: read
+  `.context/kickoff.md` and follow it instead. Done here.
+- Has `.context/` but flat (no `core/`+`memory/` zones) → **migration**,
+  not bootstrap: follow `../context/MIGRATION.md`.
+
+### Path A: `.context/` does not exist — bootstrap it
+
+#### 1a. Run the bootstrapper
 
 ```bash
-# Local agent — project repo is the cwd; package is the sibling found in 0-L.2:
-ls .                       # project repo (your working dir)
-ls "$PKG"                  # package repo with protocol + skeleton (../context)
-
-# Cloud/sandbox agent — both live under the workspace:
-ls <workspace>/<REPO>
-ls <workspace>/context
+sh ../context/core/bin/context-sync bootstrap .
 ```
 
-You should see:
-- the project repo — its code (and `.context/` if it already exists)
-- `context/ai-engineering-protocol.md` — cloud/sandbox edition
-- `context/ai-engineering-protocol-local.md` — local agent edition
-- `context/context-skeleton/` — the 18-file stub tree
-- `context/roles/` — role overlays
-- `context/QUICKSTART.md` — the two-repo mental model
-
-> **Paths from here on.** After Step 0 your cwd is the **project repo root**
-> for both agent types, and the package repo is a **sibling** of it. So
-> wherever the steps below write `<workspace>/<REPO>`, read "the repo root
-> (your cwd)", and wherever they write `../context`, read "the package
-> clone found in Step 0" (`$PKG` for local agents — same place, possibly
-> the legacy `../.context` name on older machines).
->
-> **Two directories, don't conflate them:** `../context` (one level **up**,
-> a sibling of the project) is the **package clone**; `./.context`
-> (**inside** the project) is that project's **memory dir**. Package paths
-> in the steps below are always `../context/...`; memory paths are always
-> `.context/...`.
-
-> **Staleness handover (do it NOW, before Step 1).** The copy of this
-> file you were handed may be outdated; the package clone you just put
-> on disk is not. Diff the copy you're reading against
-> `../context/universal-kickoff.md` — if they differ, execute Steps 1–4
-> from the **package's** copy and use the handed copy only for its
-> Pre-Flight values. See the bootloader note at the top of this file.
-
----
-
-## Step 1 — Check if `.context/` Exists in the Project Repo
-
-> **Two paths.** Follow ONLY ONE based on whether `.context/` already
-> exists in the project repo.
-
-### Path A: `.context/` does NOT exist (first session on this project)
-
-This is a **bootstrap**. Create `.context/` from the skeleton, fill in
-the initial data, commit, and push — BEFORE starting the protocol phases.
-
-#### 1a. Copy the skeleton into the project repo
+It vendors `core/` → `.context/core/`, copies the memory skeleton →
+`.context/memory/`, seeds `.context/README.md` + `.context/kickoff.md`
++ root `AGENTS.md`, and writes `memory/core.lock`. Verify:
 
 ```bash
-# From the project repo root (your cwd). The package is a sibling, so
-# ../context works for both local and cloud/sandbox agents.
-cp -r ../context/context-skeleton .context
+sh .context/core/bin/context-sync verify
+ls .context/.git .context/core/core .context/memory/memory 2>/dev/null
+# ANY output from the second line = a nested/double copy — rm -rf .context and redo 1a.
 ```
 
-Verify the skeleton landed (18 files including the self-gitignored `secrets/`):
-```bash
-find .context -type f | sort
-# Should include: README.md, SYNC.md, kickoff.md, agents/sessions.md, flaws/,
-# inefficiencies/, plans/, reviews/, secrets/.gitignore, secrets/README.md,
-# system/, tasks/, user/, workflows/
-```
+#### 1b. Fill in the initial memory
 
-**Guard against the classic wrong copy** — both of these must NOT exist:
-```bash
-ls .context/.git .context/ai-engineering-protocol.md 2>/dev/null
-# ANY output = you copied the whole package (../context) instead of the
-# skeleton. Fix: rm -rf .context && cp -r ../context/context-skeleton .context
-```
-Copying the package wholesale nests a second git repo inside the project
-and drags the protocol editions, roles, and consolidated flaws into every
-clone of the project — it is not a bootstrap, it's a mess.
+Using Pre-Flight (each file's HTML-comment template says how — don't
+invent formats):
 
-#### 1b. Fill in the initial `.context/` data
+- **`.context/memory/user/identity.md`** — name, git identity, GitHub username, role, timezone
+- **`.context/memory/user/preferences.md`** — seeded from Pre-Flight session parameters
+- **`.context/memory/workflows/active.md`** — protocol **"by agent type", naming BOTH editions** (never just your own — see the template's comment), protocol location (vendored), package upstream URL, scope, push policy, deliverable
+- **`.context/memory/system/environments.md`** — this machine/sandbox, with its "Identify by" line
+- **`.context/memory/system/ai-models.md`** — this agent + model: first row
+- **`.context/memory/tasks/current.md`** — this session's task
+- **`.context/memory/agents/sessions.md`** — first session entry (include the core version)
 
-Using the Pre-Flight values above, fill in these files (overwrite the
-placeholder content):
+If you record only your own edition in `workflows/active.md`, the next
+agent of the other type inherits your platform's behavior — a local
+agent on a cloud-bootstrapped repo starts doing PAT dances. Edition
+choice belongs to the agent's type at session start, never to the file.
 
-- **`.context/user/identity.md`** — name, git identity, GitHub username, role, timezone
-- **`.context/user/preferences.md`** — workflow, communication, code style, review depth, risk & approvals (seeded from Pre-Flight session parameters)
-- **`.context/workflows/active.md`** — protocol ("by agent type", naming BOTH editions — never just your own; see the template's comment), protocol source URLs, scope, focus areas, push policy, commit style, deliverable
-- **`.context/system/environments.md`** — this machine/sandbox: OS, runtimes, package manager, verified commands, quirks
-- **`.context/system/ai-models.md`** — this agent + model: first row in the registry
-- **`.context/tasks/current.md`** — set to this session's task (or "idle" if just bootstrapping)
-- **`.context/agents/sessions.md`** — first session entry
+#### 1c. Fill the generated entry points
 
-For the **protocol** and **protocol source** fields in
-`workflows/active.md`, record **both editions, keyed by agent type** —
-never just the edition you happen to be running:
-- Local agents → `https://github.com/TisoneK/.context/blob/main/ai-engineering-protocol-local.md`
-- Cloud/sandbox agents → `https://github.com/TisoneK/.context/blob/main/ai-engineering-protocol.md`
-
-The project's memory serves BOTH agent types. If you record only your
-own edition, the next agent of the other type reads it as binding and
-inherits your platform's behavior — a local agent on a cloud-bootstrapped
-repo starts doing PAT dances and re-cloning. Edition choice belongs to
-the agent's type at session start, never to the file.
-
-Read each file's HTML-comment template before filling it in — don't
-invent formats.
-
-#### 1c. Generate the inbound kickoff (`.context/kickoff.md`)
-
-The skeleton copied in 1a includes `kickoff.md` — a template whose
-**Project Facts** placeholders you now fill in, following the generation
-rules in its HTML comment. This is the **kickoff inheritance**: the
-external file you're reading right now gets you through the first
-session; the generated in-repo file — pre-filled with the project's
-verified facts (repo URL from `git remote get-url origin`, default
-branch, git identity) — is the entry point for **every future session**.
-The user never carries this external file again for this project.
-
-Rules:
-- Facts you **verified on disk** beat facts typed in Pre-Flight — record
-  what's true, and note any mismatch in chat.
-- Session parameters do NOT go in it — they live in
-  `workflows/active.md`; the kickoff only points there.
-- Never put a PAT or any secret in it.
-- Leave its pre-written Entry Steps' logic untouched — they're correct
-  for every post-bootstrap session. Fill their fact placeholders (repo
-  URLs, git identity); only the symbolic token placeholders stay.
-- After generating, scan for placeholders you missed:
+- **`.context/kickoff.md`** — fill Project Facts per its HTML-comment
+  rules: facts you **verified on disk** (remote URL, default branch)
+  beat Pre-Flight; session parameters stay out (they live in
+  `workflows/active.md`); no secrets, ever.
+- **`AGENTS.md`** (project root) — fill `<PROJECT_NAME>`. Optionally
+  copy it to `CLAUDE.md` / `.github/copilot-instructions.md` if the
+  user's tools read those.
+- Placeholder scan (covers 1b too — run before committing):
   ```bash
-  grep -rn "<PROJECT_NAME>\|<PROJECT_REPO_URL>\|<GIT_NAME>\|<GIT_EMAIL>\|<LIVE_URL" .context/
-  # Hits are allowed ONLY inside HTML template comments and as symbolic
-  # token placeholders. A hit in rendered content = a field you forgot.
+  grep -rn "<PROJECT_NAME>\|<PROJECT_REPO_URL>\|<GIT_NAME>\|<GIT_EMAIL>\|<LIVE_URL" .context/ AGENTS.md
+  # Hits allowed ONLY inside HTML template comments and symbolic token forms.
   ```
-  This scan covers the 1b files too — run it before committing.
 
 #### 1d. Commit and push the bootstrap
 
 ```bash
-cd <workspace>/<REPO>
-git add .context/
-git commit -m "chore(context): bootstrap .context/ directory with initial session data
+git add .context/ AGENTS.md
+git commit -m "chore(context): bootstrap .context/ (core $(cat .context/core/VERSION))
 
-Bootstrapped from TisoneK/.context context-skeleton. Filled in:
-- user/identity.md, user/preferences.md
-- workflows/active.md (protocol edition + source URL)
-- system/environments.md, system/ai-models.md
-- tasks/current.md, agents/sessions.md
-- kickoff.md (inbound kickoff — entry point for future sessions)
-
-First agent session on this repo."
-```
-
-Push:
-```bash
-# LOCAL agent — credentials already configured, no token dance:
+Vendored protocol core + initial memory from TisoneK/.context.
+Entry point for future sessions: .context/kickoff.md"
 git pull --ff-only && git push origin main
-
-# CLOUD/SANDBOX agent, private repo — re-add token for the push, then strip it:
-git remote set-url origin "https://x-access-token:${GIT_TOKEN}@github.com/<OWNER>/<REPO>.git"
-git push origin main
-git remote set-url origin https://github.com/<OWNER>/<REPO>.git
-
-# CLOUD/SANDBOX agent, public repo:
-git push origin main
+# cloud/sandbox + private repo: re-add the token for the push, then strip it again
 ```
 
 **Why push before starting the phases:** if the session dies during
-Phase 1, the `.context/` memory is already on remote — the next agent
-picks up where this one left off, not from scratch.
-
-#### 1e. Proceed to Step 2
-
-### Path B: `.context/` already exists (subsequent session)
-
-This is a **sync**. Pull the latest, read the existing memory, then
-proceed to the protocol phases.
-
-```bash
-cd <workspace>/<REPO>
-git pull --ff-only
-```
-
-If pull fails (non-fast-forward), STOP and report: "Local branch has
-diverged from remote. Please sync manually before I start."
-
-If the working tree has unexpected changes (files you didn't touch),
-STOP and report — don't stash or discard someone else's work.
-
-**Backfill the inbound kickoff if it's missing.** Projects bootstrapped
-before the kickoff-inheritance feature have `.context/` but no
-`.context/kickoff.md`. If that's the case, generate it now exactly as
-Step 1c (Path A) describes — copy the template from
-`../context/context-skeleton/kickoff.md`, fill **Project Facts** from
-this project's existing memory (`user/identity.md`,
-`workflows/active.md`, `git remote get-url origin`), and commit as
-`chore(context): backfill kickoff.md — inbound entry point`. From the
-next session on, that file replaces this one.
-
-**Proceed to Step 2.**
+Phase 1, the memory is already on remote — the next agent picks up
+where this one left off, not from scratch.
 
 ---
 
-## Step 2 — Read `.context/` (Agent Memory)
+## Step 2 — Read `.context/`, Step 3 — Load the Protocol, Step 4 — Follow It
 
-> **Now `.context/` exists and is synced.** Read it before fetching the
-> protocol or doing any work.
+From here the generated `.context/kickoff.md` — whose Entry Steps are
+the canonical version of what follows — takes over:
 
-Read in this order:
-1. `.context/README.md` — orientation
-2. `.context/workflows/active.md` — which protocol edition to follow + where to fetch it
-3. `.context/agents/sessions.md` — who worked here before, with which model, on which machine (read the last 3–5 entries)
-4. `.context/tasks/current.md` — is a task marked in-progress? A prior session may have died mid-task.
-5. `.context/tasks/backlog.md` — open items waiting for a session like this one
-6. `.context/inefficiencies/log.md` — known traps (tool failures, flaky tests, env quirks). **Don't re-hit a logged trap.**
-7. `.context/flaws/log.md` — workflow-level problems already found. **Don't repeat them.**
-8. `.context/plans/decisions.md` — architectural decisions already made. **Don't relitigate them; don't "fix" code into violating them.**
-9. `.context/system/environments.md` + `.context/system/ai-models.md` — environments and agents seen before
-10. `.context/user/identity.md` + `.context/user/preferences.md` — who the user is and how they like things done
-11. `.context/secrets/` — local-only secret values available on this machine (never tracked; empty on a fresh clone). Note what's available — never print values.
-
----
-
-## Step 3 — Load the Protocol
-
-> **Reading `workflows/active.md` is a binding instruction, not passive
-> documentation.** After reading it, immediately load the protocol file
-> it references before any other tool use.
-
-The protocol file is in the package repo you cloned in Step 0c. You
-don't need to fetch it from GitHub — read it from disk:
-
-```bash
-# Cloud/sandbox agent:
-cat <workspace>/context/ai-engineering-protocol.md
-
-# Local agent:
-cat <workspace>/context/ai-engineering-protocol-local.md
-```
-
-If `workflows/active.md` says to use a role overlay, also read:
-```bash
-cat <workspace>/context/roles/<role>.md
-```
-
-**Read the full protocol before proceeding.** It's ~800 lines. Take the
-time. The protocol is the instruction set for this session — don't
-skim it.
-
----
-
-## Step 4 — Follow the Protocol
-
-You now have:
-- ✅ Both repos on disk — package cloned; project cloned too if cloud/sandbox (Step 0)
-- ✅ `.context/` bootstrapped or synced (Step 1)
-- ✅ `.context/` read (Step 2)
-- ✅ Protocol loaded (Step 3)
-
-**Now follow the protocol's 19 steps across 4 phases:**
-- Phase 1: Setup (the protocol's Step 1 picks up from here — install deps, read docs, discovery, baseline)
-- Phase 2: Review
-- Phase 3: Fix
-- Phase 4: Report & Context
-
-The protocol is binding. Follow it in order. Don't skip Phase 1 because
-the task seems small. Don't ask the user for confirmation on default
-next steps. Don't forget the Exit checklist.
-
----
-
-## Two Surfaces — Know Which One You're On
-
-> Every repo managed by this protocol has two surfaces. An agent edits
-> one or the other — never both in the same commit — and must know which
-> one it's on at all times.
-
-1. **The project** — product code, docs, tests, config. Commits use
-   normal prefixes (`fix:`, `feat:`, `docs:`). Friction with the project
-   goes in `.context/inefficiencies/log.md`.
-2. **`.context/`** — agent memory. Commits use `chore(context):`. Friction
-   with the `.context/` system or the protocol itself goes in
-   `.context/flaws/log.md`.
-
-If you're editing a file under `.context/`, you're in **memory mode**.
-If you're editing anything else, you're in **project mode**.
-
----
-
-## Session Lifecycle
-
-- **ENTRY (Steps 0–3 above):** Get both repos on disk — local agents clone only the package (the project is already there); cloud/sandbox agents clone both → bootstrap or sync `.context/` → read `.context/` → load the protocol. Don't edit any project file until the protocol's Phase 1 is complete.
-- **WORK (protocol Phases 1–4):** Follow the 19 steps in order. Don't skip. Don't ask for confirmation on defaults.
-- **EXIT (protocol Step 19):** All commits pushed, report written and pushed, `.context/` updated and pushed, `tasks/current.md` cleared, PAT unset (cloud/sandbox only), chat summary delivered. **If the user has to remind you to commit or push, the protocol failed — log it as a flaw.**
+1. **Read** `.context/README.md` (zone map), then the memory files in
+   its listed order (sessions, tasks, logs, decisions, overrides,
+   system, user).
+2. **Load your edition from the vendored core, by YOUR agent type:**
+   local → `.context/core/rules/ai-engineering-protocol-local.md`;
+   cloud/sandbox → `.context/core/rules/ai-engineering-protocol.md`.
+   Plus any role overlay from `.context/core/roles/`. Read it in full —
+   it is the instruction set for this session.
+3. **Follow it**: all steps, all phases, in order. Don't skip Phase 1
+   because the task seems small. Don't ask permission for default next
+   steps. Don't forget the Exit checklist — everything committed AND
+   pushed, session logged, `tasks/current.md` cleared, PAT unset
+   (cloud only), chat summary delivered.
 
 ---
 
 ## Don't
 
-- **Don't start the project's server** unless the task requires it. "Start context workflow" means follow this protocol, not run the app.
-- **Don't grep the codebase for "context"** to find the protocol — that finds the project's context features, not the `.context/` protocol directory. Read `.context/` directly.
-- **Don't guess your model version.** Ask the user or record `unknown`.
+- **Don't start the project's server** unless the task requires it.
+  "Start context workflow" means follow this protocol, not run the app.
+- **Don't grep the codebase for "context"** to find the protocol — read
+  `.context/` directly.
+- **Don't write anything under `.context/core/`** — it's the vendored,
+  checksummed protocol. Memory goes under `.context/memory/`.
+- **Don't guess your model version.** Ask once or record `unknown`.
 - **Don't skip Phase 1** because the task seems small.
-- **Don't forget the Exit checklist** — a session isn't done until everything is committed, pushed, and logged.
-- **Don't push to the package repo** (`TisoneK/.context`) unless explicitly asked. It's a reference, not your workspace.
-- **Don't unset `GIT_TOKEN`** until the protocol's Step 19 (the very last step). It's needed for every push. *(Cloud/sandbox only — local agents never use a PAT; `git push` uses the user's existing credentials.)*
+- **Don't push to the package repo** — it's this session's read-only
+  source, not your workspace.
+- **Don't carry this file to the next session** — the project now has
+  `.context/kickoff.md`; hand THAT to the next agent.
 
 ---
 
@@ -645,31 +373,27 @@ If you're editing anything else, you're in **project mode**.
 
 | If you need... | Look in... |
 |---|---|
-| The entry point for future sessions | `<REPO>/.context/kickoff.md` (generated at bootstrap — supersedes this file) |
-| The protocol file | `<workspace>/context/ai-engineering-protocol.md` (or `-local.md`) |
-| The skeleton (for bootstrapping) | `<workspace>/context/context-skeleton/` |
-| Role overlays | `<workspace>/context/roles/` |
-| The two-repo mental model | `<workspace>/context/QUICKSTART.md` |
-| Prior agent sessions | `<REPO>/.context/agents/sessions.md` |
-| Open tasks | `<REPO>/.context/tasks/backlog.md` |
-| Known traps | `<REPO>/.context/inefficiencies/log.md` |
-| Protocol problems found | `<REPO>/.context/flaws/log.md` |
-| Architectural decisions | `<REPO>/.context/plans/decisions.md` |
-| Your environment's quirks | `<REPO>/.context/system/environments.md` |
-| Which models have worked here | `<REPO>/.context/system/ai-models.md` |
-| User preferences | `<REPO>/.context/user/preferences.md` |
-| Secret values (local agents only) | `<REPO>/.context/secrets/` (gitignored, never tracked) |
+| The entry point for every future session | `<REPO>/.context/kickoff.md` (supersedes this file) |
+| The protocol editions | `<REPO>/.context/core/rules/` |
+| Role overlays | `<REPO>/.context/core/roles/` |
+| The file/format spec | `<REPO>/.context/core/schemas/context-schema.md` |
+| Core version / integrity / updates | `sh <REPO>/.context/core/bin/context-sync status|verify|update` |
+| Prior agent sessions | `<REPO>/.context/memory/agents/sessions.md` |
+| Open tasks | `<REPO>/.context/memory/tasks/backlog.md` |
+| Known traps | `<REPO>/.context/memory/inefficiencies/log.md` |
+| Protocol problems found | `<REPO>/.context/memory/flaws/log.md` |
+| Architectural decisions | `<REPO>/.context/memory/plans/decisions.md` |
+| Your environment's quirks | `<REPO>/.context/memory/system/environments.md` |
+| User preferences | `<REPO>/.context/memory/user/preferences.md` |
+| Secret values (never tracked) | `<REPO>/.context/memory/secrets/` |
 
 ---
 
 ## Final Note
 
-This file is a **universal pointer** — and a **one-time** one per
-project. It works for any project using the `.context/` protocol: fill
-in the Pre-Flight, hand it to the agent, and the agent will clone both
-repos, bootstrap `.context/`, load the protocol, and follow it. During
-that first session the agent generates `.context/kickoff.md` inside the
-project repo — pre-filled with the project's verified facts — and every
-future session starts from there instead: *"Read `.context/kickoff.md`
-and follow it."* The real protocol is 800+ lines and lives in
-`TisoneK/.context`. This file just gets the agent through the door once.
+This file is a **one-time bootloader** per project. It gets the package
+on disk once, vendors the protocol into the project, and generates the
+real entry points: `.context/kickoff.md` (the front door) and `AGENTS.md`
+(the digest for agents that auto-load root instructions). From the next
+session on, *"Read `.context/kickoff.md` and follow it"* is the entire
+kickoff — for any agent, on any machine, with no package access at all.
