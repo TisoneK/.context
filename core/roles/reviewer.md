@@ -11,8 +11,8 @@
 
 - **Scope:** discovery + review + report — **no fixes of any kind**
 - **Findings handling:** report everything; fix nothing. Every actionable
-  finding becomes a `.context/tasks/backlog.md` entry.
-- **Deliverable:** `.context/reviews/YYYY-MM-DD-review.md` + chat summary
+  finding becomes a `.context/memory/tasks/backlog.md` entry.
+- **Deliverable:** `.context/memory/reviews/YYYY-MM-DD-review.md` + chat summary
 - **Allowed commits:** `docs(review):` (the report) and `chore(context):`
   (memory updates) only. Nothing else gets committed.
 

@@ -12,7 +12,7 @@
 - **Findings handling:** fix safe security issues; flag risky/architectural
   security changes. Non-security findings noticed in passing are backlogged,
   never fixed.
-- **Deliverable:** `.context/reviews/YYYY-MM-DD-security-review.md` + chat summary
+- **Deliverable:** `.context/memory/reviews/YYYY-MM-DD-security-review.md` + chat summary
 - **Allowed commits:** `fix(security):`, `test(security):` (regression tests
   for fixed issues), `docs(review):` (the report), `chore(context):`.
 
