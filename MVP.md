@@ -153,6 +153,19 @@ is `future`.
   - Likely landing shape: a short "Parallel discovery/review" sub-step
     in the core protocol + a `roles/orchestrator.md` overlay once
     single-source editions (MVP #3) exist — write it once, not twice.
+- **Feature-scoped memory (`memory/features/`)** — `exploring`, design
+  written — full design in `designs/feature-scoped-memory.md` (target:
+  core 0.3.0). Partitions memory by the unit that actually has a
+  lifecycle: one directory per feature (`manifest.md` update-in-place +
+  `notes.md` append-only) plus a permanent append-only
+  `features/ledger.md`. Solves the archival gap — a merged/abandoned
+  feature's directory may be archived or deleted *after* its one-line
+  ledger record is complete (the ledger line is what the append-only
+  guarantee protects) — and gives multi-session work a first-class
+  "what's in flight, since when, how's it going" record that
+  `tasks/current.md` points into via a new `Feature:` line. Includes a
+  sanctioned `Feature: none` path for hotfix-sized sessions and folds
+  in the missing ADR `Author:` line.
 - **Windows-native paths** — `future` — the docs are POSIX-flavored;
   `check` and the kickoff commands need PowerShell equivalents before a
   general public release.
