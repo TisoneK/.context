@@ -3,8 +3,9 @@
 **Status:** exploring — design proposal, not yet in core
 **Proposed:** 2026-07-18 (maintainer; seeded by gaps surfaced in an
 external review conversation)
-**Target:** core 0.3.0 (MINOR — additive memory module + one amended
-invariant)
+**Target:** core 0.4.0 (MINOR — additive memory module + one amended
+invariant). Was 0.3.0; retargeted 2026-07-21 when the harvest feature
+shipped as 0.3.0 while this remained a design.
 
 ---
 

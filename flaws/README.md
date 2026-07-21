@@ -10,12 +10,34 @@ itself can be improved.
 
 ```
 Project session hits a workflow flaw
-  → logged in the project's .context/flaws/log.md
-  → when a pattern repeats (or periodically), summarized here
-  → protocol/skeleton/roles updated in this package to fix it
+  → logged in the project's .context/memory/flaws/log.md (Status: open)
+  → context-sync harvest collects it here (into ../inbox/) — see below
+  → protocol/core/roles updated in this package to fix it
   → the project's flaw entry gets a "Fixed in package" line
-  → new projects bootstrap from the fixed skeleton
+  → new projects bootstrap from the fixed core
 ```
+
+## Harvesting (automated collection)
+
+The collection step used to be manual copy-paste from each project. It is
+now `context-sync harvest`, run from a package clone. It reads `fleet.md`
+(the registry of bootstrapped projects), reaches each one read-only (a
+sibling clone matched by remote URL, else a shallow clone), and pulls in:
+
+- **`flaws/log.md`** entries with `Status: open` — every flaw is
+  protocol-level by definition, so all open ones are candidates;
+- **`inefficiencies/log.md`** entries marked `Upstream: candidate` —
+  most inefficiencies are project-local and stay put; this opt-in marks
+  the protocol-level ones;
+- **`overrides/rules.md`** bullets tagged `[core-defect]` — these are the
+  richest signal: a project has already *written the fix* to a core bug
+  locally, and it would otherwise stay stranded there (overrides survive
+  every core bump). `[project-local]` overrides are never harvested.
+
+Output lands in `../inbox/harvest-<date>.md` for triage; a committed
+ledger (`../inbox/.harvested`) hashes each collected entry so re-runs
+never re-file the same one. Triage each entry (fix in core, or reject),
+then delete the run file — the ledger remembers.
 
 ## How to use this directory
 
