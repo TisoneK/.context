@@ -270,9 +270,14 @@ Diff the copy of this file you were handed against
 sh ../context/core/bin/context-sync bootstrap .
 ```
 
+`bootstrap` is sh-only — on **Windows**, run this one step under Git Bash
+or WSL. Every *later* session command (`verify`/`status`/`update`/
+`rollback`/`lock`) has a native PowerShell port and needs no POSIX shell.
+
 It vendors `core/` → `.context/core/`, copies the memory skeleton →
 `.context/memory/`, seeds `.context/README.md` + `.context/kickoff.md`
-+ root `AGENTS.md`, and writes `memory/core.lock`. Verify:
++ root `AGENTS.md`, and writes `memory/core.lock`. Verify (Windows:
+`pwsh -File .context/core/bin/context-sync.ps1 verify`):
 
 ```bash
 sh .context/core/bin/context-sync verify

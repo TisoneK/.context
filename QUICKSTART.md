@@ -87,6 +87,13 @@ sh .context/core/bin/context-sync status    # drift check at session start
 sh .context/core/bin/context-sync update    # same-MAJOR: applies; MAJOR: asks for --major
 ```
 
+On Windows, use the PowerShell port (same commands; `--major` is `-Major`):
+
+```powershell
+pwsh -File .context/core/bin/context-sync.ps1 status
+pwsh -File .context/core/bin/context-sync.ps1 update
+```
+
 Updates replace `core/` as a whole and never touch `memory/` — local
 customizations (overrides, preferences, logs) survive every bump. If
 core ever fails `verify` (hand-edit, corruption), `rollback` restores
