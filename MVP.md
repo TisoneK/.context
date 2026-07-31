@@ -153,17 +153,23 @@ is `future`.
   - Likely landing shape: a short "Parallel discovery/review" sub-step
     in the core protocol + a `roles/orchestrator.md` overlay once
     single-source editions (MVP #3) exist — write it once, not twice.
+- **Session-based context management (`memory/sessions/`)** — `shipped 0.5.0` —
+  three-layer model: disposable session detail (`<date>-N/notes.md`) →
+  prunable summary (`SUMMARY.md`) → permanent registry (`agents/sessions.md`).
+  Context promotion at session end ensures durable facts reach their domain
+  files before session directories are cleaned up. The core invariant:
+  **permanent context must never depend exclusively on an individual session.**
+  Retires the archival gap logged in the feature-scoped-memory design below —
+  the session lifecycle concern lands here; the feature-partitioning concern
+  (per-feature directories, ledger) remains `exploring`.
 - **Feature-scoped memory (`memory/features/`)** — `exploring`, design
   written — full design in `designs/feature-scoped-memory.md` (target:
   core 0.3.0). Partitions memory by the unit that actually has a
   lifecycle: one directory per feature (`manifest.md` update-in-place +
   `notes.md` append-only) plus a permanent append-only
-  `features/ledger.md`. Solves the archival gap — a merged/abandoned
-  feature's directory may be archived or deleted *after* its one-line
-  ledger record is complete (the ledger line is what the append-only
-  guarantee protects) — and gives multi-session work a first-class
-  "what's in flight, since when, how's it going" record that
-  `tasks/current.md` points into via a new `Feature:` line. Includes a
+  `features/ledger.md`. The session-management aspect of this design
+  shipped in 0.5.0 (`memory/sessions/`); the feature-partitioning concern
+  (per-feature directories, ledger) remains `exploring`. Includes a
   sanctioned `Feature: none` path for hotfix-sized sessions and folds
   in the missing ADR `Author:` line.
 - **Windows-native paths** — `future` — the docs are POSIX-flavored;

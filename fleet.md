@@ -11,3 +11,4 @@ https://github.com/TisoneK/LocalMind.git   bootstrapped=2026-07-11  core=0.1.0  
 https://github.com/TisoneK/vert.git        bootstrapped=2026-07-11  core=0.1.0  # backfilled
 https://github.com/TisoneK/task2sms.git    bootstrapped=2026-07-13  core=0.1.0  # backfilled
 https://github.com/TisoneK/scrapamoja.git  bootstrapped=2026-07-14  core=0.2.0  # backfilled
+https://github.com/TisoneK/glyph.git  bootstrapped=2026-07-29  core=0.3.0

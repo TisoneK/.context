@@ -98,5 +98,10 @@ Fix the source; let the instances pull.
   reports.
 - **Inefficiency logging is mandatory** — friction you absorb silently
   is friction the next agent hits blind.
+- **Session data is disposable** — detailed session notes live in
+  `memory/sessions/` and can be deleted when no longer useful; the
+  permanent record is `agents/sessions.md`. Durable facts are promoted
+  to their domain before disposal — permanent context must never depend
+  exclusively on an individual session.
 - **Verify before trusting** — if `.context/` contradicts the codebase,
   the codebase wins; append a correction.

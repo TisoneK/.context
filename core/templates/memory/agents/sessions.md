@@ -11,5 +11,6 @@ past entries — append corrections instead.
 - **Commits:** <count> (<first-sha>..<last-sha>)
 - **Outcome:** <done / partial / blocked — one line>
 - **Open items:** <pointers into tasks/backlog.md, or "none">
+- **Notes:** .context/memory/sessions/YYYY-MM-DD-N/notes.md (or "none")
 - **Report:** .context/memory/reviews/YYYY-MM-DD-review.md
 -->
