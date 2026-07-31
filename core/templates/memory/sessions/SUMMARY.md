@@ -9,7 +9,11 @@ The purpose is **continuity, not archival completeness**. A future agent
 should understand at a glance what important work happened recently,
 what significant decisions were made, and where to find detail if needed.
 
+Entries are separated by `---` so agents can parse them as discrete
+records.
+
 <!-- TEMPLATE — copy below the last entry:
+---
 - **YYYY-MM-DD — Session N** — <agent> / <model> — <one-line outcome>.
   <Key decision or discovery, if any.>
   Detail: .context/memory/sessions/YYYY-MM-DD-N/notes.md (or \"summary only\").
