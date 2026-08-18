@@ -28,6 +28,7 @@ prior agent did, what's open, what's decided, and what went wrong before.
 | [`core/roles/`](core/roles/) | Role overlays — reviewer (read-only), security-auditor, docs-agent, feature-engineer. Engineer (full-scope) is the default, no overlay needed. |
 | [`core/bin/context-sync`](core/bin/context-sync) | POSIX-sh tool: `status` (startup change detection), `verify` (checksums vs `MANIFEST.sha256`), `update` (semver-gated whole-tree core replacement — memory untouched), `rollback` (restore the last-known-good core from git history), `bootstrap` (initialize a project), `manifest` (release tool). |
 | [`core/bin/context-sync.ps1`](core/bin/context-sync.ps1) | PowerShell port for **Windows** agents (no POSIX shell): the session commands `status` / `verify` / `update` / `rollback` / `lock`. Shares `MANIFEST.sha256` with the sh tool (identical hashes). `manifest` / `bootstrap` / `harvest` stay sh-only. |
+| [`core/bin/context-collab`](core/bin/context-collab) + [`context-collab.ps1`](core/bin/context-collab.ps1) | POSIX/PowerShell helpers for opt-in peer collaboration: atomically emit immutable claims, proposals, assessments, agreements, corrections, handoffs, and releases, and report overlapping claims. |
 | [`core/VERSION`](core/VERSION) + [`core/CHANGELOG.md`](core/CHANGELOG.md) | Core semver + one entry per release with migration notes. |
 | [`universal-kickoff.md`](universal-kickoff.md) | **One-time bootstrap bootloader** — hand to the agent for a project's first-ever session. It vendors core into the project and generates the real entry points; every later session starts from the project's own `.context/kickoff.md`. |
 | [`MIGRATION.md`](MIGRATION.md) | Moving pre-0.2.0 projects (flat `.context/`, sibling-clone protocol) to the two-zone layout — one commit, zero data loss. |
@@ -103,5 +104,10 @@ Fix the source; let the instances pull.
   permanent record is `agents/sessions.md`. Durable facts are promoted
   to their domain before disposal — permanent context must never depend
   exclusively on an individual session.
+- **Collaboration is opt-in** — concurrent agents use isolated
+  worktrees/branches and immutable one-file-per-event records under
+  `memory/collaboration/events/`. Overlapping claims are resolved by
+  evidence-based peer assessment and an agreement naming the best option
+  and one owner; corrections follow the same process for cause and fixer.
 - **Verify before trusting** — if `.context/` contradicts the codebase,
   the codebase wins; append a correction.

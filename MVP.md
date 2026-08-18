@@ -7,7 +7,8 @@ a session or a flaw entry suggests a feature that's out of scope for a
 doc fix, it gets captured here, not lost in chat history.
 
 **Status legend:** `shipped 0.2.0` (landed with the vendored-core
-release, 2026-07-14) · `mvp` (ships in the first public release) ·
+release, 2026-07-14) · `shipped 0.6.0` (peer collaboration) · `mvp`
+(ships in the first public release) ·
 `future` (after MVP) · `exploring` (direction agreed, design open)
 
 ---
@@ -88,14 +89,21 @@ never find the protocol missing (task2sms Session 2's failure is
 impossible by construction), and `memory/core.lock` +
 `workflows/active.md` record exactly which core version is in force.
 
-### 5. Session concurrency convention — `mvp` (convention), `future` (tooling)
-The protocol implicitly assumes serialized sessions; two concurrent
-agents interleave session numbers and race pushes. MVP states the rule:
-**one agent per project repo at a time**; `tasks/current.md` doubles as
-the lock (an in-progress task from another live session = do not start;
-a stale one = takeover per the existing dead-session rule, noted in the
-session entry). Tooling (lock timestamps, takeover detection in `check`)
-is `future`.
+### 5. Session concurrency convention — `shipped 0.6.0`
+The protocol now supports opt-in peer collaboration while preserving the
+single-agent default. Each collaborating agent uses an isolated git
+worktree/branch; immutable one-file-per-event records under
+`memory/collaboration/events/` expose claims, proposals, assessments,
+agreements, corrections, handoffs, and releases without shared EOF
+append conflicts. Overlapping work is resolved by comparing evidence and
+agreeing on the best-supported option plus one implementation owner —
+there is no timestamp or agent-ID tie-breaker. `tasks/current.md` remains
+the lock only when collaboration is not enabled.
+
+The mechanical helper is `core/bin/context-collab`, with `emit` and
+`status` commands. Product merges remain peer-reviewed and explicit; the
+protocol does not silently merge conflicting code or choose a winner.
+
 
 ---
 
@@ -123,36 +131,11 @@ is `future`.
   card is the floor for weak models; a profile system ("strict mode":
   check runs mandatory, smaller step budget, no improvisation clauses)
   could adapt the protocol's freedom to the model driving it.
-- **Multi-agent (parallel) processing** — `future`, design constraints
-  decided now — today the workflow assumes one agent processes every
-  phase serially; capable platforms can dispatch sub-agents ("deep-scan
-  backend and frontend in parallel while the main agent reviews
-  security"). The design that preserves the protocol's invariants:
-  **orchestrator–worker, inside one session.**
-  - **One session, one writer.** The orchestrator is the session: the
-    sole author of git commits and every `.context/` write. Workers are
-    **read-only explorers** — they scan, review, and report findings
-    back; they never commit, push, or touch memory. This keeps
-    append-only logs single-writer, session numbering linear, and the
-    two-surfaces rule intact.
-  - **Where parallelism pays:** the read-only phases — discovery
-    (Step 7) and review (Step 9) — fan out by area (backend / frontend /
-    security / docs). Phase 3 (writes) stays serialized through the
-    orchestrator.
-  - **Findings merge through Pitfall #31:** the orchestrator reproduces
-    a worker's finding before acting on it — a sub-agent's report is a
-    claim, not a verified fact.
-  - **Capability-gated, never required:** the protocol must remain
-    fully executable single-agent; parallel dispatch is an optimization
-    for platforms that have it (ties into model-capability profiles).
-    The session entry records that workers were used, for which areas,
-    on which model.
-  - **Not cross-session concurrency:** the one-agent-per-repo rule
-    (MVP #5) is untouched — workers live inside the orchestrator's
-    session and hold no lock of their own.
-  - Likely landing shape: a short "Parallel discovery/review" sub-step
-    in the core protocol + a `roles/orchestrator.md` overlay once
-    single-source editions (MVP #3) exist — write it once, not twice.
+- **Orchestrator-worker dispatch** — `future` — peer collaboration is
+  now available across isolated agents, while platforms may still use a
+  read-only worker fan-out inside one orchestrator session as an optional
+  optimization. Workers must publish findings for the orchestrator or
+  peers to reproduce before acting on them.
 - **Session-based context management (`memory/sessions/`)** — `shipped 0.5.0` —
   three-layer model: disposable session detail (`<date>-N/notes.md`) →
   prunable summary (`SUMMARY.md`) → permanent registry (`agents/sessions.md`).

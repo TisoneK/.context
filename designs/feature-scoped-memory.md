@@ -136,15 +136,19 @@ feature silently deletes durable knowledge.
   directories per feature make concurrent branches naturally
   conflict-free in memory, unlike two branches appending to one shared
   log.
-- **Concurrency:** unchanged. `tasks/current.md` remains the single
-  lock (one agent per repo); multiple feature *directories* coexisting
-  is normal and is the point.
+- **Concurrency:** the single-agent default still uses
+  `tasks/current.md` as its lock. Core 0.6.0 adds opt-in peer
+  collaboration: concurrent feature work uses isolated worktrees and
+  immutable collaboration events, while multiple feature directories
+  can continue to coexist without shared-file coordination conflicts.
 
 ## The no-feature path
 
 Hotfix- and chore-sized sessions must not be forced to invent slugs
 (weak agents will fabricate ceremony to comply). `Feature: none` in
-`tasks/current.md` is fully sanctioned; such sessions touch no feature
+`tasks/current.md` is fully sanctioned for single-agent mode; a
+collaborating session instead uses its shared issue ID and event trail.
+Such sessions touch no feature
 directory and write the global logs exactly as in 0.2.0. Rule of
 thumb: multi-session work gets a feature; single-session work does not
 need one.
