@@ -28,14 +28,17 @@ If you read nothing else, obey these rules:
    `.context/memory/workflows/active.md`,
    `.context/memory/agents/sessions.md` (last entries),
    `.context/memory/collaboration/README.md` and relevant event files
-   when collaboration is enabled, `.context/memory/tasks/current.md`,
-   and `.context/memory/inefficiencies/log.md` (known traps). If the
+   when collaboration is enabled, `.context/memory/workflows/gates.conf`,
+   `.context/memory/tasks/current.md`, and
+   `.context/memory/inefficiencies/log.md` (known traps). If the
    active session has detailed notes at
    `.context/memory/sessions/`, skim them for current state.
 5. **Choose the mode explicitly.** Without a shared collaboration
    `session` + `issue`, `tasks/current.md` is the single-agent lock. In
    collaboration mode, use an isolated git worktree/branch and the
-   immutable event trail; do not block peers on `tasks/current.md`.
+   immutable event trail; do not block peers on `tasks/current.md`. Before
+   each next action run `context-gates checkpoint`; before commits,
+   integration, and exit run the matching gate.
 6. **Append-only files are append-only:** `agents/sessions.md`,
    `tasks/backlog.md`, `plans/decisions.md`, `flaws/log.md`,
    `inefficiencies/log.md`. Add at the bottom; never edit or delete

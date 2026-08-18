@@ -29,7 +29,9 @@ is committed to git and travels with the repo. It has **two zones**:
     ├── flaws/log.md             # protocol friction — flows upstream to the package
     ├── inefficiencies/log.md    # project friction
     ├── reviews/                 # session reports
-    ├── workflows/active.md      # standing session parameters
+    ├── workflows/
+    │   ├── active.md             # standing session parameters
+    │   └── gates.conf             # explicit lifecycle commands + hybrid discovery mode
     ├── system/                  # machines + agent/model registry
     ├── user/                    # identity + preferences
     ├── overrides/rules.md       # project-local protocol adjustments

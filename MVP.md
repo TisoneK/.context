@@ -8,7 +8,8 @@ doc fix, it gets captured here, not lost in chat history.
 
 **Status legend:** `shipped 0.2.0` (landed with the vendored-core
 release, 2026-07-14) · `shipped 0.6.0` (peer collaboration) ·
-`shipped 0.7.0` (collaboration checks) · `mvp`
+`shipped 0.7.0` (collaboration checks) · `shipped 0.8.0` (lifecycle gates) ·
+`mvp`
 (ships in the first public release) ·
 `future` (after MVP) · `exploring` (direction agreed, design open)
 
@@ -101,10 +102,11 @@ agreeing on the best-supported option plus one implementation owner —
 there is no timestamp or agent-ID tie-breaker. `tasks/current.md` remains
 the lock only when collaboration is not enabled.
 
-The mechanical helper is `core/bin/context-collab`, with `emit`,
-`status`, and integration-readiness `check` commands. Product merges remain
-peer-reviewed and explicit; the protocol does not silently merge conflicting
-code or choose a winner.
+The mechanical helpers are `core/bin/context-collab` and
+`core/bin/context-gates`, covering collaboration events, integration checks,
+per-turn checkpoints, pre-commit, integration, and exit gates. Product
+merges remain peer-reviewed and explicit; the protocol does not silently
+merge conflicting code or choose a winner.
 
 
 ---

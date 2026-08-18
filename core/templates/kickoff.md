@@ -140,7 +140,7 @@ if the active entry points to `sessions/<date>-N/notes.md`, skim it
 for the current state) → `collaboration/README.md` and relevant
 `collaboration/events/` when collaboration is enabled → `tasks/current.md` → `tasks/backlog.md` →
 `inefficiencies/log.md` → `flaws/log.md` → `plans/decisions.md` →
-`overrides/rules.md` → `system/` → `user/` → note what's in
+`overrides/rules.md` → `workflows/gates.conf` → `system/` → `user/` → note what's in
 `secrets/` (never print values).
 
 If no collaboration `session` + `issue` was declared and
@@ -171,6 +171,33 @@ best-supported option and one implementation owner. There is no timestamp
 or agent-ID winner. A correction similarly records evidence, root cause,
 candidate repairs, and a suggested owner; peers agree on the repair and
 owner before it is applied.
+
+### Gate commands (every session)
+
+The project-owned registry is `.context/memory/workflows/gates.conf`.
+If it is missing, initialize it with:
+
+```bash
+sh .context/core/bin/context-gates init
+```
+
+Before the next agent action/turn, run the checkpoint:
+
+```bash
+sh .context/core/bin/context-gates checkpoint [--session <SESSION_ID> --issue <ISSUE_ID>]
+```
+
+Run the lifecycle gates at their boundaries:
+
+```bash
+sh .context/core/bin/context-gates run pre-commit
+sh .context/core/bin/context-gates run integration --session <SESSION_ID> --issue <ISSUE_ID>
+sh .context/core/bin/context-gates run exit
+```
+
+On Windows use `pwsh -File .context/core/bin/context-gates.ps1` with the
+same commands. A failing gate blocks the next lifecycle transition; record
+the exact failing command and output in the session notes or event trail.
 
 ### Step 3 — Load the protocol
 

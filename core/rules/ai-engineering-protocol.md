@@ -192,6 +192,36 @@ lock. Do not overwrite or clear a peer's current task. Normal durable
 files are updated by their named owner or after rebasing; event files are
 the live coordination channel.
 
+## Explicit Gate Protocol — Commands, Not Prose
+
+The project-owned registry is `.context/memory/workflows/gates.conf`.
+Run the POSIX helper (or its PowerShell equivalent) at every lifecycle
+boundary. A failing gate blocks the next transition; record the exact
+command and observed result before retrying.
+
+- **Per-agent-turn checkpoint:** before the next action after reading,
+  editing, or receiving peer state, run:
+  `sh .context/core/bin/context-gates checkpoint [--session <id> --issue <id>]`.
+  This refreshes working-tree and collaboration state so an agent never
+  acts on stale context.
+- **Before every commit:** run
+  `sh .context/core/bin/context-gates run pre-commit`.
+  It runs universal staged-diff checks plus explicit project commands;
+  hybrid mode discovers conventional commands only when none are listed.
+- **Before branch integration:** run
+  `sh .context/core/bin/context-gates run integration --session <id> --issue <id>`.
+  This includes `context-collab check` and configured build/integration
+  commands. Omit the collaboration scope only for a non-collaborative
+  single-agent integration.
+- **Before session exit:** run
+  `sh .context/core/bin/context-gates run exit`.
+  It verifies core integrity, final diffs, and configured exit commands.
+
+Commands are explicit when present in `gates.conf`; auto-discovery is a
+fallback, not permission to invent a command. If a project requires a
+specific command, configure it explicitly and use `mode=explicit` to make
+missing commands fail rather than pass with a notice.
+
 ## Session Lifecycle — Entry, Transitions, Exit
 
 > **The protocol must direct the agent at every point.** If you don't
@@ -277,16 +307,17 @@ git config user.email "<GIT_EMAIL>"
   2. `.context/memory/agents/sessions.md` — who worked here before, with which model, and what they did (read the last 3–5 entries)
   3. `.context/memory/sessions/SUMMARY.md` — compressed session continuity (skim the last ~10 entries; if the file doesn't exist yet, skip — it's created by the first session that runs on 0.5.0+)
   4. `.context/memory/collaboration/README.md` — collaboration rules; if a shared session/issue is active, read its event files and status before claiming work.
-  5. `.context/memory/tasks/current.md` — in single-agent mode, is a task marked in-progress? If a prior session died mid-task, this is where you find out. In collaboration mode it is not a lock.
-  6. `.context/memory/tasks/backlog.md` — open items waiting for a session like this one
-  7. `.context/memory/flaws/log.md` — known workflow/protocol traps — where the `.context` system itself misled a prior agent. **Don't re-hit a logged flaw.**
-  8. `.context/memory/inefficiencies/log.md` — known project traps (tool failures, flaky tests, env quirks). **Don't re-hit a logged trap.**
-  9. `.context/memory/plans/decisions.md` — architectural decisions already made. **Don't relitigate them; don't "fix" code into violating them.**
-  10. `.context/memory/overrides/rules.md` — project-local protocol adjustments. **Overrides beat this edition** (except secret-handling and append-only rules).
-  11. `.context/memory/system/environments.md` + `.context/memory/system/ai-models.md` — environments and agents seen before
-  12. `.context/memory/user/identity.md` + `.context/memory/user/preferences.md` — who the user is and how they like things done
-  13. `.context/memory/workflows/active.md` — the workflow currently in force
-  14. `.context/memory/secrets/` — local-only secret values available on this machine (never tracked; empty on a fresh clone). Note what's available — never print values.
+  5. `.context/memory/workflows/gates.conf` — explicit commands and gate mode; initialize it if missing.
+  6. `.context/memory/tasks/current.md` — in single-agent mode, is a task marked in-progress? If a prior session died mid-task, this is where you find out. In collaboration mode it is not a lock.
+  7. `.context/memory/tasks/backlog.md` — open items waiting for a session like this one
+  8. `.context/memory/flaws/log.md` — known workflow/protocol traps — where the `.context` system itself misled a prior agent. **Don't re-hit a logged flaw.**
+  9. `.context/memory/inefficiencies/log.md` — known project traps (tool failures, flaky tests, env quirks). **Don't re-hit a logged trap.**
+  10. `.context/memory/plans/decisions.md` — architectural decisions already made. **Don't relitigate them; don't "fix" code into violating them.**
+  11. `.context/memory/overrides/rules.md` — project-local protocol adjustments. **Overrides beat this edition** (except secret-handling and append-only rules).
+  12. `.context/memory/system/environments.md` + `.context/memory/system/ai-models.md` — environments and agents seen before
+  13. `.context/memory/user/identity.md` + `.context/memory/user/preferences.md` — who the user is and how they like things done
+  14. `.context/memory/workflows/active.md` — the workflow currently in force
+  15. `.context/memory/secrets/` — local-only secret values available on this machine (never tracked; empty on a fresh clone). Note what's available — never print values.
 - If `.context/` does NOT exist, bootstrap it now (see Bootstrap in the `.context/` section) and commit it: `chore(context): bootstrap .context/ (core <version>)`.
 - **Migration:** if `docs/report/` contains prior reviews, move them: `git mv docs/report/*.md .context/memory/reviews/` in the same bootstrap commit. Leave a `docs/report/README.md` pointer saying reviews now live in `.context/memory/reviews/`.
 - In single-agent mode, set `.context/memory/tasks/current.md` to this session's task before starting work (overwrite — it holds one task at a time). In collaboration mode, do not use it as a lock: create an isolated branch/worktree, emit a `claim` event with the shared session/issue IDs, and inspect peer events first.

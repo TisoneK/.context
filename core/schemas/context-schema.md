@@ -65,7 +65,9 @@ core/
 │   ├── context-collab       # POSIX-sh: atomic collaboration events + status + check
 │   ├── context-collab.ps1   # PowerShell port (Windows): emit + status + check
 │   ├── context-collab-check # POSIX integration-readiness validator
-│   └── context-collab-check.ps1 # PowerShell integration-readiness validator
+│   ├── context-collab-check.ps1 # PowerShell integration-readiness validator
+│   ├── context-gates        # POSIX lifecycle gates + checkpoint
+│   └── context-gates.ps1    # PowerShell lifecycle gates + checkpoint
 ├── rules/
 │   ├── ai-engineering-protocol-local.md   # LOCAL agents' edition
 │   └── ai-engineering-protocol.md         # CLOUD/SANDBOX agents' edition
@@ -123,6 +125,7 @@ File inventory, write modes, and scopes. **Write modes:**
 | `sessions/SUMMARY.md` | update-in-place (entries are removable) | project | Compressed session history — one line per session, prunable. The permanent record is `agents/sessions.md` |
 | `sessions/YYYY-MM-DD-N/notes.md` | append-only while active; deletable after promotion | project | Per-session detailed notes — research, exploration, dead ends. Disposable; durable facts must be promoted first |
 | `workflows/active.md` | overwrite | project (see scoping!) | Standing session parameters + core version in force |
+| `workflows/gates.conf` | update-in-place | project | Explicit lifecycle commands and hybrid discovery mode |
 | `system/environments.md` | update-in-place | **machine** | One block per machine/sandbox, keyed by an "Identify by" line |
 | `system/ai-models.md` | update-in-place | **agent** | Registry + evidence-based observations per agent/model |
 | `user/identity.md` | update-in-place | user | Who the user is |
@@ -143,11 +146,14 @@ wins.
 `.context/README.md` → `kickoff.md` → `memory/workflows/active.md` →
 `memory/agents/sessions.md` (last 3–5) → `memory/sessions/SUMMARY.md`
 (skim last 10 entries for compressed continuity) → `memory/collaboration/README.md`
-(and active event files when collaboration is enabled) → `memory/tasks/current.md` →
-`memory/tasks/backlog.md` → `memory/inefficiencies/log.md` →
+(and active event files when collaboration is enabled) →
+`memory/tasks/current.md` → `memory/tasks/backlog.md` →
+`memory/inefficiencies/log.md` →
 `memory/flaws/log.md` → `memory/plans/decisions.md` →
-`memory/overrides/rules.md` → `memory/system/` → `memory/user/` →
-note what's in `memory/secrets/` (never print values).
+`memory/overrides/rules.md` → `memory/workflows/gates.conf` →
+`memory/system/` → `memory/user/` → note what's in `memory/secrets/`
+(never print values).
+
 
 ---
 

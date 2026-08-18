@@ -10,6 +10,29 @@ bump MINOR; wording and fixes bump PATCH.
 
 ---
 
+## 0.8.0 — 2026-08-17
+
+**Explicit lifecycle command gates.** Agents now have mechanical,
+project-owned gates instead of relying only on prose instructions.
+
+- **`context-gates` + `context-gates.ps1`:** add `checkpoint`,
+  `pre-commit`, `integration`, and `exit` gate commands with consistent
+  exit behavior and observable command output.
+- **Per-agent-turn checkpoint:** refreshes working-tree and collaboration
+  state before the next action, reducing stale-context work.
+- **Project command registry:** new `memory/workflows/gates.conf` supports
+  explicit commands per lifecycle gate. `mode=hybrid` uses safe conventional
+  package.json/Python discovery only when no explicit command is configured;
+  `mode=explicit` fails when a required gate has no command.
+- **Mandatory transitions:** protocol editions, kickoff, AGENTS digest,
+  and schema now require gates before commits, branch integration, and
+  session exit. Integration includes `context-collab check` when a
+  collaboration session/issue is supplied.
+
+**Migration from 0.7.x:** existing projects remain compatible. New
+bootstraps receive `gates.conf`; existing projects can initialize it with
+`sh .context/core/bin/context-gates init` or the PowerShell equivalent.
+
 ## 0.7.0 — 2026-08-17
 
 **Collaboration integration-readiness checks.** The collaboration helper
