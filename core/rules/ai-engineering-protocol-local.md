@@ -171,6 +171,10 @@ workflow and `tasks/current.md` lock remain in force.
   Use `sh .context/core/bin/context-collab` to emit and inspect events.
 - Fetch before reading peer state and again before applying a conflicting
   change. A claim exposes intent and scope; it is not a lock.
+- Before integrating product branches, run
+  `sh .context/core/bin/context-collab check --session <id> --issue <id>`.
+  A failing check blocks integration until peers resolve the reported
+  event-trail problem.
 
 ### Peer decision lifecycle
 

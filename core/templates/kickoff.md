@@ -157,10 +157,11 @@ sh .context/core/bin/context-collab emit claim --session <SESSION_ID> \
   --agent <AGENT_ID> --issue <ISSUE_ID> --paths <path1,path2> \
   --body-file <claim-notes-file>
 sh .context/core/bin/context-collab status --session <SESSION_ID> --issue <ISSUE_ID>
+sh .context/core/bin/context-collab check --session <SESSION_ID> --issue <ISSUE_ID>
 ```
 
 On Windows use `pwsh -File .context/core/bin/context-collab.ps1` with the
-same `emit` and `status` arguments.
+same `emit`, `status`, and `check` arguments.
 
 Publish coordination events on the shared event-only branch
 `collab/<SESSION_ID>/coordination`; keep product changes on each agent's

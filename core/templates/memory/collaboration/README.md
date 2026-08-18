@@ -73,7 +73,13 @@ sh .context/core/bin/context-collab emit claim \
   --session <session-id> --agent <agent-id> --issue <issue-id> \
   --paths src/auth.py,tests/test_auth.py --body-file /path/to/claim.md
 sh .context/core/bin/context-collab status --session <session-id> --issue <issue-id>
+sh .context/core/bin/context-collab check --session <session-id> --issue <issue-id>
 ```
+
+`status` is for live work. `check` is the integration-readiness gate and
+fails if metadata or references are invalid, claims overlap, agreements are
+incomplete, corrections or handoffs remain unresolved, or releases do not
+cite a product commit.
 
 On Windows, use the PowerShell port:
 
@@ -82,6 +88,8 @@ pwsh -File .context/core/bin/context-collab.ps1 emit claim `
   --session <session-id> --agent <agent-id> --issue <issue-id> `
   --paths src/auth.py,tests/test_auth.py --body-file C:\path\claim.md
 pwsh -File .context/core/bin/context-collab.ps1 status `
+  --session <session-id> --issue <issue-id>
+pwsh -File .context/core/bin/context-collab.ps1 check `
   --session <session-id> --issue <issue-id>
 ```
 

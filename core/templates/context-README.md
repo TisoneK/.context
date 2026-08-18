@@ -17,7 +17,7 @@ is committed to git and travels with the repo. It has **two zones**:
 │   ├── roles/            # mission overlays
 │   ├── schemas/          # context-schema.md — the single source of truth on formats
 │   ├── templates/        # what memory files are generated from
-│   └── bin/              # context-sync (sh) + context-sync.ps1 (Windows) + context-collab (+ .ps1): sync and peer coordination helpers
+│   └── bin/              # context-sync + context-collab (+ .ps1): sync, peer coordination, and integration checks
 └── memory/       # this project's living memory — project-owned, writable
     ├── agents/sessions.md       # append-only session log
     ├── collaboration/           # opt-in peer coordination

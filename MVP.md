@@ -7,7 +7,8 @@ a session or a flaw entry suggests a feature that's out of scope for a
 doc fix, it gets captured here, not lost in chat history.
 
 **Status legend:** `shipped 0.2.0` (landed with the vendored-core
-release, 2026-07-14) · `shipped 0.6.0` (peer collaboration) · `mvp`
+release, 2026-07-14) · `shipped 0.6.0` (peer collaboration) ·
+`shipped 0.7.0` (collaboration checks) · `mvp`
 (ships in the first public release) ·
 `future` (after MVP) · `exploring` (direction agreed, design open)
 
@@ -100,9 +101,10 @@ agreeing on the best-supported option plus one implementation owner —
 there is no timestamp or agent-ID tie-breaker. `tasks/current.md` remains
 the lock only when collaboration is not enabled.
 
-The mechanical helper is `core/bin/context-collab`, with `emit` and
-`status` commands. Product merges remain peer-reviewed and explicit; the
-protocol does not silently merge conflicting code or choose a winner.
+The mechanical helper is `core/bin/context-collab`, with `emit`,
+`status`, and integration-readiness `check` commands. Product merges remain
+peer-reviewed and explicit; the protocol does not silently merge conflicting
+code or choose a winner.
 
 
 ---
@@ -131,9 +133,10 @@ protocol does not silently merge conflicting code or choose a winner.
   card is the floor for weak models; a profile system ("strict mode":
   check runs mandatory, smaller step budget, no improvisation clauses)
   could adapt the protocol's freedom to the model driving it.
-- **Orchestrator-worker dispatch** — `future` — peer collaboration is
-  now available across isolated agents, while platforms may still use a
-  read-only worker fan-out inside one orchestrator session as an optional
+- **Orchestrator-worker dispatch** — `future` — peer collaboration and
+  integration checks are now available across isolated agents, while
+  platforms may still use a read-only worker fan-out inside one
+  orchestrator session as an optional
   optimization. Workers must publish findings for the orchestrator or
   peers to reproduce before acting on them.
 - **Session-based context management (`memory/sessions/`)** — `shipped 0.5.0` —

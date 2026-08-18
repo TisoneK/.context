@@ -10,6 +10,7 @@
 #     --session ID --agent ID --issue ID --paths src/a.py `
 #     --body-file C:\path\claim.md
 #   pwsh -File .context/core/bin/context-collab.ps1 status --session ID --issue ID
+#   pwsh -File .context/core/bin/context-collab.ps1 check --session ID --issue ID
 
 [CmdletBinding()]
 param(
@@ -28,6 +29,7 @@ function Usage {
     'Commands:',
     '  emit TYPE --session ID --agent ID --issue ID [metadata] [--body-file FILE]',
     '  status [--session ID] [--issue ID]',
+    '  check  [--session ID] [--issue ID]   integration-readiness gate',
     '',
     'Metadata: --paths CSV --refs CSV --option ID --selected ID --owner ID',
     '          --participants CSV --body TEXT --body-file FILE',
@@ -125,7 +127,7 @@ function Emit { param([string]$EventType, [string[]]$Args)
 
 function Is-Released { param([string]$ClaimId, [IO.FileInfo[]]$Files)
   foreach ($file in $Files) {
-    if ((Get-Field $file 'type') -eq 'release' -and ",$(Get-Field $file 'refs')," -like "*,$ClaimId,*") { return $true }
+    if ((Get-Field $file 'type') -in @('release','handoff') -and ",$(Get-Field $file 'refs')," -like "*,$ClaimId,*") { return $true }
   }
   return $false
 }
@@ -173,6 +175,13 @@ switch ($Command) {
     if ($Type) { $statusArgs += $Type }
     if ($null -ne $Rest) { $statusArgs += $Rest }
     Status $statusArgs
+  }
+  'check' {
+    $checkArgs = @()
+    if ($Type) { $checkArgs += $Type }
+    if ($null -ne $Rest) { $checkArgs += $Rest }
+    & (Join-Path $scriptDir 'context-collab-check.ps1') @checkArgs
+    exit $LASTEXITCODE
   }
   default { Die "unknown command '$Command' (try: context-collab.ps1 help)" }
 }

@@ -9,6 +9,7 @@
 # Commands:
 #   emit TYPE --session ID --agent ID --issue ID [metadata] [--body-file FILE]
 #   status [--session ID] [--issue ID]
+#   check  [--session ID] [--issue ID]   integration-readiness gate
 #
 # Metadata:
 #   --paths CSV       repo-relative paths or logical scopes
@@ -20,6 +21,7 @@
 #   --body TEXT       one-line event detail (use --body-file for reasoning)
 #
 # Event types: claim proposal assessment agreement correction handoff release
+# check validates the event trail for integration readiness.
 
 set -u
 
@@ -161,7 +163,8 @@ released() {
   _claim=$1
   for _f in "$EVENT_DIR"/*.md; do
     [ -f "$_f" ] || continue
-    [ "$(field type "$_f")" = release ] || continue
+    _type=$(field type "$_f")
+    [ "$_type" = release ] || [ "$_type" = handoff ] || continue
     _refs=$(field refs "$_f")
     case ",$_refs," in *",$_claim,"*) return 0 ;; esac
   done
@@ -230,6 +233,7 @@ CMD=${1:-}; [ $# -gt 0 ] && shift
 case "$CMD" in
   emit)   emit "$@" ;;
   status) status "$@" ;;
+  check)  sh "$SCRIPT_DIR/context-collab-check" check "$@" ;;
   ''|-h|--help|help) usage ;;
   *) die "unknown command '$CMD' (try: context-collab help)" ;;
 esac

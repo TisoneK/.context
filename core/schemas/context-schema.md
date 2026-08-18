@@ -62,8 +62,10 @@ core/
 ├── bin/
 │   ├── context-sync     # POSIX-sh: status / verify / update / rollback / bootstrap
 │   ├── context-sync.ps1   # PowerShell port (Windows): status / verify / update / rollback / lock
-│   ├── context-collab     # POSIX-sh: atomic collaboration events + status
-│   └── context-collab.ps1 # PowerShell port (Windows): emit + status
+│   ├── context-collab       # POSIX-sh: atomic collaboration events + status + check
+│   ├── context-collab.ps1   # PowerShell port (Windows): emit + status + check
+│   ├── context-collab-check # POSIX integration-readiness validator
+│   └── context-collab-check.ps1 # PowerShell integration-readiness validator
 ├── rules/
 │   ├── ai-engineering-protocol-local.md   # LOCAL agents' edition
 │   └── ai-engineering-protocol.md         # CLOUD/SANDBOX agents' edition
@@ -166,7 +168,8 @@ likely cause, candidate repairs, and suggested owner; peers agree on the
 repair and owner before it is applied. There is no timestamp or agent-ID
 tie-breaker. If evidence remains tied, pause the conflicting work and ask
 the user. Use `.context/core/bin/context-collab` to emit events and inspect
-status; event commits remain separate from product commits.
+status; run `context-collab check` before integration. Event commits remain
+separate from product commits.
 
 `tasks/current.md` remains the single-agent lock when collaboration is not
 enabled. In collaboration mode it is not a lock and must not be used to

@@ -10,6 +10,25 @@ bump MINOR; wording and fixes bump PATCH.
 
 ---
 
+## 0.7.0 — 2026-08-17
+
+**Collaboration integration-readiness checks.** The collaboration helper
+now provides a mechanical gate before product branches are integrated.
+
+- **`context-collab check`:** validates required event metadata, event ID
+  uniqueness, resolvable same-session/same-issue references, complete agreements,
+  selected options, peer participants, owners, active claim overlaps,
+  unresolved proposals/assessments/corrections/handoffs, and product
+  commit references on releases.
+- **PowerShell parity:** `context-collab.ps1 check` delegates to the
+  PowerShell validator with the same checks and exit-code contract.
+- **Operational split:** `status` remains the live-work view; `check` is
+  the integration-readiness gate and fails when the event trail is not
+  complete.
+
+**Migration from 0.6.x:** none. Existing event trails remain readable;
+projects gain the check helpers on their next core update.
+
 ## 0.6.0 — 2026-08-17
 
 **Peer collaboration for concurrent and shared-issue sessions.** The
