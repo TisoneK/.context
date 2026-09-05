@@ -67,7 +67,9 @@ core/
 │   ├── context-collab-check # POSIX integration-readiness validator
 │   ├── context-collab-check.ps1 # PowerShell integration-readiness validator
 │   ├── context-gates        # POSIX lifecycle gates + checkpoint
-│   └── context-gates.ps1    # PowerShell lifecycle gates + checkpoint
+│   ├── context-gates.ps1    # PowerShell lifecycle gates + checkpoint
+│   ├── context-mem          # POSIX: duplicate-key check for update-in-place registries
+│   └── context-mem.ps1      # PowerShell port: same registry hygiene check
 ├── rules/
 │   ├── ai-engineering-protocol-local.md   # LOCAL agents' edition
 │   └── ai-engineering-protocol.md         # CLOUD/SANDBOX agents' edition
@@ -101,8 +103,14 @@ File inventory, write modes, and scopes. **Write modes:**
   duplicate entries may be removed, leaving a one-line note in place.
 - **overwrite** — current-state only; replace the content, history
   lives in the append-only logs.
-- **update-in-place** — structured records updated where they stand
-  (a row, a block, a bullet); never wholesale replaced.
+- **update-in-place** — structured records with one entry per key,
+  updated where they stand (a row, a block, a bullet); never wholesale
+  replaced. **This is the opposite of append-only: you correct an entry by
+  editing it, not by appending a second one.** The prior value survives in
+  git history, so editing loses nothing. Appending a duplicate for a key
+  that already exists is the failure mode (two rows, conflicting counts);
+  `context-mem check` flags it. Keys: `ai-models.md` = (Agent, Model),
+  `environments.md` = the "Identify by:" line.
 - **generated** — created from a `core/templates/` file at bootstrap,
   then maintained as data (facts updated in place; regenerated only
   when the template materially changes).

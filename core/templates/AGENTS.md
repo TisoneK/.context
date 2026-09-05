@@ -47,11 +47,15 @@ If you read nothing else, obey these rules:
    Before each next action run `context-gates checkpoint`; before commits,
    integration, and exit run the matching gate. On Windows, use the `.ps1`
    ports.
-6. **Append-only files are append-only:** `agents/sessions.md`,
-   `tasks/backlog.md`, `plans/decisions.md`, `flaws/log.md`,
-   `inefficiencies/log.md`. Add at the bottom; never edit or delete
-   past entries. Collaboration event files are stronger: immutable,
-   one event per file; emit a correction instead of editing one.
+6. **Know which kind of file you're in.** *Append-only* logs
+   (`agents/sessions.md`, `tasks/backlog.md`, `plans/decisions.md`,
+   `flaws/log.md`, `inefficiencies/log.md`) grow at the bottom — never edit
+   or delete past entries. *Update-in-place* registries
+   (`system/ai-models.md`, `system/environments.md`) have one entry per key:
+   correct them by **editing** the entry, never by appending a duplicate
+   (its old value is in git history). `context-mem check` flags a dup key.
+   Collaboration event files are stronger still: immutable, one event per
+   file; emit a correction instead of editing one.
 7. **No secrets in tracked files, ever.** Values go only in
    `.context/memory/secrets/` (self-gitignored). Never echo a secret or
    token in chat, logs, or commit messages.

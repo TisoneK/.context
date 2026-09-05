@@ -37,7 +37,7 @@ model, and what went wrong before.
 1. **Read `.context/` before touching anything; update it before ending.** (Steps 3, 15–17)
 2. **Two zones under `.context/`:** `core/` is the vendored protocol — **read-only, never write one byte there** (it updates only as a whole tree via `core/bin/context-sync`); `memory/` is this project's writable memory. Nothing needs to be cloned or fetched to run a session — the protocol travels inside the repo.
 3. **Two surfaces, never one commit:** project code and `.context/` memory are staged and committed separately — `git add .context/` for memory, explicit paths for project. Never `git add -A` with both dirty.
-4. **Append-only logs only grow.** Before committing one, its `git diff` must show no removed lines.
+4. **Know which kind of memory file you're in.** *Append-only* logs (`sessions.md`, `inefficiencies/log.md`, `backlog.md`, `decisions.md`, `flaws/log.md`) only grow — before committing one, its `git diff` shows no removed lines. *Update-in-place* registries (`system/ai-models.md`, `system/environments.md`) hold one entry per key — **correct them by editing the entry, never by appending a duplicate row/block** (the old value is safe in git history). Appending to an update-in-place file is the same mistake as editing an append-only one. `context-mem check` catches a duplicated key.
 5. **No secret values in any tracked file** — including inside recorded commands.
 6. **Commit each logical change, push after each commit, ask permission for neither.** (Pitfall #30)
 7. **A missing input only the user can supply — ask for it up front, not after the failure.** (Pitfall #34)
@@ -481,7 +481,7 @@ git push origin main  # uses the user's existing credentials
 
 **Step 16 — Update `.context/memory/system/` + `.context/memory/user/` + `.context/memory/plans/`**
 - `.context/memory/system/environments.md`: add/update the block for this machine (OS + version, runtime versions, package manager, anything machine-specific the next agent should know — e.g., "no psql installed", "port 3000 usually taken"). Refresh its last-verified date and record the commands you verified work (install / test / lint / dev).
-- `.context/memory/system/ai-models.md`: add/update your row — agent name, model, first/last seen dates, sessions count. Add an Observations bullet for any concrete capability or limit this session demonstrated (yours or a prior agent's).
+- `.context/memory/system/ai-models.md`: update the row for your **(agent, model)** — bump the sessions count and last-seen date. If a row for your pair already exists, **edit it in place; do not add a second row** (a new row is only for a genuinely new agent+model pair). Add an Observations bullet for any concrete capability or limit this session demonstrated (yours or a prior agent's). Then run `sh .context/core/bin/context-mem check` (Windows: `pwsh -File .context/core/bin/context-mem.ps1 check`) — it fails if a registry has a duplicated key.
 - `.context/memory/user/preferences.md`: record every standing preference this session revealed — corrections the user gave, patterns they approved, things they stated — with provenance + date, per the file's learning rules. One-off instructions don't count. Skip if none.
 - `.context/memory/plans/decisions.md`: append an ADR-style entry for every architectural decision made or confirmed this session (context → decision → consequences). Skip if none.
 

@@ -10,7 +10,31 @@ bump MINOR; wording and fixes bump PATCH.
 
 ---
 
----
+## 0.10.0 — 2026-09-05
+
+**Update-in-place registries stop duplicating.** `system/ai-models.md` and
+`system/environments.md` are update-in-place (one entry per key), but the
+append-only invariant is stated so loudly that agents apply it here too and
+*append* a corrected entry instead of editing the existing one — so a
+registry accumulates two rows for one key with conflicting counts (observed
+in the fleet: one agent+model registered three times, sessions 8/10/30).
+
+- **`context-mem` + `context-mem.ps1`:** a new helper. `context-mem check`
+  flags a duplicated key in the update-in-place registries —
+  `ai-models.md` keyed by (Agent, Model), `environments.md` by its
+  "Identify by:" line. It is the inverse of the append-only rule: for these
+  files, a *second* entry for an existing key is the defect. Different
+  models for one agent are separate rows (expected), not duplicates.
+- **The distinction is now stated as loudly as append-only.** Both protocol
+  editions' top rules, the `AGENTS.md` digest, the `ai-models.md` header,
+  and the schema now say: correct an update-in-place entry by *editing* it,
+  never by appending a duplicate — the prior value is safe in git history,
+  so editing loses nothing. The exit step runs `context-mem check`.
+
+**Migration from 0.9.x:** none — additive helper + wording. Existing
+registries that already have a duplicated key will fail `context-mem check`;
+merge the rows/blocks into one (sessions accumulate) and the old values
+remain in git history.
 
 ## 0.9.1 — 2026-09-05
 

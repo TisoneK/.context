@@ -1,0 +1,113 @@
+#!/bin/sh
+# context-mem — hygiene checks for the update-in-place memory registries.
+#
+# Update-in-place files hold ONE entry per key: you correct an entry by
+# editing its row/block, never by appending a second one — its prior value
+# already lives in git history, so nothing is lost. This is the opposite of
+# the append-only logs (sessions/inefficiencies/backlog/decisions/flaws),
+# where you never edit and only append. Agents reach for the loud append-only
+# reflex on these files too and append a duplicate instead of updating, which
+# is how a registry ends up with two rows for one key and conflicting counts.
+#
+# check  flags duplicate keys in the update-in-place registries:
+#   system/ai-models.md    key = (Agent, Model)          — one row per pair
+#   system/environments.md key = the "Identify by:" line  — one block per env
+#
+# Exit codes: 0 clean · 1 duplicate key found · 2 usage/error
+
+set -u
+
+say() { printf '%s\n' "$*"; }
+err() { printf 'context-mem: %s\n' "$*" >&2; }
+die() { err "$*"; exit 2; }
+
+SCRIPT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd) || exit 2
+CORE_DIR=$(CDPATH= cd -- "$SCRIPT_DIR/.." && pwd) || exit 2
+CONTEXT_DIR=$(dirname -- "$CORE_DIR")
+MEMORY_DIR=$CONTEXT_DIR/memory
+
+usage() {
+  sed -n '11,18p' "$0" | sed 's/^# \{0,1\}//'
+  say ""
+  say "Usage: context-mem check"
+  exit 2
+}
+
+# ai-models registry: a row is | Agent | Model | YYYY-MM-DD | YYYY-MM-DD | N |
+# Filtering on the date+count shape ignores the header, the separator, and any
+# illustrative tables in the Observations section — only real registry rows.
+check_ai_models() {
+  _f=$MEMORY_DIR/system/ai-models.md
+  [ -f "$_f" ] || return 0
+  awk '
+    /^[[:space:]]*\|/ {
+      n = split($0, c, "|")
+      if (n < 6) next
+      a = c[2]; m = c[3]; f = c[4]; l = c[5]; s = c[6]
+      gsub(/^[[:space:]]+|[[:space:]]+$/, "", a); gsub(/^[[:space:]]+|[[:space:]]+$/, "", m)
+      gsub(/^[[:space:]]+|[[:space:]]+$/, "", f); gsub(/^[[:space:]]+|[[:space:]]+$/, "", l)
+      gsub(/^[[:space:]]+|[[:space:]]+$/, "", s)
+      if (f ~ /^[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]$/ &&
+          l ~ /^[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]$/ &&
+          s ~ /^[0-9]+$/) {
+        key = a "\t" m
+        seen[key]++
+        where[key] = where[key] " " FNR
+      }
+    }
+    END {
+      d = 0
+      for (k in seen) if (seen[k] > 1) {
+        split(k, kk, "\t")
+        printf "DUP ai-models.md: %d rows for agent=\"%s\" model=\"%s\" (lines%s) — merge into one row; sessions accumulate, old values are in git history\n", seen[k], kk[1], kk[2], where[k] | "cat 1>&2"
+        d++
+      }
+      exit (d > 0) ? 1 : 0
+    }
+  ' "$_f"
+}
+
+# environments registry: one block per env, keyed by the "Identify by:" line.
+check_environments() {
+  _f=$MEMORY_DIR/system/environments.md
+  [ -f "$_f" ] || return 0
+  awk '
+    /^[[:space:]]*-[[:space:]]*\*\*Identify by:\*\*/ {
+      v = $0
+      sub(/^[[:space:]]*-[[:space:]]*\*\*Identify by:\*\*[[:space:]]*/, "", v)
+      gsub(/^[[:space:]]+|[[:space:]]+$/, "", v)
+      if (v == "" || v ~ /^</) next   # skip the empty template placeholder
+      seen[v]++
+      where[v] = where[v] " " FNR
+    }
+    END {
+      d = 0
+      for (k in seen) if (seen[k] > 1) {
+        printf "DUP environments.md: %d blocks with Identify by=\"%s\" (lines%s) — merge into one block; keep the latest facts, old ones are in git history\n", seen[k], k, where[k] | "cat 1>&2"
+        d++
+      }
+      exit (d > 0) ? 1 : 0
+    }
+  ' "$_f"
+}
+
+check() {
+  [ $# -eq 0 ] || { case "$1" in -h|--help) usage ;; *) die "unknown argument '$1'" ;; esac; }
+  [ -d "$MEMORY_DIR" ] || { say "context-mem: no memory dir (nothing to check)"; return 0; }
+  _rc=0
+  check_ai_models || _rc=1
+  check_environments || _rc=1
+  if [ "$_rc" -eq 0 ]; then
+    say "memory check passed: no duplicate keys in the update-in-place registries"
+  else
+    err "memory check failed: a registry has more than one entry for a key — correct in place (edit the entry), do not append a duplicate"
+  fi
+  return "$_rc"
+}
+
+CMD=${1:-}; [ $# -gt 0 ] && shift
+case "$CMD" in
+  check) check "$@" ;;
+  ''|-h|--help|help) usage ;;
+  *) die "unknown command '$CMD' (try: context-mem help)" ;;
+esac
