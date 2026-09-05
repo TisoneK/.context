@@ -1,5 +1,5 @@
 #!/usr/bin/env pwsh
-# context-collab.ps1 — PowerShell peer coordination helper.
+# context-collab.ps1 -- PowerShell peer coordination helper.
 #
 # Coordination state is immutable, one-file-per-event under
 # .context/memory/collaboration/events/. Product changes still belong on an
@@ -35,7 +35,7 @@ function Usage {
     '          --participants CSV --to CSV (note recipients) --body TEXT --body-file FILE',
     '',
     'Event types: note claim proposal assessment agreement correction handoff release',
-    '  note — the office channel: an informal heads-up to peers. Only a body',
+    '  note -- the office channel: an informal heads-up to peers. Only a body',
     '         is required; never gates integration. The proposal/assessment/',
     '         agreement ceremony is reserved for a genuine conflict.'
   ) | ForEach-Object { Say $_ }
@@ -59,22 +59,25 @@ function Validate-Id { param([string]$Name, [string]$Value)
 function Metadata { param([string]$Name, [string]$Value)
   if ($Value -eq '') { return 'none' } else { return $Value }
 }
-function Parse-Options { param([string[]]$Args)
+# NOTE: never name a PowerShell parameter $Args - it collides with the
+# automatic variable of the same name, and flag tokens (--session ...)
+# are silently lost before the loop ever sees them.
+function Parse-Options { param([string[]]$OptArgs)
   $result = @{
     session = ''; agent = ''; issue = ''; paths = 'none'; refs = 'none'; option = 'none'
     selected = 'none'; owner = 'none'; participants = 'none'; body = ''; bodyFile = ''
   }
-  for ($i = 0; $i -lt $Args.Count; $i++) {
-    $key = $Args[$i]
+  for ($i = 0; $i -lt $OptArgs.Count; $i++) {
+    $key = $OptArgs[$i]
     if ($key -in @('--session','--agent','--issue','--paths','--refs','--re','--option','--selected','--owner','--participants','--to','--body','--body-file')) {
-      if ($i + 1 -ge $Args.Count) { Die "$key needs a value" }
+      if ($i + 1 -ge $OptArgs.Count) { Die "$key needs a value" }
       $name = switch ($key) {
         '--body-file' { 'bodyFile' }
         '--re' { 'refs' }        # informal alias, mainly for notes
         '--to' { 'participants' } # a note's addressed peer(s)
         default { $key.Substring(2) }
       }
-      $result[$name] = $Args[$i + 1]; $i++
+      $result[$name] = $OptArgs[$i + 1]; $i++
     } elseif ($key -in @('-h','--help')) { Usage }
     else { Die "unknown argument '$key'" }
   }
@@ -96,11 +99,11 @@ function Get-FirstBodyLine { param([IO.FileInfo]$File)
   return ''
 }
 
-function Emit { param([string]$EventType, [string[]]$Args)
+function Emit { param([string]$EventType, [string[]]$EventArgs)
   if ($EventType -notin @('note','claim','proposal','assessment','agreement','correction','handoff','release')) {
     Die "unknown event type '$EventType'"
   }
-  $o = Parse-Options $Args
+  $o = Parse-Options $EventArgs
   Validate-Id 'session' $o.session; Validate-Id 'agent' $o.agent; Validate-Id 'issue' $o.issue
   Validate-Value 'paths' $o.paths; Validate-Value 'refs' $o.refs; Validate-Id 'option' $o.option
   Validate-Id 'selected' $o.selected; Validate-Id 'owner' $o.owner; Validate-Value 'participants' $o.participants
@@ -119,7 +122,7 @@ function Emit { param([string]$EventType, [string[]]$Args)
     $body = Get-Content -LiteralPath $o.bodyFile -Raw
   } elseif ($o.body) { $body = $o.body }
   elseif ($EventType -eq 'claim') { $body = 'Intent and evidence: describe the intended change and why this scope is safe.' }
-  elseif ($EventType -eq 'note') { Die 'note requires --body or --body-file — say what you want your peers to know' }
+  elseif ($EventType -eq 'note') { Die 'note requires --body or --body-file -- say what you want your peers to know' }
   else { Die "$EventType requires --body-file or --body with evidence and reasoning" }
 
   New-Item -ItemType Directory -Path $eventDir -Force | Out-Null
@@ -139,7 +142,7 @@ function Emit { param([string]$EventType, [string[]]$Args)
   Move-Item -LiteralPath $temp -Destination $target
   Say "created collaboration event: .context/memory/collaboration/events/$id.md"
   if ($EventType -eq 'note') {
-    Say 'publish it in a chore(context): commit so your peers see it — a note carries no obligation'
+    Say 'publish it in a chore(context): commit so your peers see it -- a note carries no obligation'
   } else {
     Say 'publish it in a separate chore(context): commit before changing the claimed product scope'
   }
@@ -165,8 +168,8 @@ function Overlap { param([string]$Left, [string]$Right)
   foreach ($a in $l) { foreach ($b in $r) { if ($a -ne 'none' -and $a -eq $b) { return $true } } }
   return $false
 }
-function Status { param([string[]]$Args)
-  $o = Parse-Options $Args
+function Status { param([string[]]$StatusArgs)
+  $o = Parse-Options $StatusArgs
   $files = @(Get-ChildItem -LiteralPath $eventDir -Filter '*.md' -File -ErrorAction SilentlyContinue)
   if ($files.Count -eq 0) { Say 'no collaboration events yet'; return }
   $files = @($files | Where-Object {
@@ -175,24 +178,24 @@ function Status { param([string[]]$Args)
   })
   Say "Collaboration events$(if ($o.session) { " for session $($o.session)" })$(if ($o.issue) { " / issue $($o.issue)" }):"
   foreach ($file in $files) {
-    Say "- $(Get-Field $file 'type') $(Get-Field $file 'id') — agent=$(Get-Field $file 'agent') paths=$(Get-Field $file 'paths') refs=$(Get-Field $file 'refs')"
+    Say "- $(Get-Field $file 'type') $(Get-Field $file 'id') -- agent=$(Get-Field $file 'agent') paths=$(Get-Field $file 'paths') refs=$(Get-Field $file 'refs')"
   }
   Say ''; Say 'Active claims and possible overlaps:'
   $claims = @($files | Where-Object { (Get-Field $_ 'type') -eq 'claim' -and -not (Is-Released $_ $files) })
   for ($a = 0; $a -lt $claims.Count; $a++) {
     $left = $claims[$a]
-    Say "- $(Get-Field $left 'id') — agent=$(Get-Field $left 'agent') paths=$(Get-Field $left 'paths')"
+    Say "- $(Get-Field $left 'id') -- agent=$(Get-Field $left 'agent') paths=$(Get-Field $left 'paths')"
     for ($b = $a + 1; $b -lt $claims.Count; $b++) {
       $right = $claims[$b]
       if ((Get-Field $left 'session') -eq (Get-Field $right 'session') -and (Get-Field $left 'issue') -eq (Get-Field $right 'issue') -and (Overlap (Get-Field $left 'paths') (Get-Field $right 'paths'))) {
-        Say "  POSSIBLE OVERLAP with $(Get-Field $right 'id') — talk it through (a note), compare the two changes, and agree who takes it"
+        Say "  POSSIBLE OVERLAP with $(Get-Field $right 'id') -- talk it through (a note), compare the two changes, and agree who takes it"
       }
     }
   }
-  Say ''; Say 'Recent chatter (notes) — read these first to catch up, like a team channel:'
+  Say ''; Say 'Recent chatter (notes) -- read these first to catch up, like a team channel:'
   $notes = @($files | Where-Object { (Get-Field $_ 'type') -eq 'note' })
   if ($notes.Count -eq 0) {
-    Say "  (none yet — a quick 'note' is how you say what you're on or flag something to a peer)"
+    Say "  (none yet -- a quick 'note' is how you say what you're on or flag something to a peer)"
   } else {
     foreach ($n in $notes) {
       $to = Get-Field $n 'participants'; if ($to -eq 'none') { $to = '' }
@@ -204,7 +207,7 @@ function Status { param([string[]]$Args)
   }
   Say ''
   Say 'A genuine conflict (same paths, incompatible changes) escalates to proposal -> assessment -> agreement.'
-  Say "Everything else is a note plus your own claim/release — you're on the same team, not bidding against each other."
+  Say "Everything else is a note plus your own claim/release -- you're on the same team, not bidding against each other."
 }
 
 if ($Command -in @('', '-h', '--help', 'help')) { Usage }
@@ -224,8 +227,13 @@ switch ($Command) {
     $checkArgs = @()
     if ($Type) { $checkArgs += $Type }
     if ($null -ne $Rest) { $checkArgs += $Rest }
+    # A child .ps1's `exit N` does not reliably set $LASTEXITCODE on every
+    # host (reading it unset trips StrictMode), so pre-seed it and fall
+    # back to the child's success status.
+    $global:LASTEXITCODE = $null
     & (Join-Path $scriptDir 'context-collab-check.ps1') @checkArgs
-    exit $LASTEXITCODE
+    if ($null -ne $LASTEXITCODE) { exit $LASTEXITCODE }
+    if ($?) { exit 0 } else { exit 1 }
   }
   default { Die "unknown command '$Command' (try: context-collab.ps1 help)" }
 }

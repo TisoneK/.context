@@ -1,5 +1,5 @@
 #!/usr/bin/env pwsh
-# context-collab-check.ps1 — Windows integration-readiness validator.
+# context-collab-check.ps1 -- Windows integration-readiness validator.
 
 [CmdletBinding()]
 param(
@@ -20,7 +20,7 @@ function Usage {
     'Notes (type: note) are informal and never gate integration.',
     'A claim counts as closed when a later release/handoff cites its event ID OR',
     'shares its session+issue and overlaps its paths (weak-agent / SHA-only case).',
-    'Exit codes: 0 passed · 1 validation failure · 2 usage/error'
+    'Exit codes: 0 passed | 1 validation failure | 2 usage/error'
   ) | ForEach-Object { Say $_ }
   exit 2
 }
@@ -144,7 +144,7 @@ function Check-Event { param([IO.FileInfo]$File)
   if ($type -notin @('note','claim','proposal','assessment','agreement','correction','handoff','release')) {
     Fail "$($File.Name) has unknown type '$type'"; return
   }
-  # Notes are informal — their --re may be a path, URL, event, or commit, so
+  # Notes are informal -- their --re may be a path, URL, event, or commit, so
   # they are exempt from reference validation (and carry no requirements).
   if ($type -ne 'note') {
     foreach ($ref in (Refs $File)) {
@@ -211,7 +211,7 @@ function Check-Overlaps {
       if ((Get-Field $claims[$i] 'session') -eq (Get-Field $claims[$j] 'session') -and
           (Get-Field $claims[$i] 'issue') -eq (Get-Field $claims[$j] 'issue') -and
           (Overlap (Get-Field $claims[$i] 'paths') (Get-Field $claims[$j] 'paths'))) {
-        Fail "active claims overlap: $(Get-Field $claims[$i] 'id') and $(Get-Field $claims[$j] 'id') — talk it through and agree who takes it"
+        Fail "active claims overlap: $(Get-Field $claims[$i] 'id') and $(Get-Field $claims[$j] 'id') -- talk it through and agree who takes it"
       }
     }
   }
@@ -242,8 +242,8 @@ for ($i = 0; $i -lt $args.Count; $i++) {
 if ($script:Session -and -not (Valid-Id $script:Session)) { Die "invalid session id: $($script:Session)" }
 if ($script:Issue -and -not (Valid-Id $script:Issue)) { Die "invalid issue id: $($script:Issue)" }
 
-$script:Files = @(Get-ChildItem -LiteralPath $eventDir -Filter '*.md' -File -ErrorAction SilentlyContinue)
-if ($script:Files.Count -eq 0) { Say 'collaboration check: no events (nothing to check)'; exit 0 }
+$script:Files = @(Get-ChildItem -LiteralPath $eventDir -Filter '*.md' -File -ErrorAction SilentlyContinue | Where-Object { $_ })
+if (-not $script:Files -or $script:Files.Count -eq 0) { Say 'collaboration check: no events (nothing to check)'; exit 0 }
 $script:Failures = 0
 foreach ($file in $script:Files) { Check-Event $file }
 Check-Duplicates

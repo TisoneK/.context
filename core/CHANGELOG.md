@@ -10,6 +10,86 @@ bump MINOR; wording and fixes bump PATCH.
 
 ---
 
+---
+
+## 0.9.1 — 2026-09-05
+
+**Windows verified on Windows.** 0.9.0 shipped the durable LF policy
+(`.gitattributes`) and the CRLF manifest-parse fix, but the verifiers still
+hashed raw on-disk bytes — so any CRLF copy of the core (a project checked
+out under `core.autocrlf=true` before the `.gitattributes` existed, or files
+copied outside git, where the attribute never reaches) still failed every
+hash and reported CORE INTEGRITY FAILURE. Worse, the advised remediation
+(`rollback`) re-restored CRLF bytes on those targets — an unfixable loop —
+and on the sh side a CRLF `memory/core.lock` poisoned the version lookup so
+rollback died with "no commit in history has core VERSION". This release
+was written and validated on Windows (Git Bash + PowerShell 7.6 + Windows
+PowerShell 5.1), closing the validation pass 0.9.0 owed.
+
+- **`verify` hashes CR-stripped content** (both sh and PowerShell). One
+  manifest stays byte-compatible across LF checkouts and CRLF copies:
+  LF-only files hash identically, so `MANIFEST.sha256` values are unchanged
+  and 0.9.1 verifiers validate 0.9.0 cores and vice versa. A CRLF copy now
+  verifies clean instead of reporting 46 false integrity failures.
+- **`update` / `bootstrap` normalize the staged copy to LF in place**
+  (sh `normalize_lf`; PowerShell `Convert-ToLf`), so a core vendored or
+  updated from a CRLF source is byte-identical to its manifest on disk —
+  no renormalize dance needed afterward. `bootstrap` normalizes the memory
+  skeleton too.
+- **PowerShell `rollback` rewrites the restored core to LF**, so a rollback
+  under `core.autocrlf=true` verifies afterward instead of looping.
+- **`lock_version` tolerates a CRLF `core.lock`** (sh), fixing the
+  rollback dead-end above.
+- **PowerShell `update` parity with sh:** installs `.context/.gitattributes`
+  and the root `CLAUDE.md` pointer when absent — and `update` now installs
+  them on *every* run, including a no-op, so a 0.8.x project's second
+  `update` (after the new core has landed) picks them up (0.9.0 taught
+  only the sh script; Windows agents run the `.ps1`).
+- **Gate results propagate again.** Two independent bugs silently turned
+  every gate failure into a pass. PowerShell: `Run-One`'s log lines went
+  through the return pipeline, so `if (-not (Run-One ...))` compared an
+  array — and `-not` on a non-empty array is always `$false`. sh:
+  `run_explicit` and `run_discovered` reset the caller's `_failed` counter
+  (functions have no locals in sh). Gate logs now go to the host stream
+  and the sh helpers use distinct failure counters. Also: a cmdlet-only
+  gate command no longer inherits a stale `$LASTEXITCODE`, a thrown
+  script error fails the gate instead of crashing it, and child `.ps1`
+  invocations pre-seed `$LASTEXITCODE` (a child script's `exit N` does
+  not reliably set it on every host, and reading it unset trips
+  StrictMode).
+- **PowerShell argument parsing works again.** Parameters named `$Args`
+  collide with the automatic variable of the same name, so every
+  `--session/--issue/--paths/...` flag was silently lost in
+  `context-collab.ps1` (status filters matched everything) and
+  `context-gates.ps1` (checkpoint and integration scopes no-oped).
+  Renamed throughout. A missing collaboration events directory no longer
+  crashes `context-collab-check.ps1` under StrictMode.
+- **`manifest` regenerates identically on Windows.** `sha256sum` under Git
+  Bash defaults to the binary-mode separator (`hash *path`), so a
+  Windows-regenerated manifest churned all 46 lines vs a mac `shasum`
+  regen; `cmd_manifest` now forces the text-mode separator (`-t`). The
+  parsers already accept both.
+
+**Migration from 0.9.0:** none — verify both ways, no manifest or memory
+changes. Projects still on a CRLF working tree no longer need the 0.9.0
+renormalize step for `verify` to pass; the `.gitattributes` LF policy
+remains the durable git-level fix and is worth committing anyway.
+
+**Upgrading a 0.8.x project on Windows:** (1) Use a git checkout of this
+package as the update source — a fresh clone, or the existing clone pulled
+to 0.9.1 and re-smudged (`rm -rf core && git checkout -- core`) if it
+predates 0.9.0. The 0.8.x verifier hashes raw bytes, so a CRLF source (a
+stale clone or a hand copy) will be refused. (2) Run the update under Git
+Bash or PowerShell 7 — the 0.8.x `.ps1` cannot be parsed by Windows
+PowerShell 5.1 (its UTF-8 punctuation breaks 5.1's ANSI decoding; the
+0.9.1 `.ps1` files are ASCII-clean). (3) Run `update` a second time after
+it lands: the first run executes the old script and swaps in 0.9.1, the
+second (no-op) run is the one that installs `.context/.gitattributes` and
+the root `CLAUDE.md` pointer. (4) Commit `chore(context): update core to
+0.9.1`, and `git add --renormalize .` if the project ever committed CRLF
+blobs. Once 0.9.1 is in place, `verify` passes on LF and CRLF working
+trees alike, so the rollback deadlock cannot recur.
+
 ## 0.9.0 — 2026-09-05
 
 **Collaboration that feels like coworkers.** Peer collaboration was

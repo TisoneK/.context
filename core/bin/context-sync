@@ -95,19 +95,45 @@ find_source() { # echoes a core dir, or nothing. $1 = optional explicit source
 
 verify_tree() { # $1 = a core dir; returns 0 clean, 3 mismatch
   [ -f "$1/MANIFEST.sha256" ] || { err "no MANIFEST.sha256 in $1"; return 3; }
-  # On a CRLF checkout (Windows core.autocrlf=true) every manifest line carries
-  # a trailing '\r', so --check looks for 'bin/…\r' and dies "No such file"
-  # before it can report a real result. Check against a CR-stripped copy kept
-  # outside the tree. (Content-byte mismatches from CRLF files still surface as
-  # honest FAILs — the durable fix is .gitattributes eol=lf + git renormalize.)
+  _sha=$(sha_cmd); [ -n "$_sha" ] || return 3
+  # Hash the CR-stripped content of each file against the manifest. One
+  # manifest stays byte-compatible across LF checkouts (macOS/Linux) and CRLF
+  # copies (files copied outside git on Windows, where .gitattributes does not
+  # reach); LF-only files hash identically, so manifest values never change.
+  # The manifest itself is CR-stripped before parsing (B-2026-08-30-17).
   _mf=$(mktemp 2>/dev/null) || _mf="$1/.MANIFEST.lf.$$"
-  tr -d '\r' < "$1/MANIFEST.sha256" > "$_mf" 2>/dev/null || { cp "$1/MANIFEST.sha256" "$_mf"; }
-  if ( cd "$1" && $(sha_cmd) --check --status "$_mf" ); then
-    rm -f "$_mf"; return 0
-  fi
-  ( cd "$1" && $(sha_cmd) --check "$_mf" 2>&1 | grep -v ': OK$' | head -n 20 ) >&2
+  tr -d '\r' < "$1/MANIFEST.sha256" > "$_mf" 2>/dev/null || cp "$1/MANIFEST.sha256" "$_mf"
+  _rc=0; _shown=0
+  while read -r _h _rest || [ -n "${_h:-}" ]; do
+    [ -n "${_h:-}" ] || continue
+    case $_h in '#'*) continue ;; esac
+    _p=${_rest#\*}
+    if [ ! -f "$1/$_p" ]; then
+      echo "$_p: FAILED open or read" >&2
+      _rc=3; continue
+    fi
+    _got=$(tr -d '\r' < "$1/$_p" | $_sha | awk '{print $1}')
+    if [ "$_got" != "$_h" ]; then
+      [ "$_shown" -lt 20 ] && echo "$_p: FAILED" >&2
+      _shown=$((_shown + 1))
+      _rc=3
+    fi
+  done < "$_mf"
   rm -f "$_mf"
-  return 3
+  return $_rc
+}
+
+# rewrite every file under each $1... to LF in place (cat > keeps each file's
+# inode and mode). update/bootstrap run this on the staged copy so the
+# vendored core is byte-identical to its manifest no matter what line endings
+# the source checkout had.
+normalize_lf() {
+  for _dir in "$@"; do
+    find "$_dir" -type f -exec sh -c '
+      for f do
+        tr -d "\r" < "$f" > "$f.lf" && cat "$f.lf" > "$f" && rm -f "$f.lf"
+      done' _ {} +
+  done
 }
 
 write_lock() { # $1 = version
@@ -124,7 +150,9 @@ write_lock() { # $1 = version
 
 lock_version() {
   [ -f "$MEMORY_DIR/core.lock" ] || { echo ""; return; }
-  sed -n 's/^version=//p' "$MEMORY_DIR/core.lock" | head -n1
+  # tr -d '\r' keeps this correct when the lock file itself arrived CRLF
+  # (template copied outside git on Windows).
+  sed -n 's/^version=//p' "$MEMORY_DIR/core.lock" | head -n1 | tr -d '\r'
 }
 
 fleet_file() { echo "${CONTEXT_FLEET:-$PACKAGE_DIR/fleet.md}"; }
@@ -188,6 +216,13 @@ cmd_verify() {
 
 cmd_update() {
   need_project update
+  # refresh the core-owned root file and install the LF policy + CLAUDE.md
+  # pointer BEFORE any version logic: a 0.8.x project's first update runs the
+  # old script (which never installs these), so the post-update no-op run of
+  # the new script must still leave the project with them.
+  cp "$CORE_DIR/templates/context-README.md" "$CONTEXT_DIR/README.md" 2>/dev/null || true
+  [ -f "$CONTEXT_DIR/.gitattributes" ] || cp "$CORE_DIR/templates/.gitattributes" "$CONTEXT_DIR/.gitattributes" 2>/dev/null || true
+  [ -e "$PROJECT_DIR/CLAUDE.md" ] || cp "$CORE_DIR/templates/CLAUDE.md" "$PROJECT_DIR/CLAUDE.md" 2>/dev/null || true
   ALLOW_MAJOR=no; SRC_ARG=""
   for a in "$@"; do
     case "$a" in
@@ -209,19 +244,15 @@ cmd_update() {
   STAGE=$CONTEXT_DIR/core.new
   rm -rf "$STAGE"
   cp -R "$SRC" "$STAGE" || die "staging copy failed"
+  # rewrite the staged copy to LF so the vendored core is byte-identical to
+  # its manifest even when the source checkout was CRLF (Windows), then
+  # verify what is actually on disk.
+  normalize_lf "$STAGE"
   verify_tree "$STAGE" || { rm -rf "$STAGE"; die "staged copy fails verify — aborting, core untouched"; }
 
   # unlink-safe: this running script keeps its open inode
   rm -rf "$CORE_DIR" && mv "$STAGE" "$CORE_DIR" || die "swap failed — restore .context/core from git (git checkout -- .context/core)"
   write_lock "$SRC_V"
-  # refresh the core-owned root file
-  cp "$CORE_DIR/templates/context-README.md" "$CONTEXT_DIR/README.md" 2>/dev/null || true
-  # install/refresh the LF policy so Windows checkouts don't corrupt the
-  # manifest-hashed core or the append-only memory logs.
-  [ -f "$CONTEXT_DIR/.gitattributes" ] || cp "$CORE_DIR/templates/.gitattributes" "$CONTEXT_DIR/.gitattributes" 2>/dev/null || true
-  # install the CLAUDE.md pointer if the project never had one, so Claude
-  # Code (which auto-loads CLAUDE.md, not AGENTS.md) is routed into the protocol.
-  [ -e "$PROJECT_DIR/CLAUDE.md" ] || cp "$CORE_DIR/templates/CLAUDE.md" "$PROJECT_DIR/CLAUDE.md" 2>/dev/null || true
   say "core updated: $LOCAL_V -> $SRC_V"
   say "next: read the new entries in .context/core/CHANGELOG.md;"
   say "      if templates/kickoff.md or templates/AGENTS.md changed materially,"
@@ -253,8 +284,11 @@ cmd_manifest() {
   need_package manifest
   cd "$CORE_DIR" || exit 1
   TMP=MANIFEST.sha256.tmp
+  # -t forces the text-mode separator ("hash  path") on every platform —
+  # without it Git Bash's sha256sum emits the binary marker ("hash *path")
+  # and a Windows-regenerated manifest churns all 46 lines vs a mac regen.
   find . -type f ! -name 'MANIFEST.sha256*' ! -name '.DS_Store' | LC_ALL=C sort \
-    | sed 's|^\./||' | while IFS= read -r f; do $(sha_cmd) "$f"; done > "$TMP" \
+    | sed 's|^\./||' | while IFS= read -r f; do $(sha_cmd) -t "$f"; done > "$TMP" \
     || { rm -f "$TMP"; die "manifest generation failed"; }
   mv "$TMP" MANIFEST.sha256
   say "wrote core/MANIFEST.sha256 ($(wc -l < MANIFEST.sha256 | tr -d ' ') files, version $(core_version "$CORE_DIR"))"
@@ -272,6 +306,9 @@ cmd_bootstrap() {
   mkdir "$DEST/.context" || exit 1
   cp -R "$CORE_DIR" "$DEST/.context/core"                            || die "vendoring core failed"
   cp -R "$CORE_DIR/templates/memory" "$DEST/.context/memory"         || die "copying memory skeleton failed"
+  # byte-identical vendored core + skeleton regardless of this checkout's
+  # line endings (Windows CRLF) — verify/rollback then work out of the box.
+  normalize_lf "$DEST/.context/core" "$DEST/.context/memory"
   cp "$CORE_DIR/templates/context-README.md" "$DEST/.context/README.md"
   cp "$CORE_DIR/templates/kickoff.md" "$DEST/.context/kickoff.md"
   cp "$CORE_DIR/templates/.gitattributes" "$DEST/.context/.gitattributes" 2>/dev/null || true
