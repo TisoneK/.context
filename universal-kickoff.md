@@ -276,8 +276,9 @@ or WSL. Every *later* session command (`verify`/`status`/`update`/
 
 It vendors `core/` → `.context/core/`, copies the memory skeleton →
 `.context/memory/`, seeds `.context/README.md` + `.context/kickoff.md`
-+ root `AGENTS.md`, and writes `memory/core.lock`. Verify (Windows:
-`pwsh -File .context/core/bin/context-sync.ps1 verify`):
++ root `AGENTS.md` + root `CLAUDE.md` (a pointer so Claude Code is routed
+in) + `.context/.gitattributes` (LF policy), and writes `memory/core.lock`.
+Verify (Windows: `pwsh -File .context/core/bin/context-sync.ps1 verify`):
 
 ```bash
 sh .context/core/bin/context-sync verify
@@ -309,19 +310,22 @@ choice belongs to the agent's type at session start, never to the file.
   rules: facts you **verified on disk** (remote URL, default branch)
   beat Pre-Flight; session parameters stay out (they live in
   `workflows/active.md`); no secrets, ever.
-- **`AGENTS.md`** (project root) — fill `<PROJECT_NAME>`. Optionally
-  copy it to `CLAUDE.md` / `.github/copilot-instructions.md` if the
-  user's tools read those.
+- **`AGENTS.md`** (project root) — fill `<PROJECT_NAME>`. This is the
+  canonical digest. Bootstrap already created a root `CLAUDE.md` pointer
+  (Claude Code auto-loads it, not AGENTS.md). If the user's other tools read
+  their own entrypoint, add a one-line "read AGENTS.md first" pointer there
+  too — Copilot: `.github/copilot-instructions.md`, Cursor: `.cursor/rules`,
+  Gemini: `GEMINI.md`.
 - Placeholder scan (covers 1b too — run before committing):
   ```bash
-  grep -rn "<PROJECT_NAME>\|<PROJECT_REPO_URL>\|<GIT_NAME>\|<GIT_EMAIL>\|<LIVE_URL" .context/ AGENTS.md
+  grep -rn "<PROJECT_NAME>\|<PROJECT_REPO_URL>\|<GIT_NAME>\|<GIT_EMAIL>\|<LIVE_URL" .context/ AGENTS.md CLAUDE.md
   # Hits allowed ONLY inside HTML template comments and symbolic token forms.
   ```
 
 #### 1d. Commit and push the bootstrap
 
 ```bash
-git add .context/ AGENTS.md
+git add .context/ AGENTS.md CLAUDE.md
 git commit -m "chore(context): bootstrap .context/ (core $(cat .context/core/VERSION))
 
 Vendored protocol core + initial memory from TisoneK/.context.
@@ -398,7 +402,9 @@ the canonical version of what follows — takes over:
 
 This file is a **one-time bootloader** per project. It gets the package
 on disk once, vendors the protocol into the project, and generates the
-real entry points: `.context/kickoff.md` (the front door) and `AGENTS.md`
-(the digest for agents that auto-load root instructions). From the next
-session on, *"Read `.context/kickoff.md` and follow it"* is the entire
-kickoff — for any agent, on any machine, with no package access at all.
+real entry points: `.context/kickoff.md` (the front door), `AGENTS.md`
+(the digest for agents that auto-load root instructions), and `CLAUDE.md`
+(a pointer to AGENTS.md so Claude Code, which auto-loads CLAUDE.md, doesn't
+miss the protocol). From the next session on, *"Read `.context/kickoff.md`
+and follow it"* is the entire kickoff — for any agent, on any machine, with
+no package access at all.

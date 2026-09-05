@@ -10,6 +10,70 @@ bump MINOR; wording and fixes bump PATCH.
 
 ---
 
+## 0.9.0 — 2026-09-05
+
+**Collaboration that feels like coworkers.** Peer collaboration was
+technically working but less effective than single-agent mode: fleet
+evidence (LocalMind's 42-event trail — the only trail that ever exercised
+it) showed agents paying heavy ceremony for solo work, never once
+completing an `agreement`, and colliding on identical paths with no
+resolution. The framing primed rivalry ("competing proposals are
+expected"), the tooling reported closed claims as active forever and hung
+for minutes, and Windows CRLF corrupted the integrity system. This release
+turns the "courtroom" into an "office."
+
+- **New `note` event — the office channel.** An informal heads-up to peers:
+  a body is all it needs (optional `--to <peer>`, `--re <event|path|commit>`),
+  it never gates `check`, and it never has to be resolved. `status` opens
+  with a **Recent chatter** feed. Notes give agents the low-stakes
+  back-and-forth they lacked, so peer reviews and hand-offs stop being
+  smuggled into shared durable files.
+- **Cooperative reframing.** The README, both protocol editions, the AGENTS
+  digest, the schema, and the kickoff now frame peers as one team with one
+  goal. The light path (`note` + `claim`/`release`) is the documented
+  default; the `proposal → assessment → agreement` ceremony is the
+  escalation for a genuine conflict (same paths, incompatible changes) only.
+- **`context-collab` tells the truth.** A `release`/`handoff` now closes a
+  claim when it cites the claim's event ID **or** simply shares its
+  session+issue and overlaps its paths — so a release citing only the commit
+  SHA no longer strands its claim as "active forever" (the common,
+  weak-agent case).
+- **`context-collab check` no longer hangs.** Rewritten as a single-pass
+  in-memory index instead of re-globbing the events dir and forking
+  `sed`+`head` per field. On a 42-event trail it went from > 3.5 minutes
+  (killed) to < 0.1 s. Notes are exempt from every gate; release/handoff
+  correspondence is checked by the same forgiving claim-linkage.
+- **Windows / CRLF root fix.** New package-root `.gitattributes` and a
+  shipped `templates/.gitattributes` (installed into `.context/` by
+  `bootstrap` and `update`) force `eol=lf` on the vendored core *and* the
+  memory logs — fixing the `context-sync verify` false-positive under
+  `core.autocrlf=true`, the `sh` manifest-parse death on `\r`-suffixed
+  filenames, and the phantom whole-file diffs in append-only logs. `verify`
+  also tolerates a CRLF manifest defensively, and the "no sha256sum" error
+  now points Windows users at the `.ps1` port.
+- **`context-gates.ps1` runs again.** Fixed a PowerShell binding crash
+  (`Cannot bind parameter because parameter 'PathType' is specified more
+  than once` — two `Test-Path` calls chained by `-or` without parenthesizing
+  each) that made every gate fail on Windows.
+- **No agent starts blind.** Bootstrap (and `update`) now install a root
+  `CLAUDE.md` pointer, because Claude Code auto-loads `CLAUDE.md`, not
+  `AGENTS.md`, and a session that never reads the digest runs with zero
+  `.context/` discipline (a logged fleet failure). `CLAUDE.md` routes into
+  `AGENTS.md` + the kickoff; the bootstrap guidance and `AGENTS.md` header
+  now name the other agent entrypoints (Copilot/Cursor/Gemini) that should
+  carry the same one-line pointer. Existing `CLAUDE.md` files are never
+  overwritten.
+
+**Migration from 0.8.x:** fully compatible — the seven formal event types
+keep their exact meaning; `note` is additive. New bootstraps and `update`
+install `.context/.gitattributes`. If a project was already checked out with
+CRLF (Windows `core.autocrlf=true`), run once after updating:
+`git add --renormalize . && git commit -m "chore(context): normalize line endings to LF"`
+(or set `core.autocrlf=false` and `git checkout -- .context`). The `.ps1`
+ports could not be executed on the maintainer's Mac (no `pwsh`); they were
+updated by mirroring the POSIX behavior and are cross-checked against the
+manifest — a Windows validation pass is still owed.
+
 ## 0.8.0 — 2026-08-17
 
 **Explicit lifecycle command gates.** Agents now have mechanical,

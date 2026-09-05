@@ -1,0 +1,33 @@
+# Line-ending policy for the .context protocol package.
+#
+# The core is integrity-checked byte-for-byte against core/MANIFEST.sha256,
+# whose hashes are computed over LF bytes. If a Windows checkout with
+# core.autocrlf=true rewrites these files to CRLF, every hash mismatches and
+# the sh manifest parser dies on '\r'-suffixed filenames (B-2026-08-30-17).
+# Forcing eol=lf keeps the working tree byte-identical to the manifest on
+# every platform. PowerShell and Git Bash both read LF without issue.
+#
+# This file lives OUTSIDE core/, so it is never itself hashed by the manifest.
+
+# Everything text-ish is LF, everywhere.
+* text=auto eol=lf
+
+# Belt-and-suspenders for the integrity-critical and executable files.
+core/**            text eol=lf
+core/MANIFEST.sha256 text eol=lf
+core/bin/*         text eol=lf
+*.sh               text eol=lf
+*.ps1              text eol=lf
+*.md               text eol=lf
+*.json             text eol=lf
+*.conf             text eol=lf
+*.lock             text eol=lf
+
+# Binary assets must never be normalized.
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.gif  binary
+*.pdf  binary
+*.ico  binary
+*.db   binary

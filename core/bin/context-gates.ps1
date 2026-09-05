@@ -65,7 +65,7 @@ function Explicit-Commands { param([string]$RequestedGate)
   return $commands
 }
 function Package-Manager {
-  if (Test-Path (Join-Path $projectDir 'bun.lock') -PathType Leaf -or Test-Path (Join-Path $projectDir 'bun.lockb') -PathType Leaf) { return 'bun' }
+  if ((Test-Path (Join-Path $projectDir 'bun.lock') -PathType Leaf) -or (Test-Path (Join-Path $projectDir 'bun.lockb') -PathType Leaf)) { return 'bun' }
   if (Test-Path (Join-Path $projectDir 'pnpm-lock.yaml') -PathType Leaf) { return 'pnpm' }
   if (Test-Path (Join-Path $projectDir 'yarn.lock') -PathType Leaf) { return 'yarn' }
   if (Test-Path (Join-Path $projectDir 'package-lock.json') -PathType Leaf) { return 'npm' }
@@ -86,8 +86,8 @@ function Discovered-Commands { param([string]$RequestedGate)
                   ($RequestedGate -eq 'exit' -and $script -eq 'test'))
       if ($include -and $scripts -contains $script) { $commands += "$pm run $script" }
     }
-  } elseif (Test-Path (Join-Path $projectDir 'pyproject.toml') -PathType Leaf -or Test-Path (Join-Path $projectDir 'pytest.ini') -PathType Leaf) {
-    if ($RequestedGate -in @('pre-commit','integration','exit') -and (Test-Path (Join-Path $projectDir 'pytest.ini') -PathType Leaf -or (Select-String -Path (Join-Path $projectDir 'pyproject.toml') -Pattern 'pytest' -Quiet))) { $commands += 'python -m pytest' }
+  } elseif ((Test-Path (Join-Path $projectDir 'pyproject.toml') -PathType Leaf) -or (Test-Path (Join-Path $projectDir 'pytest.ini') -PathType Leaf)) {
+    if ($RequestedGate -in @('pre-commit','integration','exit') -and ((Test-Path (Join-Path $projectDir 'pytest.ini') -PathType Leaf) -or (Select-String -Path (Join-Path $projectDir 'pyproject.toml') -Pattern 'pytest' -Quiet))) { $commands += 'python -m pytest' }
     if ($RequestedGate -eq 'pre-commit' -and (Select-String -Path (Join-Path $projectDir 'pyproject.toml') -Pattern 'ruff' -Quiet)) { $commands += 'ruff check .' }
   }
   return $commands

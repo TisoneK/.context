@@ -9,7 +9,8 @@ doc fix, it gets captured here, not lost in chat history.
 **Status legend:** `shipped 0.2.0` (landed with the vendored-core
 release, 2026-07-14) · `shipped 0.6.0` (peer collaboration) ·
 `shipped 0.7.0` (collaboration checks) · `shipped 0.8.0` (lifecycle gates) ·
-`mvp`
+`shipped 0.9.0` (collaboration reframed as coworkers — the informal `note`
+channel, truthful/fast tooling, Windows CRLF fix) · `mvp`
 (ships in the first public release) ·
 `future` (after MVP) · `exploring` (direction agreed, design open)
 

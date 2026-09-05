@@ -53,7 +53,7 @@ fi
 sha_cmd() {
   if command -v sha256sum >/dev/null 2>&1; then echo "sha256sum"
   elif command -v shasum >/dev/null 2>&1; then echo "shasum -a 256"
-  else die "need sha256sum or shasum on PATH"; fi
+  else die "need sha256sum or shasum on PATH — on Windows without them, use the PowerShell port instead: pwsh -File .context/core/bin/context-sync.ps1 ${CMD:-verify}"; fi
 }
 
 core_version() { # $1 = a core dir
@@ -95,10 +95,18 @@ find_source() { # echoes a core dir, or nothing. $1 = optional explicit source
 
 verify_tree() { # $1 = a core dir; returns 0 clean, 3 mismatch
   [ -f "$1/MANIFEST.sha256" ] || { err "no MANIFEST.sha256 in $1"; return 3; }
-  if ( cd "$1" && $(sha_cmd) --check --status MANIFEST.sha256 ); then
-    return 0
+  # On a CRLF checkout (Windows core.autocrlf=true) every manifest line carries
+  # a trailing '\r', so --check looks for 'bin/…\r' and dies "No such file"
+  # before it can report a real result. Check against a CR-stripped copy kept
+  # outside the tree. (Content-byte mismatches from CRLF files still surface as
+  # honest FAILs — the durable fix is .gitattributes eol=lf + git renormalize.)
+  _mf=$(mktemp 2>/dev/null) || _mf="$1/.MANIFEST.lf.$$"
+  tr -d '\r' < "$1/MANIFEST.sha256" > "$_mf" 2>/dev/null || { cp "$1/MANIFEST.sha256" "$_mf"; }
+  if ( cd "$1" && $(sha_cmd) --check --status "$_mf" ); then
+    rm -f "$_mf"; return 0
   fi
-  ( cd "$1" && $(sha_cmd) --check MANIFEST.sha256 2>&1 | grep -v ': OK$' | head -n 20 ) >&2
+  ( cd "$1" && $(sha_cmd) --check "$_mf" 2>&1 | grep -v ': OK$' | head -n 20 ) >&2
+  rm -f "$_mf"
   return 3
 }
 
@@ -208,6 +216,12 @@ cmd_update() {
   write_lock "$SRC_V"
   # refresh the core-owned root file
   cp "$CORE_DIR/templates/context-README.md" "$CONTEXT_DIR/README.md" 2>/dev/null || true
+  # install/refresh the LF policy so Windows checkouts don't corrupt the
+  # manifest-hashed core or the append-only memory logs.
+  [ -f "$CONTEXT_DIR/.gitattributes" ] || cp "$CORE_DIR/templates/.gitattributes" "$CONTEXT_DIR/.gitattributes" 2>/dev/null || true
+  # install the CLAUDE.md pointer if the project never had one, so Claude
+  # Code (which auto-loads CLAUDE.md, not AGENTS.md) is routed into the protocol.
+  [ -e "$PROJECT_DIR/CLAUDE.md" ] || cp "$CORE_DIR/templates/CLAUDE.md" "$PROJECT_DIR/CLAUDE.md" 2>/dev/null || true
   say "core updated: $LOCAL_V -> $SRC_V"
   say "next: read the new entries in .context/core/CHANGELOG.md;"
   say "      if templates/kickoff.md or templates/AGENTS.md changed materially,"
@@ -260,7 +274,11 @@ cmd_bootstrap() {
   cp -R "$CORE_DIR/templates/memory" "$DEST/.context/memory"         || die "copying memory skeleton failed"
   cp "$CORE_DIR/templates/context-README.md" "$DEST/.context/README.md"
   cp "$CORE_DIR/templates/kickoff.md" "$DEST/.context/kickoff.md"
+  cp "$CORE_DIR/templates/.gitattributes" "$DEST/.context/.gitattributes" 2>/dev/null || true
   [ -e "$DEST/AGENTS.md" ] || cp "$CORE_DIR/templates/AGENTS.md" "$DEST/AGENTS.md"
+  # CLAUDE.md points Claude Code (which auto-loads it, not AGENTS.md) into
+  # the protocol. Only create it when absent — never clobber a real one.
+  [ -e "$DEST/CLAUDE.md" ] || cp "$CORE_DIR/templates/CLAUDE.md" "$DEST/CLAUDE.md"
 
   V=$(core_version "$CORE_DIR")
   {
@@ -280,12 +298,15 @@ cmd_bootstrap() {
     say "      by hand once it has one, so 'context-sync harvest' can reach it."
   fi
 
-  say "bootstrapped $DEST/.context (core $V) + AGENTS.md"
+  say "bootstrapped $DEST/.context (core $V) + AGENTS.md + CLAUDE.md"
   say "next (the bootstrapping agent does this):"
   say "  1. fill .context/kickoff.md Project Facts + AGENTS.md <PROJECT_NAME>"
   say "  2. fill memory/: user/, workflows/active.md, system/, tasks/current.md, agents/sessions.md"
   say "  3. scan: grep -rn '<PROJECT\\|<GIT_\\|<LIVE_' $DEST/.context --include='*.md' (hits only in HTML comments/token forms)"
-  say "  4. commit as: chore(context): bootstrap .context/ (core $V)  — and push"
+  say "  4. entrypoints: CLAUDE.md points Claude Code here. If the project also uses"
+  say "     Copilot/Cursor/Gemini/Codex, add a one-line 'read AGENTS.md first' pointer"
+  say "     to their entrypoint (.github/copilot-instructions.md, .cursor/rules, GEMINI.md)."
+  say "  5. commit as: chore(context): bootstrap .context/ (core $V)  — and push"
 }
 
 # resolve a fleet URL to a readable local checkout. Prefers a sibling clone

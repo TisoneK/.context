@@ -105,10 +105,12 @@ Fix the source; let the instances pull.
   permanent record is `agents/sessions.md`. Durable facts are promoted
   to their domain before disposal — permanent context must never depend
   exclusively on an individual session.
-- **Collaboration is opt-in** — concurrent agents use isolated
-  worktrees/branches and immutable one-file-per-event records under
-  `memory/collaboration/events/`. Overlapping claims are resolved by
-  evidence-based peer assessment and an agreement naming the best option
-  and one owner; corrections follow the same process for cause and fixer.
+- **Collaboration is opt-in, and peers are coworkers, not rivals** —
+  concurrent agents use isolated worktrees/branches and immutable
+  one-file-per-event records under `memory/collaboration/events/`. The
+  everyday move is an informal `note` (the office channel); the common
+  lifecycle is `note` + `claim`/`release`. Only a genuine conflict (same
+  paths, incompatible changes) escalates to evidence-based peer assessment
+  and an agreement naming the best option and one owner.
 - **Verify before trusting** — if `.context/` contradicts the codebase,
   the codebase wins; append a correction.
