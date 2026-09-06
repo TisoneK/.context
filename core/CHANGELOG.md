@@ -10,6 +10,16 @@ bump MINOR; wording and fixes bump PATCH.
 
 ---
 
+## 0.13.1 — 2026-09-06
+
+**ASCII-clean the new PowerShell ports.** `context-mem.ps1` and
+`context-history.ps1` (0.10.0–0.13.0) shipped with UTF-8 punctuation
+(em-dashes, arrows) in string literals. Windows PowerShell 5.1 decodes the
+`.ps1` as ANSI and fails to parse non-ASCII bytes — the same defect 0.9.1
+fixed for the other ports. Both files are now ASCII-only, matching the
+standing rule. POSIX ports unchanged (sh handles UTF-8). No behavior change;
+manifest regenerated.
+
 ## 0.13.0 — 2026-09-06
 
 **Session history is grouped and bounded (three-zone lifecycle).**

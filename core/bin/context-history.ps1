@@ -1,5 +1,5 @@
 #!/usr/bin/env pwsh
-# context-history.ps1 — Windows port of context-history (session-group rotation).
+# context-history.ps1 - Windows port of context-history (session-group rotation).
 #
 # Groups the session-history subtree (agents/sessions.md, sessions/SUMMARY.md,
 # sessions/<date-N>/) and rotates it memory/ -> history/ -> archive/ -> gc.
@@ -14,7 +14,7 @@
 #   gc [--confirm]         delete oldest archive/ tarballs over the cap
 #                          (git-recoverable). --confirm executes.
 #
-# Config: memory/workflows/history.conf — group_size=20, history_keep=3,
+# Config: memory/workflows/history.conf - group_size=20, history_keep=3,
 # archive_keep=12 (defaults when absent). Uses tar (Windows 10+ ships tar.exe)
 # so archives are .tar.gz, matching the POSIX port.
 
@@ -43,7 +43,7 @@ $configFile = Join-Path $memoryDir 'workflows/history.conf'
 
 function Usage {
   @(
-    'context-history — group and rotate session history',
+    'context-history - group and rotate session history',
     '  status                 current group, session count, zone sizes, due?',
     '  close [--milestone L] [--confirm]   close the live group into history/',
     '  gc [--confirm]         delete oldest archive/ tarballs over the cap',
@@ -99,7 +99,7 @@ function Pad { param([int]$N) '{0:000}' -f $N }
 function Write-GroupState { param([int]$N, [string]$Opened)
   New-Item -ItemType Directory -Path (Split-Path -Parent $groupState) -Force | Out-Null
   @(
-    '# Current session group — written by context-history. Do not hand-edit.',
+    '# Current session group - written by context-history. Do not hand-edit.',
     "group=$N",
     "opened=$Opened"
   ) -join "`n" | Set-Content -LiteralPath $groupState -NoNewline
@@ -113,9 +113,9 @@ function Reset-Registry {
     'Closed groups live in .context/history/ and .context/archive/ (not read',
     'at session start). Rotate with context-history.',
     '',
-    '<!-- TEMPLATE — copy below the last entry and FILL IN every placeholder:',
+    '<!-- TEMPLATE - copy below the last entry and FILL IN every placeholder:',
     '---',
-    '## YYYY-MM-DD — Session N',
+    '## YYYY-MM-DD - Session N',
     '- **Agent:** <name> | **Model:** <model id> | **Platform:** <machine/sandbox + OS> | **Role:** <engineer, or overlay> | **Core:** <version>',
     '- **Task:** <what this session set out to do>',
     '- **Commits:** <count> (<first-sha>..<last-sha>)',
@@ -128,7 +128,7 @@ function Reset-Registry {
 
 function Reset-Summary {
   @(
-    '# Session Summary (current group — prunable)',
+    '# Session Summary (current group - prunable)',
     '',
     'One line per session: date, agent, model, one-line outcome. Closed groups',
     'are in .context/history/. Keep this small.'
@@ -137,7 +137,7 @@ function Reset-Summary {
 
 function Show-PromotionChecklist {
   Say 'Before closing this group, confirm every open thread is captured in a'
-  Say 'DURABLE file (it will NOT carry over implicitly — the new group starts clean):'
+  Say 'DURABLE file (it will NOT carry over implicitly - the new group starts clean):'
   Say '  - open work              -> tasks/backlog.md'
   Say '  - decisions in force      -> plans/decisions.md'
   Say '  - constraints/workarounds -> inefficiencies/log.md'
@@ -163,7 +163,7 @@ function Roll-OldestHistoryToArchive {
 function Cmd-Status {
   $n = Pad (Get-GroupInt); $c = Get-SessionCount
   $gs = Get-Conf 'group_size' 20; $hk = Get-Conf 'history_keep' 3; $ak = Get-Conf 'archive_keep' 12
-  $opened = Get-GroupOpened; if (-not $opened) { $opened = '—' }
+  $opened = Get-GroupOpened; if (-not $opened) { $opened = '-' }
   Say "Current group:   group-$n (opened $opened)"
   Say "Sessions in it:  $c / $gs"
   Say "history/:        $(Count-History) closed group(s) readable (keep $hk)"
@@ -181,7 +181,7 @@ function Cmd-Close {
       default { Die "unknown argument '$($RestArgs[$i])'" }
     }
   }
-  if (-not (Test-Path -LiteralPath $sessionsMd)) { Die "no $sessionsMd — is this a bootstrapped project?" }
+  if (-not (Test-Path -LiteralPath $sessionsMd)) { Die "no $sessionsMd - is this a bootstrapped project?" }
   $int = Get-GroupInt; $n = Pad $int; $next = Pad ($int + 1)
   $c = Get-SessionCount; $opened = Get-GroupOpened; if (-not $opened) { $opened = Today }
   $target = Join-Path $historyDir "group-$n.md"
@@ -192,13 +192,13 @@ function Cmd-Close {
   Say "  - write $target (condensed registry + summaries)"
   Say "  - reset the live registry + SUMMARY for a new group-$next"
   Say '  - roll the oldest readable group into archive/ if history/ exceeds keep'
-  if (-not $confirm) { Say ''; Say 'Dry run — nothing changed. Re-run with --confirm once promotion is done.'; return }
+  if (-not $confirm) { Say ''; Say 'Dry run - nothing changed. Re-run with --confirm once promotion is done.'; return }
 
   New-Item -ItemType Directory -Path $historyDir -Force | Out-Null
   $lines = @("# Session group $n (closed $(Today))", '',
     "- Opened: $opened", "- Closed: $(Today)", "- Sessions: $c")
   if ($milestone) { $lines += "- Milestone: $milestone" }
-  $lines += @('', 'Not read at session start — audit/lookback only.', '', '## Session registry', '')
+  $lines += @('', 'Not read at session start - audit/lookback only.', '', '## Session registry', '')
   $lines += (Get-Content -LiteralPath $sessionsMd)
   if (Test-Path -LiteralPath $summaryMd) { $lines += @('', '## Summaries', ''); $lines += (Get-Content -LiteralPath $summaryMd) }
   $lines -join "`n" | Set-Content -LiteralPath $target
@@ -214,13 +214,13 @@ function Cmd-Gc {
   $confirm = ($RestArgs -contains '--confirm')
   $ak = Get-Conf 'archive_keep' 12
   $tarballs = @(Get-ChildItem -LiteralPath $archiveDir -Filter 'group-*.tar.gz' -File -ErrorAction SilentlyContinue | Sort-Object Name)
-  if ($tarballs.Count -le $ak) { Say "archive/ holds $($tarballs.Count) tarball(s), cap $ak — nothing to delete."; return }
+  if ($tarballs.Count -le $ak) { Say "archive/ holds $($tarballs.Count) tarball(s), cap $ak - nothing to delete."; return }
   $over = $tarballs.Count - $ak
   $doomed = $tarballs | Select-Object -First $over
   Say "archive/ over cap ($($tarballs.Count) > $ak). Oldest-first, $over tarball(s) to delete:"
   $doomed | ForEach-Object { Say "  - $($_.Name)" }
-  Say '(recoverable from git history after deletion — this only bounds the working tree)'
-  if (-not $confirm) { Say 'Dry run — nothing deleted. Re-run with --confirm to delete.'; return }
+  Say '(recoverable from git history after deletion - this only bounds the working tree)'
+  if (-not $confirm) { Say 'Dry run - nothing deleted. Re-run with --confirm to delete.'; return }
   $doomed | ForEach-Object { Remove-Item -LiteralPath $_.FullName -Force; Say "deleted $($_.Name)" }
   Say "Commit as: chore(context): gc archive/ to the $ak-tarball cap"
 }

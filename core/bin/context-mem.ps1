@@ -1,5 +1,5 @@
 #!/usr/bin/env pwsh
-# context-mem.ps1 — Windows port of context-mem (memory-registry hygiene).
+# context-mem.ps1 - Windows port of context-mem (memory-registry hygiene).
 #
 # Update-in-place files hold ONE entry per key: correct an entry by editing
 # its row/block, never by appending a second one (its prior value is in git
@@ -28,7 +28,7 @@ $memoryDir = Join-Path $contextDir 'memory'
 
 function Usage {
   @(
-    'context-mem — .context hygiene checks',
+    'context-mem - .context hygiene checks',
     '',
     '  check   duplicate keys in the update-in-place registries',
     '          (ai-models.md by Agent+Model, environments.md by Identify-by)',
@@ -64,7 +64,7 @@ function Check-AiModels {
   foreach ($k in $seen.Keys) {
     if ($seen[$k] -gt 1) {
       $parts = $k.Split("`t")
-      ErrLine ('DUP ai-models.md: {0} rows for agent="{1}" model="{2}" (lines {3}) — merge into one row; sessions accumulate, old values are in git history' -f $seen[$k], $parts[0], $parts[1], $where[$k].Trim())
+      ErrLine ('DUP ai-models.md: {0} rows for agent="{1}" model="{2}" (lines {3}) - merge into one row; sessions accumulate, old values are in git history' -f $seen[$k], $parts[0], $parts[1], $where[$k].Trim())
       $dup = $true
     }
   }
@@ -87,7 +87,7 @@ function Check-Environments {
   $dup = $false
   foreach ($k in $seen.Keys) {
     if ($seen[$k] -gt 1) {
-      ErrLine ('DUP environments.md: {0} blocks with Identify by="{1}" (lines {2}) — merge into one block; keep the latest facts, old ones are in git history' -f $seen[$k], $k, $where[$k].Trim())
+      ErrLine ('DUP environments.md: {0} blocks with Identify by="{1}" (lines {2}) - merge into one block; keep the latest facts, old ones are in git history' -f $seen[$k], $k, $where[$k].Trim())
       $dup = $true
     }
   }
@@ -138,7 +138,7 @@ function Invoke-Prune {
     }
     if ($inseg -and $closed) { $cand += $heading }
     $c = $cand.Count
-    Say ('{0} — {1} entries ({2} lines); {3} marked resolved/superseded -> archive-eligible.' -f $rel, $total, $lines, $c)
+    Say ('{0} - {1} entries ({2} lines); {3} marked resolved/superseded -> archive-eligible.' -f $rel, $total, $lines, $c)
     if ($c -gt 0) {
       $dir = $rel -replace '[^/]*$', ''
       Say ('  move the resolved entries to {0}archive.md; startup then reads only the active log.' -f $dir)
@@ -148,11 +148,11 @@ function Invoke-Prune {
   }
   if ($eligible) {
     Say ''
-    Say 'memory prune: advisory only — nothing was moved. Archiving is a manual edit'
+    Say 'memory prune: advisory only - nothing was moved. Archiving is a manual edit'
     Say '(cut the resolved entries into archive.md); they stay grep-able and out of the'
     Say 'startup read. Re-run with --list to see the eligible entries.'
   } else {
-    Say 'memory prune: durable logs are lean — nothing archive-eligible.'
+    Say 'memory prune: durable logs are lean - nothing archive-eligible.'
   }
 }
 
@@ -162,7 +162,7 @@ switch ($Command) {
     $ok1 = Check-AiModels
     $ok2 = Check-Environments
     if ($ok1 -and $ok2) { Say 'memory check passed: no duplicate keys in the update-in-place registries'; exit 0 }
-    ErrLine 'memory check failed: a registry has more than one entry for a key — correct in place (edit the entry), do not append a duplicate'
+    ErrLine 'memory check failed: a registry has more than one entry for a key - correct in place (edit the entry), do not append a duplicate'
     exit 1
   }
   'lint' {
