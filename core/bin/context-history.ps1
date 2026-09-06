@@ -21,7 +21,7 @@
 [CmdletBinding()]
 param(
   [Parameter(Position = 0)] [string] $Command = '',
-  [Parameter(ValueFromRemainingArguments = $true)] [string[]] $RestArgs
+  [Parameter(ValueFromRemainingArguments = $true)] [string[]] $RestArgs = @()
 )
 
 Set-StrictMode -Version Latest
@@ -153,10 +153,17 @@ function Roll-OldestHistoryToArchive {
     if (-not $oldest) { break }
     $base = [IO.Path]::GetFileNameWithoutExtension($oldest.Name)
     New-Item -ItemType Directory -Path $archiveDir -Force | Out-Null
-    & tar -czf (Join-Path $archiveDir "$base.tar.gz") -C $historyDir "$base.md"
-    if ($LASTEXITCODE -ne 0) { [Console]::Error.WriteLine("context-history: could not archive $base (need tar.exe)"); break }
-    Remove-Item -LiteralPath $oldest.FullName -Force
-    Say "archived $base -> archive/$base.tar.gz"
+    # tar runs with the CWD inside history/ and a relative -f path: GNU tar
+    # (MSYS, often first on PATH) parses "C:\..." in -f as remote host "C"
+    # and dies; bsdtar (System32 tar.exe) and GNU tar both accept a relative
+    # name. archive/ is always a sibling of history/ under .context/.
+    Push-Location $historyDir
+    try {
+      & tar -czf ("../{0}/{1}.tar.gz" -f (Split-Path -Leaf $archiveDir), $base) "$($oldest.Name)"
+      if ($LASTEXITCODE -ne 0) { [Console]::Error.WriteLine("context-history: could not archive $base (need tar.exe)"); break }
+      Remove-Item -LiteralPath $oldest.FullName -Force
+      Say "archived $base -> archive/$base.tar.gz"
+    } finally { Pop-Location }
   }
 }
 

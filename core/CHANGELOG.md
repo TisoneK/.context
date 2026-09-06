@@ -10,6 +10,52 @@ bump MINOR; wording and fixes bump PATCH.
 
 ---
 
+## 0.14.0 — 2026-09-06
+
+**Windows verified for real: three latent port bugs fixed, `.cmd`
+launchers remove the execution-policy hurdle.** 0.13.1 made the `.ps1`
+ports *parse* under Windows PowerShell 5.1; this release makes them *run*.
+Every port was executed end-to-end against a bootstrapped fixture project
+(registry hygiene, the full three-zone history lifecycle, the
+collaboration trail, the gates), which surfaced defects a parse-level fix
+cannot catch.
+
+- **`context-collab-check.ps1` crashed on every invocation.** It assigned
+  the automatic `$args` variable (a no-op under `Set-StrictMode`) and its
+  `if`-expression `@()` unwrapped to `$null`, so the argument loop died on
+  `$null.Count`. The array is now built by direct assignment. 0.9.1 had
+  shipped this file as "Windows-verified"; only its parse had ever been
+  exercised.
+- **`context-history.ps1 close` / `gc` crashed when run without flags.**
+  `$RestArgs.Count` on a `$null` `ValueFromRemainingArguments` parameter
+  is fatal under strict mode. Both such parameters now default to `@()`
+  (`context-mem.ps1` hardened the same way).
+- **`context-history.ps1` never archived anything.** It passed a
+  `C:\...` archive path to `tar`, which GNU tar (MSYS, often first on
+  PATH) parses as remote *host* `C` ("Cannot connect to C: resolve
+  failed"). The roll now runs tar from inside `history/` with a relative
+  `-f` path — the exact pattern the POSIX port already used — so bsdtar
+  (System32 `tar.exe`) and GNU tar behave identically.
+- **`context-collab.ps1` rejected its own documented `--re` flag.**
+  PowerShell parameter prefix-matching bound `--re` to the `$Rest`
+  parameter (re ⊂ Rest), consuming it and derailing binding of every
+  later flag ("parameter cannot be found '-session'"). The parameter is
+  renamed `$Extra`; `emit assessment --re <id>` and friends work.
+- **New `context-*.cmd` launchers**, one per `.ps1` port. A `.cmd` file is
+  executed by cmd.exe regardless of the PowerShell execution policy, and
+  starts its port with `powershell -NoProfile -ExecutionPolicy Bypass
+  -File`. The documented Windows invocation becomes e.g.
+  `.context/core/bin/context-mem.cmd check` — no `Set-ExecutionPolicy`
+  step. Windows PowerShell 5.1 is targeted deliberately: it ships with
+  every Windows 10+ install, while pwsh 7 is an optional add-on. All
+  docs (kickoff, both protocol editions, schema, README, QUICKSTART) now
+  show the `.cmd` form.
+
+**Migration from 0.13.x:** `update` installs the launchers with the rest
+of `core/`; no memory changes and no behavior change for POSIX. Windows
+agents should switch to the `.cmd` form; `pwsh -File` keeps working where
+the policy allows it.
+
 ## 0.13.1 — 2026-09-06
 
 **ASCII-clean the new PowerShell ports.** `context-mem.ps1` and

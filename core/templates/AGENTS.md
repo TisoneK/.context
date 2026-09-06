@@ -45,8 +45,8 @@ If you read nothing else, obey these rules:
    `claim → work → release`. Save the `proposal → assessment → agreement`
    ceremony for a genuine conflict (same paths, incompatible changes).
    Before each next action run `context-gates checkpoint`; before commits,
-   integration, and exit run the matching gate. On Windows, use the `.ps1`
-   ports.
+   integration, and exit run the matching gate. On Windows, use the `.cmd`
+   launchers (they run the `.ps1` ports; no execution-policy setup).
 6. **Know which kind of file you're in.** *Append-only* logs
    (`agents/sessions.md`, `tasks/backlog.md`, `plans/decisions.md`,
    `flaws/log.md`, `inefficiencies/log.md`) grow at the bottom — never edit

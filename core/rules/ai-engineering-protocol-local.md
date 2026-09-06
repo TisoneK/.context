@@ -174,7 +174,7 @@ are optional. It never blocks `check` and never needs resolving.
 sh .context/core/bin/context-collab emit note --session <id> --agent <id> \
   --issue <id> --to <peer> --re <path> --body "On the web side; loop is yours."
 ```
-On Windows: `pwsh -File .context/core/bin/context-collab.ps1 emit note …`.
+On Windows: `.context/core/bin/context-collab.cmd emit note …`.
 
 ### The escalation (only for a real conflict)
 
@@ -210,9 +210,10 @@ commit SHA still closes it.
 - Before integrating branches, run `context-collab check` — it's fast and
   notes never fail it. Push your own `collab/<session-id>/<agent-id>`
   branch, never the shared one; never force-overwrite a peer.
-- On Windows, use the `.ps1` ports (`pwsh -File …context-collab.ps1`, and
-  `context-gates.ps1`, which now runs). Git Bash's `sh` may lack
-  `sha256sum`; if `context-sync` says so, use `.ps1`. The shipped
+- On Windows, use the `.cmd` launchers — they run the `.ps1` ports
+  (`context-collab.cmd`, `context-gates.cmd`, which now runs) with
+  `-ExecutionPolicy Bypass`. Git Bash's `sh` may lack
+  `sha256sum`; if `context-sync` says so, use the `.cmd` launcher. The shipped
   `.context/.gitattributes` (`eol=lf`) fixes a `context-sync verify`
   false-positive and phantom log diffs.
 
@@ -486,7 +487,7 @@ git push origin main  # uses the user's existing credentials
 
 **Step 16 — Update `.context/memory/system/` + `.context/memory/user/` + `.context/memory/plans/`**
 - `.context/memory/system/environments.md`: add/update the block for this machine (OS + version, runtime versions, package manager, anything machine-specific the next agent should know — e.g., "no psql installed", "port 3000 usually taken"). Refresh its last-verified date and record the commands you verified work (install / test / lint / dev).
-- `.context/memory/system/ai-models.md`: update the row for your **(agent, model)** — bump the sessions count and last-seen date. If a row for your pair already exists, **edit it in place; do not add a second row** (a new row is only for a genuinely new agent+model pair). Add an Observations bullet for any concrete capability or limit this session demonstrated (yours or a prior agent's). Then run `sh .context/core/bin/context-mem check` (Windows: `pwsh -File .context/core/bin/context-mem.ps1 check`) — it fails if a registry has a duplicated key.
+- `.context/memory/system/ai-models.md`: update the row for your **(agent, model)** — bump the sessions count and last-seen date. If a row for your pair already exists, **edit it in place; do not add a second row** (a new row is only for a genuinely new agent+model pair). Add an Observations bullet for any concrete capability or limit this session demonstrated (yours or a prior agent's). Then run `sh .context/core/bin/context-mem check` (Windows: `.context/core/bin/context-mem.cmd check`) — it fails if a registry has a duplicated key.
 - `.context/memory/user/preferences.md`: record every standing preference this session revealed — corrections the user gave, patterns they approved, things they stated — with provenance + date, per the file's learning rules. One-off instructions don't count. Skip if none.
 - `.context/memory/plans/decisions.md`: append an ADR-style entry for every architectural decision made or confirmed this session (context → decision → consequences). Skip if none.
 

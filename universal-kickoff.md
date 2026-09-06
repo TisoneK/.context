@@ -278,7 +278,7 @@ It vendors `core/` → `.context/core/`, copies the memory skeleton →
 `.context/memory/`, seeds `.context/README.md` + `.context/kickoff.md`
 + root `AGENTS.md` + root `CLAUDE.md` (a pointer so Claude Code is routed
 in) + `.context/.gitattributes` (LF policy), and writes `memory/core.lock`.
-Verify (Windows: `pwsh -File .context/core/bin/context-sync.ps1 verify`):
+Verify (Windows: `.context/core/bin/context-sync.cmd verify`):
 
 ```bash
 sh .context/core/bin/context-sync verify

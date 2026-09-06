@@ -79,7 +79,10 @@ core/
 │   ├── context-mem          # POSIX: check (registry dup keys) + lint (.context leak) + prune (log-archive advisory)
 │   ├── context-mem.ps1      # PowerShell port: same hygiene checks
 │   ├── context-history      # POSIX: group session history, rotate memory→history→archive→gc
-│   └── context-history.ps1  # PowerShell port: session-group rotation
+│   ├── context-history.ps1  # PowerShell port: session-group rotation
+│   └── context-*.cmd        # cmd.exe launchers, one per .ps1 port: each
+│                            #   runs it with -ExecutionPolicy Bypass -- no
+│                            #   Windows Set-ExecutionPolicy setup needed
 ├── rules/
 │   ├── ai-engineering-protocol-local.md   # LOCAL agents' edition
 │   └── ai-engineering-protocol.md         # CLOUD/SANDBOX agents' edition
@@ -96,7 +99,7 @@ core/
 
 Integrity: `sh .context/core/bin/context-sync verify` checks every core
 file against `MANIFEST.sha256` (on Windows:
-`pwsh -File .context/core/bin/context-sync.ps1 verify` — the port shares
+`.context/core/bin/context-sync.cmd verify` — the launcher shares
 the same manifest). A failed verify means core was
 hand-edited or corrupted — restore it (`context-sync rollback` or
 `git checkout` of the last good commit) and log a flaw. Never "fix"

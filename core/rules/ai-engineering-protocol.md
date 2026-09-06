@@ -242,12 +242,13 @@ release never strands a claim as "active forever").
 
 ### Windows
 
-On Windows, use the PowerShell ports — `pwsh -File
-.context/core/bin/context-collab.ps1 emit note …`, and the `.ps1` ports of
-`context-sync` and `context-gates` (the earlier `context-gates.ps1`
-binding crash is fixed, so the gate now runs). Git Bash provides `sh` but
+On Windows, use the `.cmd` launchers —
+`.context/core/bin/context-collab.cmd emit note …`, and the launchers for
+`context-sync` and `context-gates` (each runs its `.ps1` port with
+`-ExecutionPolicy Bypass`; the earlier `context-gates.ps1` binding crash
+is fixed, so the gate now runs). Git Bash provides `sh` but
 may lack `sha256sum`; if `context-sync` reports it missing, switch to the
-`.ps1` port. The shipped `.context/.gitattributes` enforces `eol=lf`,
+`.cmd` launcher. The shipped `.context/.gitattributes` enforces `eol=lf`,
 which fixes the `context-sync verify` false-positive under `core.autocrlf`
 and keeps the append-only memory logs from showing phantom whole-file
 diffs.
@@ -539,7 +540,7 @@ git log --oneline -20
 
 **Step 16 — Update `.context/memory/system/` + `.context/memory/user/` + `.context/memory/plans/`**
 - `.context/memory/system/environments.md`: add/update the block for the environment you ran on (sandbox/OS, runtime versions, package manager, anything the next agent needs to reproduce your setup). Refresh its last-verified date and record the commands you verified work (install / test / lint / dev).
-- `.context/memory/system/ai-models.md`: update the row for your **(agent, model)** — bump the sessions count and last-seen date. If a row for your pair already exists, **edit it in place; do not add a second row** (a new row is only for a genuinely new agent+model pair). Add an Observations bullet for any concrete capability or limit this session demonstrated (yours or a prior agent's). Then run `sh .context/core/bin/context-mem check` (Windows: `pwsh -File .context/core/bin/context-mem.ps1 check`) — it fails if a registry has a duplicated key.
+- `.context/memory/system/ai-models.md`: update the row for your **(agent, model)** — bump the sessions count and last-seen date. If a row for your pair already exists, **edit it in place; do not add a second row** (a new row is only for a genuinely new agent+model pair). Add an Observations bullet for any concrete capability or limit this session demonstrated (yours or a prior agent's). Then run `sh .context/core/bin/context-mem check` (Windows: `.context/core/bin/context-mem.cmd check`) — it fails if a registry has a duplicated key.
 - `.context/memory/user/preferences.md`: record every standing preference this session revealed — corrections the user gave, patterns they approved, things they stated — with provenance + date, per the file's learning rules. One-off instructions don't count. Skip if none.
 - `.context/memory/plans/decisions.md`: append an ADR-style entry for every architectural decision made or confirmed this session (context → decision → consequences). Skip if none.
 

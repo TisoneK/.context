@@ -10,7 +10,7 @@
 [CmdletBinding()]
 param(
   [Parameter(Position = 0)] [string] $Command = '',
-  [Parameter(ValueFromRemainingArguments = $true)] [string[]] $RestArgs
+  [Parameter(ValueFromRemainingArguments = $true)] [string[]] $RestArgs = @()
 )
 
 Set-StrictMode -Version Latest
