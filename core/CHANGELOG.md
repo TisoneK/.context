@@ -10,6 +10,33 @@ bump MINOR; wording and fixes bump PATCH.
 
 ---
 
+## 0.12.0 — 2026-09-05
+
+**Bound the durable logs (context pruning).** The append-only durable logs
+(`flaws/log.md`, `inefficiencies/log.md`) grow forever and sit in the
+mandatory startup reading order, so a mature project reads mostly resolved
+history every session (LocalMind: flaws 614 lines / 52 entries,
+inefficiencies 1172 lines / 108 entries). The session layer already had a
+cold-storage story (disposable notes, prunable SUMMARY.md); the durable
+layer had none.
+
+- **`context-mem prune`:** advises archiving resolved history out of the
+  durable logs. It reports each log's size and how many entries are
+  explicitly marked `RESOLVED` / `superseded` / fixed — the archive-eligible
+  ones — and `--list` names them. It **never moves or deletes anything**;
+  archiving stays a deliberate cut-and-paste into a companion `archive.md`
+  (which stays in git, grep-able). Conservative by design: **only an
+  explicit closed marker makes an entry eligible; age alone never does**, so
+  an unresolved flaw is never archived out from under the next agent.
+- **The archive convention** is documented in both editions (beside the
+  SUMMARY.md prune rule), the schema, and the `flaws/` and `inefficiencies/`
+  log templates: move a resolved entry verbatim into `archive.md`; startup
+  reads only the active log.
+
+**Migration from 0.11.x:** none — additive advisory + wording. Nothing is
+moved automatically; run `context-mem prune` when a log feels heavy and
+archive the entries it flags.
+
 ## 0.11.0 — 2026-09-05
 
 **Keep `.context` vocabulary out of product code.** The protocol trains

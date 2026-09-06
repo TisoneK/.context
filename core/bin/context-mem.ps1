@@ -34,8 +34,10 @@ function Usage {
     '          (ai-models.md by Agent+Model, environments.md by Identify-by)',
     '  lint    .context vocabulary (ADR-N, bug IDs, .context/ paths) leaking',
     '          into the staged product diff',
+    '  prune   advise archiving resolved/superseded entries out of the',
+    '          append-only durable logs; --list names them. Reports only.',
     '',
-    'Exit codes: 0 clean, 1 problem found, 2 usage/error'
+    'Exit codes: check/lint 0 clean, 1 problem; prune always 0; 2 usage/error'
   ) | ForEach-Object { Say $_ }
   exit 2
 }
@@ -116,6 +118,44 @@ function Invoke-Lint {
   return $false
 }
 
+function Invoke-Prune {
+  param([bool]$List)
+  if (-not (Test-Path -LiteralPath $memoryDir)) { Say 'context-mem: no memory dir (nothing to prune)'; return }
+  $eligible = $false
+  foreach ($rel in @('flaws/log.md', 'inefficiencies/log.md')) {
+    $f = Join-Path $memoryDir $rel
+    if (-not (Test-Path -LiteralPath $f)) { continue }
+    $total = 0; $lines = 0; $inseg = $false; $closed = $false; $heading = ''; $cand = @()
+    foreach ($raw in Get-Content -LiteralPath $f) {
+      $lines++
+      $line = $raw.TrimEnd("`r")
+      if ($line -match '^## ') {
+        if ($inseg -and $closed) { $cand += $heading }
+        $inseg = $true; $closed = $false; $heading = $line; $total++
+        continue
+      }
+      if ($inseg -and ($line -match 'RESOLVED|[Ss]uperseded|[Ff]ixed in package|no longer (a )?(flaw|issue)')) { $closed = $true }
+    }
+    if ($inseg -and $closed) { $cand += $heading }
+    $c = $cand.Count
+    Say ('{0} — {1} entries ({2} lines); {3} marked resolved/superseded -> archive-eligible.' -f $rel, $total, $lines, $c)
+    if ($c -gt 0) {
+      $dir = $rel -replace '[^/]*$', ''
+      Say ('  move the resolved entries to {0}archive.md; startup then reads only the active log.' -f $dir)
+      if ($List) { foreach ($h in $cand) { Say ('    - {0}' -f $h) } }
+      $eligible = $true
+    }
+  }
+  if ($eligible) {
+    Say ''
+    Say 'memory prune: advisory only — nothing was moved. Archiving is a manual edit'
+    Say '(cut the resolved entries into archive.md); they stay grep-able and out of the'
+    Say 'startup read. Re-run with --list to see the eligible entries.'
+  } else {
+    Say 'memory prune: durable logs are lean — nothing archive-eligible.'
+  }
+}
+
 switch ($Command) {
   'check' {
     if (-not (Test-Path -LiteralPath $memoryDir)) { Say 'context-mem: no memory dir (nothing to check)'; exit 0 }
@@ -127,6 +167,10 @@ switch ($Command) {
   }
   'lint' {
     if (Invoke-Lint) { exit 0 } else { exit 1 }
+  }
+  'prune' {
+    Invoke-Prune -List:($RestArgs -contains '--list')
+    exit 0
   }
   { $_ -in @('', '-h', '--help', 'help') } { Usage }
   default { Die "unknown command '$Command' (try: context-mem.ps1 help)" }

@@ -38,8 +38,11 @@ usage() {
   say "          (ai-models.md by Agent+Model, environments.md by Identify-by)"
   say "  lint    .context vocabulary (ADR-N, bug IDs, .context/ paths) leaking"
   say "          into the staged product diff"
+  say "  prune   advise archiving resolved/superseded entries out of the"
+  say "          append-only durable logs (flaws, inefficiencies); --list"
+  say "          names them. Never moves or deletes — reports only."
   say ""
-  say "Exit codes: 0 clean, 1 problem found, 2 usage/error"
+  say "Exit codes: check/lint 0 clean, 1 problem; prune always 0; 2 usage/error"
   exit 2
 }
 
@@ -115,6 +118,55 @@ check() {
   return "$_rc"
 }
 
+# prune — advise archiving resolved history out of the append-only durable
+# logs so startup stops re-reading cold, closed entries. It NEVER moves or
+# deletes anything (that stays a human/agent edit); it reports how large each
+# log is and which entries are explicitly marked resolved/superseded/fixed —
+# the archive-eligible ones. Move those to a companion archive.md (still
+# grep-able); the active log is what startup reads. Age alone is never a
+# reason to archive — only an explicit closed marker is.
+prune() {
+  _list=0
+  while [ $# -gt 0 ]; do
+    case "$1" in
+      --list) _list=1; shift ;;
+      -h|--help) usage ;;
+      *) die "unknown argument '$1'" ;;
+    esac
+  done
+  [ -d "$MEMORY_DIR" ] || { say "context-mem: no memory dir (nothing to prune)"; return 0; }
+  _eligible=0
+  for _rel in flaws/log.md inefficiencies/log.md; do
+    _f=$MEMORY_DIR/$_rel
+    [ -f "$_f" ] || continue
+    awk -v rel="$_rel" -v list="$_list" '
+      function flush() { if (inseg && closed) { c++; cand[c] = heading } }
+      /^## / { flush(); inseg = 1; closed = 0; heading = $0; total++; next }
+      inseg && /RESOLVED|[Ss]uperseded|[Ff]ixed in package|no longer (a )?(flaw|issue)/ { closed = 1 }
+      END {
+        flush()
+        printf "%s — %d entries (%d lines); %d marked resolved/superseded → archive-eligible.\n", rel, total, NR, c
+        if (c > 0) {
+          dir = rel; sub(/[^\/]*$/, "", dir)
+          printf "  move the resolved entries to %sarchive.md; startup then reads only the active log.\n", dir
+          if (list == 1) for (i = 1; i <= c; i++) printf "    - %s\n", cand[i]
+        }
+        exit (c > 0) ? 10 : 0
+      }
+    ' "$_f"
+    [ $? -eq 10 ] && _eligible=1
+  done
+  if [ "$_eligible" -eq 1 ]; then
+    say ""
+    say "memory prune: advisory only — nothing was moved. Archiving is a manual edit"
+    say "(cut the resolved entries into archive.md); they stay grep-able and out of the"
+    say "startup read. Re-run with --list to see the eligible entries."
+  else
+    say "memory prune: durable logs are lean — nothing archive-eligible."
+  fi
+  return 0
+}
+
 lint() {
   [ $# -eq 0 ] || { case "$1" in -h|--help) usage ;; *) die "unknown argument '$1'" ;; esac; }
   command -v git >/dev/null 2>&1 || die "lint needs git on PATH"
@@ -147,6 +199,7 @@ CMD=${1:-}; [ $# -gt 0 ] && shift
 case "$CMD" in
   check) check "$@" ;;
   lint)  lint "$@" ;;
+  prune) prune "$@" ;;
   ''|-h|--help|help) usage ;;
   *) die "unknown command '$CMD' (try: context-mem help)" ;;
 esac
