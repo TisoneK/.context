@@ -68,8 +68,8 @@ core/
 │   ├── context-collab-check.ps1 # PowerShell integration-readiness validator
 │   ├── context-gates        # POSIX lifecycle gates + checkpoint
 │   ├── context-gates.ps1    # PowerShell lifecycle gates + checkpoint
-│   ├── context-mem          # POSIX: duplicate-key check for update-in-place registries
-│   └── context-mem.ps1      # PowerShell port: same registry hygiene check
+│   ├── context-mem          # POSIX: check (registry dup keys) + lint (.context leak into product)
+│   └── context-mem.ps1      # PowerShell port: same hygiene checks
 ├── rules/
 │   ├── ai-engineering-protocol-local.md   # LOCAL agents' edition
 │   └── ai-engineering-protocol.md         # CLOUD/SANDBOX agents' edition

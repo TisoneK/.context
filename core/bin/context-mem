@@ -1,19 +1,23 @@
 #!/bin/sh
-# context-mem — hygiene checks for the update-in-place memory registries.
+# context-mem — hygiene checks that keep .context healthy and contained.
 #
-# Update-in-place files hold ONE entry per key: you correct an entry by
-# editing its row/block, never by appending a second one — its prior value
-# already lives in git history, so nothing is lost. This is the opposite of
-# the append-only logs (sessions/inefficiencies/backlog/decisions/flaws),
-# where you never edit and only append. Agents reach for the loud append-only
-# reflex on these files too and append a duplicate instead of updating, which
-# is how a registry ends up with two rows for one key and conflicting counts.
+# check  flags duplicate keys in the update-in-place registries. Those files
+#        hold ONE entry per key: correct an entry by editing its row/block,
+#        never by appending a second one — its prior value already lives in
+#        git history. Agents reach for the loud append-only reflex here too
+#        and append a duplicate, which is how a registry ends up with two
+#        rows for one key and conflicting counts.
+#          system/ai-models.md    key = (Agent, Model)         — one row/pair
+#          system/environments.md key = the "Identify by:" line — one block/env
 #
-# check  flags duplicate keys in the update-in-place registries:
-#   system/ai-models.md    key = (Agent, Model)          — one row per pair
-#   system/environments.md key = the "Identify by:" line  — one block per env
+# lint   flags .context vocabulary leaking into product artifacts. A product
+#        file (anything outside .context/) must stand on its own: a docstring
+#        or comment must not cite ADR-N, a bug ID, "per ADR", or a .context/
+#        path — meaningless to someone reading only the product repo. Memory
+#        may reference code; code must never reference memory. Scans the
+#        STAGED diff (the new lines you are about to commit).
 #
-# Exit codes: 0 clean · 1 duplicate key found · 2 usage/error
+# Exit codes: 0 clean · 1 problem found · 2 usage/error
 
 set -u
 
@@ -24,12 +28,18 @@ die() { err "$*"; exit 2; }
 SCRIPT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd) || exit 2
 CORE_DIR=$(CDPATH= cd -- "$SCRIPT_DIR/.." && pwd) || exit 2
 CONTEXT_DIR=$(dirname -- "$CORE_DIR")
+PROJECT_DIR=$(dirname -- "$CONTEXT_DIR")
 MEMORY_DIR=$CONTEXT_DIR/memory
 
 usage() {
-  sed -n '11,18p' "$0" | sed 's/^# \{0,1\}//'
+  say "context-mem — .context hygiene checks"
   say ""
-  say "Usage: context-mem check"
+  say "  check   duplicate keys in the update-in-place registries"
+  say "          (ai-models.md by Agent+Model, environments.md by Identify-by)"
+  say "  lint    .context vocabulary (ADR-N, bug IDs, .context/ paths) leaking"
+  say "          into the staged product diff"
+  say ""
+  say "Exit codes: 0 clean, 1 problem found, 2 usage/error"
   exit 2
 }
 
@@ -105,9 +115,38 @@ check() {
   return "$_rc"
 }
 
+lint() {
+  [ $# -eq 0 ] || { case "$1" in -h|--help) usage ;; *) die "unknown argument '$1'" ;; esac; }
+  command -v git >/dev/null 2>&1 || die "lint needs git on PATH"
+  _root=$(git -C "$PROJECT_DIR" rev-parse --show-toplevel 2>/dev/null) \
+    || die "lint must run inside the project git repo"
+  git -C "$_root" diff --cached -U0 --no-color 2>/dev/null | awk '
+    /^\+\+\+ /{ f=$0; sub(/^\+\+\+ b\//, "", f); sub(/^\+\+\+ /, "", f); next }
+    /^\+/ && !/^\+\+\+/ {
+      if (f ~ /^\.context\// || f == "/dev/null") next
+      s = substr($0, 2)
+      pat = ""
+      if (s ~ /ADR-[0-9]/) pat = "an ADR reference"
+      else if (s ~ /B-[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9]/) pat = "a bug-ID reference"
+      else if (s ~ /\.context\//) pat = "a .context/ path"
+      else if (tolower(s) ~ /per adr/) pat = "\"per ADR\""
+      if (pat != "") { printf "LEAK: %s cites %s: %s\n", f, pat, s | "cat 1>&2"; n++ }
+    }
+    END { exit (n > 0) ? 1 : 0 }
+  '
+  _rc=$?
+  if [ "$_rc" -eq 0 ]; then
+    say "lint passed: no .context vocabulary (ADR-N, bug IDs, .context/ paths) in the staged product diff"
+  else
+    err "lint failed: product code must stand on its own. State the reason in plain words in the docstring/comment; the ADR or bug-ID link belongs in .context/memory, not the source. Memory references code, never the reverse."
+  fi
+  return "$_rc"
+}
+
 CMD=${1:-}; [ $# -gt 0 ] && shift
 case "$CMD" in
   check) check "$@" ;;
+  lint)  lint "$@" ;;
   ''|-h|--help|help) usage ;;
   *) die "unknown command '$CMD' (try: context-mem help)" ;;
 esac

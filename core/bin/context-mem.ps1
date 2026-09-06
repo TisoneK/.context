@@ -23,15 +23,19 @@ function Die { param([string]$Message) ErrLine $Message; exit 2 }
 $scriptDir = $PSScriptRoot
 $coreDir = (Resolve-Path (Join-Path $scriptDir '..')).Path
 $contextDir = Split-Path -Parent $coreDir
+$projectDir = Split-Path -Parent $contextDir
 $memoryDir = Join-Path $contextDir 'memory'
 
 function Usage {
   @(
-    'context-mem check — flag duplicate keys in the update-in-place registries:',
-    '  system/ai-models.md     key = (Agent, Model)   — one row per pair',
-    '  system/environments.md  key = "Identify by:"    — one block per env',
-    'Correct in place (edit the entry); never append a duplicate.',
-    'Exit codes: 0 clean, 1 duplicate key, 2 usage/error'
+    'context-mem — .context hygiene checks',
+    '',
+    '  check   duplicate keys in the update-in-place registries',
+    '          (ai-models.md by Agent+Model, environments.md by Identify-by)',
+    '  lint    .context vocabulary (ADR-N, bug IDs, .context/ paths) leaking',
+    '          into the staged product diff',
+    '',
+    'Exit codes: 0 clean, 1 problem found, 2 usage/error'
   ) | ForEach-Object { Say $_ }
   exit 2
 }
@@ -88,6 +92,30 @@ function Check-Environments {
   return (-not $dup)
 }
 
+function Invoke-Lint {
+  if (-not (Get-Command git -ErrorAction SilentlyContinue)) { Die 'lint needs git on PATH' }
+  $root = (& git -C $projectDir rev-parse --show-toplevel 2>$null)
+  if (-not $root) { Die 'lint must run inside the project git repo' }
+  $diff = (& git -C $root diff --cached -U0 --no-color 2>$null)
+  $file = ''; $n = 0
+  foreach ($line in $diff) {
+    if ($line -match '^\+\+\+ ') { $file = $line -replace '^\+\+\+ b/', '' -replace '^\+\+\+ ', ''; continue }
+    if ($line -match '^\+' -and $line -notmatch '^\+\+\+') {
+      if ($file -match '^\.context/' -or $file -eq '/dev/null') { continue }
+      $s = $line.Substring(1)
+      $pat = ''
+      if ($s -match 'ADR-[0-9]') { $pat = 'an ADR reference' }
+      elseif ($s -match 'B-[0-9]{4}-[0-9]{2}-[0-9]') { $pat = 'a bug-ID reference' }
+      elseif ($s -match '\.context/') { $pat = 'a .context/ path' }
+      elseif ($s.ToLower() -match 'per adr') { $pat = '"per ADR"' }
+      if ($pat -ne '') { ErrLine ('LEAK: {0} cites {1}: {2}' -f $file, $pat, $s); $n++ }
+    }
+  }
+  if ($n -eq 0) { Say 'lint passed: no .context vocabulary (ADR-N, bug IDs, .context/ paths) in the staged product diff'; return $true }
+  ErrLine 'lint failed: product code must stand on its own. State the reason in plain words; the ADR or bug-ID link belongs in .context/memory, not the source. Memory references code, never the reverse.'
+  return $false
+}
+
 switch ($Command) {
   'check' {
     if (-not (Test-Path -LiteralPath $memoryDir)) { Say 'context-mem: no memory dir (nothing to check)'; exit 0 }
@@ -96,6 +124,9 @@ switch ($Command) {
     if ($ok1 -and $ok2) { Say 'memory check passed: no duplicate keys in the update-in-place registries'; exit 0 }
     ErrLine 'memory check failed: a registry has more than one entry for a key — correct in place (edit the entry), do not append a duplicate'
     exit 1
+  }
+  'lint' {
+    if (Invoke-Lint) { exit 0 } else { exit 1 }
   }
   { $_ -in @('', '-h', '--help', 'help') } { Usage }
   default { Die "unknown command '$Command' (try: context-mem.ps1 help)" }

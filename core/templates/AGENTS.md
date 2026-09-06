@@ -62,7 +62,11 @@ If you read nothing else, obey these rules:
 8. **Two surfaces, two prefixes:** editing product code = normal commit
    prefixes; editing `.context/` = `chore(context):` (reports:
    `docs(review):`). Never mix both surfaces in one commit. Collaboration
-   events are separate immutable context commits.
+   events are separate immutable context commits. And keep the surfaces
+   apart in *content* too: never cite `.context` vocabulary (an ADR number,
+   a bug ID, a `.context/` path) in a product docstring or comment — it's a
+   dangling pointer for anyone reading only the product repo. `context-mem
+   lint` flags it in your staged diff.
 9. **The session is not done until everything is committed AND pushed**,
    the session is logged in `.context/memory/agents/sessions.md`, and
    `.context/memory/tasks/current.md` is cleared. If the user has to

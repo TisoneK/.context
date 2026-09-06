@@ -239,6 +239,11 @@ command and observed result before retrying.
   `sh .context/core/bin/context-gates run pre-commit`.
   It runs universal staged-diff checks plus explicit project commands;
   hybrid mode discovers conventional commands only when none are listed.
+  When the commit touches product code, also run
+  `sh .context/core/bin/context-mem lint` (Windows: the `.ps1`): it fails if
+  the staged product diff cites `.context` vocabulary (an ADR number, a bug
+  ID, a `.context/` path). Keep that vocabulary out of product artifacts —
+  see the one-way-linkage pitfall.
 - **Before branch integration:** run
   `sh .context/core/bin/context-gates run integration --session <id> --issue <id>`.
   This includes `context-collab check` and configured build/integration
@@ -1053,6 +1058,7 @@ Save to `.context/memory/reviews/YYYY-MM-DD-review.md`. Commit and push it.
 41. **Don't write dates from memory** — run `date -u +%F` and use its output for session entries, reports, "last verified" fields, everything. Models autocomplete plausible-but-wrong dates (often from their training years); a wrong date in an append-only log is permanent and silently corrupts every "how stale is this?" judgment that later reads it.
 42. **Don't claim verification without the evidence** — "tests pass" in a report or session entry must carry the exact command and its observed result (test count, exit status). If you didn't run it this session on this environment, write "not verified" and say what would verify it. A confident unverified claim is worse than an honest gap: the next agent builds on it.
 43. **Don't absorb another agent type's identity from the project's memory** — `.context/` is shared by local AND cloud agents, so some of what it records is per-agent-type or per-machine, not per-project. Your edition comes from YOUR agent type at session start, never from whichever edition `workflows/active.md`'s last writer happened to be; `environments.md` blocks apply only to the machine you match by its "Identify by" line (never run another environment's verified commands or paths); PAT/token steps never apply to local agents no matter how many cloud sessions the logs show. The canonical failure: a cloud agent bootstraps a repo, the user pulls it locally, and the local agent starts doing PAT dances and re-cloning because it read the cloud agent's records as its own instructions.
+44. **Don't cite `.context` vocabulary in product artifacts (one-way linkage)** — a product file (anything outside `.context/`) must stand on its own for someone who cloned only the product repo. Never put an ADR number, a bug ID (`B-YYYY-MM-DD-N`), "per ADR", or a `.context/` path in a product docstring, comment, or user-facing doc — those are dangling pointers into a `.context/` the reader doesn't have. If the reason matters, say it in plain words; the ADR link lives in `plans/decisions.md`, which may reference the code — never the reverse. `context-mem lint` catches the leak in your staged diff.
 
 ---
 

@@ -10,6 +10,34 @@ bump MINOR; wording and fixes bump PATCH.
 
 ---
 
+## 0.11.0 — 2026-09-05
+
+**Keep `.context` vocabulary out of product code.** The protocol trains
+agents to think in ADRs, bug IDs, and session numbers — and that vocabulary
+leaks into product artifacts. Across the fleet, product source cites
+`.context`-internal terms in docstrings and comments
+(`/** ADR-34 B-8: bounded evidence entry */`, `"""ADR-11 one-time data
+copy..."""`) — dangling pointers into a `.context/` that anyone cloning only
+the product repo does not have.
+
+- **`context-mem lint`:** a new subcommand (POSIX + PowerShell). It scans the
+  **staged** product diff (everything outside `.context/`) and fails if an
+  added line cites an ADR number (`ADR-N`), a bug ID (`B-YYYY-MM-DD-N`),
+  `"per ADR"`, or a `.context/` path. `.context/` files are exempt — they
+  legitimately use the vocabulary. (`Session N` is deliberately *not*
+  flagged: apps have a legitimate "session" domain noun.)
+- **The one-way-linkage rule.** Memory may reference product code; product
+  code must never reference memory. Added as a pitfall in both editions, the
+  `AGENTS.md` "two surfaces" rule, and a schema invariant. If the reason for
+  a decision matters, state it in plain words in the docstring; the ADR link
+  lives in `plans/decisions.md`, which points at the code — never the
+  reverse. The pre-commit step runs `context-mem lint` for product commits.
+
+**Migration from 0.10.x:** none — additive subcommand + wording. Existing
+product code that already cites `.context` vocabulary will fail
+`context-mem lint` on the next edit to those lines; rephrase the docstring to
+stand alone and move the ADR link into `plans/decisions.md`.
+
 ## 0.10.0 — 2026-09-05
 
 **Update-in-place registries stop duplicating.** `system/ai-models.md` and
