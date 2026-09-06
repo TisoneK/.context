@@ -10,6 +10,36 @@ bump MINOR; wording and fixes bump PATCH.
 
 ---
 
+## 0.15.0 — 2026-09-06
+
+**Agents are named coworkers, not "peers".** Collaboration works, but agents
+identified as "peer" or a bare `S427`. Now each agent picks a real name and
+the team reads as people in a workplace — with the human as the supervisor.
+
+- **New `agents/roster.md`** (update-in-place, current-group-scoped): a team
+  board, one row per person — a chosen human **Name**, a **codename**
+  `S<NNN>` (session number), the **model**, and one line on what they're
+  doing. An agent adds its row at session start and presents itself by that
+  name everywhere ("John (S427)"), in events and when reporting to the
+  supervisor.
+- **Name and codename are each unique within the group.** `context-mem
+  check` now validates the roster and flags a duplicate name or codename
+  (there is only one John on the team at a time) — the same update-in-place
+  discipline as the other registries.
+- **The roster rotates with the group.** `context-history close` captures
+  the closed group's roster into `history/group-<NNN>.md` and resets a fresh
+  empty roster for the new group.
+- **Docs reframed to the workplace metaphor:** the collaboration README (new
+  "Who you are — pick a name" section), both protocol editions (a step 0 in
+  the light path), the AGENTS digest, and the schema now say: pick a name,
+  present yourself by it, the human is the supervisor. `--agent` takes your
+  name, so the chatter feed reads "John: ...".
+
+**Migration from 0.14.x:** `update` installs `agents/roster.md` if absent.
+Existing agents just start adding rows; nothing else changes. The `.ps1`
+port changes (roster check + roster reset) are ASCII-clean but owe the usual
+Windows runtime pass.
+
 ## 0.14.0 — 2026-09-06
 
 **Windows verified for real: three latent port bugs fixed, `.cmd`

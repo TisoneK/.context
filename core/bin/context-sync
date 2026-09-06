@@ -229,6 +229,7 @@ cmd_update() {
   [ -d "$CONTEXT_DIR/archive" ] || cp -R "$CORE_DIR/templates/archive" "$CONTEXT_DIR/archive" 2>/dev/null || true
   [ -f "$MEMORY_DIR/workflows/history.conf" ] || cp "$CORE_DIR/templates/memory/workflows/history.conf" "$MEMORY_DIR/workflows/history.conf" 2>/dev/null || true
   [ -f "$MEMORY_DIR/agents/GROUP" ] || printf 'group=1\nopened=%s\n' "$(date +%Y-%m-%d)" > "$MEMORY_DIR/agents/GROUP" 2>/dev/null || true
+  [ -f "$MEMORY_DIR/agents/roster.md" ] || cp "$CORE_DIR/templates/memory/agents/roster.md" "$MEMORY_DIR/agents/roster.md" 2>/dev/null || true
   ALLOW_MAJOR=no; SRC_ARG=""
   for a in "$@"; do
     case "$a" in
