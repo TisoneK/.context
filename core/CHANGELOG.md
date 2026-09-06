@@ -10,6 +10,46 @@ bump MINOR; wording and fixes bump PATCH.
 
 ---
 
+## 0.13.0 — 2026-09-06
+
+**Session history is grouped and bounded (three-zone lifecycle).**
+`agents/sessions.md` was append-only *forever* — session history grew without
+bound and sat in the startup read (LocalMind's registry alone spans dozens of
+sessions). This introduces session **groups** that rotate through three zones
+so `memory/` only ever holds the live group.
+
+- **New zones `history/` and `archive/`** under `.context/` (created by
+  bootstrap and installed by `update` for existing projects). Neither is read
+  at session start — the schema and both editions state this. `memory/`
+  (live) → `history/` (closed, readable `group-<NNN>.md`) → `archive/` (cold
+  `group-<NNN>.tar.gz`) → `gc`.
+- **New `context-history` + `context-history.ps1`:** `status` (current group,
+  session count, zone sizes, due?), `close [--milestone L] [--confirm]`
+  (consolidate the live group into `history/`, start a fresh group, roll the
+  oldest readable group into `archive/`), `gc [--confirm]` (delete oldest
+  `archive/` tarballs over the cap, oldest-first, git-recoverable). Destructive
+  steps are gated behind `--confirm` and print a dry-run plan first.
+- **A "group" is the session-history subtree only** — `agents/sessions.md`,
+  `sessions/SUMMARY.md`, `sessions/<date-N>/`. Durable facts (`user/`,
+  `system/`, decisions, backlog, flaws, inefficiencies) and collaboration
+  events never rotate; they persist in `memory/` with their own hygiene. This
+  scoping is deliberate: resetting all of `memory/` per group would break the
+  durable-facts spine (ADRs are respected, not relitigated).
+- **No implicit carryover.** `close` prints a promotion checklist and refuses
+  to execute without `--confirm`: every open thread must already live in its
+  durable domain file before the group closes, so the new group starts clean —
+  the spec's "no carryover" enforced at the boundary, not by wiping memory.
+- **Tunable, weak-agent-safe defaults** in `memory/workflows/history.conf`:
+  `group_size=20`, `history_keep=3`, `archive_keep=12`. `agents/sessions.md`
+  becomes the *current group's* registry (backward-compatible — rotation only
+  begins at the first `close`).
+
+**Migration from 0.12.x:** `update` creates `history/`, `archive/`,
+`history.conf`, and `agents/GROUP` if absent, and never clobbers an existing
+one. Existing `agents/sessions.md` keeps growing until the first
+`context-history close`, which starts the rotation. Archives are `.tar.gz` on
+both platforms (the `.ps1` uses `tar.exe`, shipped on Windows 10+).
+
 ## 0.12.0 — 2026-09-05
 
 **Bound the durable logs (context pruning).** The append-only durable logs
