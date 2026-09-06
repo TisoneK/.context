@@ -10,6 +10,42 @@ bump MINOR; wording and fixes bump PATCH.
 
 ---
 
+## 0.16.0 — 2026-09-06
+
+**Sync is one command and fill again.** Each release since 0.9.x added files
+or zones that only `update`'s versioned backfill installed — and because that
+backfill lived in the *old* script that runs first, migrating an old project
+meant running `update` twice, guessing about CRLF, and hand-creating new
+zones. This restores the old simplicity.
+
+- **New `context-sync migrate` (POSIX + PowerShell + `.cmd`):** the
+  one-command bring-current. It updates the core to the newest reachable
+  same-MAJOR version, then **backfills every missing zone/file** (`history/`,
+  `archive/`, `CLAUDE.md`, `.gitattributes`, `roster.md`, `history.conf`,
+  `GROUP`, …), LF-normalizes, relocks, and verifies — then prints the single
+  manual step: fill the project facts. Idempotent; safe to re-run; doubles as
+  a repair command for a project missing any current file.
+- **The backfill is factored out** (`backfill_project`) as the one definition
+  of "what a fully-migrated project contains" — adding a new template file to
+  that list is all it takes to teach migration about it. Both `update` and
+  `migrate` go through it.
+- **`update` now fully migrates in one run** (from this version on): after
+  the core swap it re-execs the *just-installed* script's `migrate
+  --backfill-only`, so the new script — which knows every new file — does the
+  backfill. No more "run update twice."
+- **The PowerShell `update` caught up:** it had only ever backfilled README /
+  `.gitattributes` / `CLAUDE.md`, missing the `history/`, `archive/`,
+  `roster.md`, `GROUP`, and `history.conf` a 0.13+ project needs. It now
+  installs all of them through the shared backfill.
+- **MIGRATION.md rewritten** to lead with the one-command path for any
+  0.2.0+ project (with the old-script fallback), keeping the pre-0.2.0
+  flat-layout `git mv` steps as a clearly-marked special case that ends in
+  the same `migrate`.
+
+**Migration to 0.16.0 itself:** from an older project, `update` once (installs
+this script) then `migrate` — or just `migrate` if the vendored script already
+has it. From 0.16.0 forward, one `update` (or one `migrate`) is enough.
+
 ## 0.15.0 — 2026-09-06
 
 **Agents are named coworkers, not "peers".** Collaboration works, but agents

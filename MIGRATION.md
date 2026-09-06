@@ -1,81 +1,111 @@
-# Migrating a Project to Core 0.2.0 (the two-zone layout)
+# Migrating a Project to the Current Core
 
-For projects bootstrapped before 0.2.0 — the ones with a **flat**
-`.context/` (memory files at the top level, `SYNC.md`, no `core/` or
-`memory/` zones, protocol read from a sibling `../context` clone).
+Sync is meant to be **one command, then fill the facts**. This page is that
+recipe, plus the one special case (pre-0.2.0 flat layouts) that needs a
+manual step first.
 
-The migration is one session, one commit, **zero data loss**: every
-memory file moves with `git mv` (history preserved); nothing is
-regenerated except the files whose templates changed (`kickoff.md`,
-`.context/README.md`).
+## The easy path — any 0.2.0+ project → current
 
-An agent can run this. Treat it as a `.context/`-surface session:
-`chore(context):` prefix, memory rules apply throughout.
+From the project repo root, with a fresh package checkout reachable (a
+sibling `../context` clone freshened, or `CONTEXT_PKG=/path/to/context`):
 
-## Steps
+```bash
+sh .context/core/bin/context-sync migrate
+```
 
-From the project repo root, with the package clone as a sibling
-(`../context`, freshened — find it by remote URL, never by name):
+That single command updates the vendored core to the newest reachable
+version, backfills every zone/file newer releases added (`history/`,
+`archive/`, `CLAUDE.md`, `.gitattributes`, `roster.md`, `history.conf`,
+`GROUP`, …), LF-normalizes the core, relocks, and verifies. It is
+idempotent — safe to run again. Then it prints the **one manual step**:
+
+- **`.context/kickoff.md`** — refill Project Facts (remote URL, default
+  branch, project name) if its template changed.
+- **`AGENTS.md`** — `<PROJECT_NAME>`.
+- **`memory/workflows/active.md`** — protocol *"by agent type"*, both edition
+  paths under `.context/core/rules/`.
+
+Commit + push: `chore(context): migrate to core <version>`.
+
+**On Windows:** `.context/core/bin/context-sync.cmd migrate` (the `.cmd`
+launcher needs no execution-policy change).
+
+### If `migrate` isn't recognized (project predates it, core < 0.16.0)
+
+The vendored script is too old to have `migrate`. Run `update` once — it
+installs a script that has it — then `migrate`:
+
+```bash
+sh .context/core/bin/context-sync update    # swaps in a current-enough core
+sh .context/core/bin/context-sync migrate   # backfills + verifies + fills-facts prompt
+```
+
+From core 0.16.0 onward, a plain `update` already hands off to `migrate`
+internally, so one command is enough.
+
+### Windows / CRLF note
+
+The installed `.context/.gitattributes` forces `eol=lf`, so future checkouts
+stay correct. If the project ever committed CRLF blobs, run once after
+migrating: `git add --renormalize . && git commit -m "chore(context): normalize line endings to LF"`.
+
+---
+
+## Special case: pre-0.2.0 (flat layout) → current
+
+For projects bootstrapped before 0.2.0 — a **flat** `.context/` (memory files
+at the top level, `SYNC.md`, no `core/` or `memory/` zones, protocol read
+from a sibling `../context` clone). These need the two-zone layout created by
+hand **first**, then the easy path above.
+
+One session, one commit, **zero data loss**: every memory file moves with
+`git mv` (history preserved).
 
 ```bash
 # 0. Preconditions: clean tree, flat layout confirmed
 git status --short                  # must be empty
-ls .context/core 2>/dev/null && echo "already migrated — stop"
+ls .context/core 2>/dev/null && echo "already migrated — use the easy path"
 
 # 1. Move ALL memory into the memory/ zone (git mv — never cp)
 cd .context && mkdir memory
 git mv agents inefficiencies plans reviews system tasks user workflows memory/ 2>/dev/null
 git mv flaws memory/ 2>/dev/null
-git mv secrets memory/ 2>/dev/null || mv secrets memory/   # mostly untracked — mv is fine
+git mv secrets memory/ 2>/dev/null || mv secrets memory/   # mostly untracked
 cd ..
 
-# 2. Retire the old structural files (their jobs moved to core/)
+# 2. Retire the old structural files
 git rm .context/SYNC.md 2>/dev/null
-git rm .context/README.md          # replaced from core/templates below
-OLD_KICKOFF=.context/kickoff.md; [ -f "$OLD_KICKOFF" ] && git rm "$OLD_KICKOFF"
+git rm .context/README.md
+[ -f .context/kickoff.md ] && git rm .context/kickoff.md
 
-# 3. Vendor the core + seed the new zone files
+# 3. Vendor the core, then run the one-command migrate to finish everything
 cp -R ../context/core .context/core
-cp .context/core/templates/context-README.md .context/README.md
-cp .context/core/templates/kickoff.md .context/kickoff.md
-cp -R .context/core/templates/memory/overrides .context/memory/overrides
-[ -f AGENTS.md ] || cp .context/core/templates/AGENTS.md AGENTS.md
-sh .context/core/bin/context-sync verify   # writes memory/core.lock too
+sh .context/core/bin/context-sync migrate
 ```
 
-Then, by hand (an agent does this from the project's own memory —
-formats in each file's HTML comment and in
-`.context/core/schemas/context-schema.md`):
+Step 3's `migrate` seeds `.context/README.md`, `kickoff.md`, `AGENTS.md`, the
+`history/`/`archive/` zones, and every current file, then verifies and prints
+the fill-facts step. Finish that step, then:
 
-4. **Refill `.context/kickoff.md`** Project Facts from memory
-   (`memory/user/identity.md`, `memory/workflows/active.md`,
-   `git remote get-url origin`). Fill `AGENTS.md`'s `<PROJECT_NAME>`.
-5. **Update `memory/workflows/active.md`** to the 0.2.0 template shape:
-   protocol **"by agent type", naming BOTH editions** at their new
-   `.context/core/rules/` paths; replace the raw/blob "Protocol source"
-   URLs with "Protocol location: vendored in `.context/core/`" plus a
-   "Package upstream" URL.
-6. **Path sweep:** update stale `.context/<module>` self-references in
-   memory files where they're *instructions* (e.g. a report pointer
-   template) — do NOT rewrite historical log entries; append-only
-   history stays as written.
-7. **Commit everything as one commit and push:**
-   `chore(context): migrate to core 0.2.0 two-zone layout`
-   — then log a session entry noting the migration and the core version.
+4. **Update `memory/workflows/active.md`** to the current template shape:
+   protocol **"by agent type", naming BOTH editions** at their
+   `.context/core/rules/` paths; replace any raw protocol-source URLs with
+   "Protocol location: vendored in `.context/core/`" + a "Package upstream"
+   URL.
+5. **Path sweep:** update stale `.context/<module>` *instruction* references
+   in memory files (not historical log entries — append-only history stays
+   as written).
+6. **Commit as one commit and push:**
+   `chore(context): migrate to core <version> (two-zone + current)` — then log
+   a session entry noting the migration and the core version.
 
-## What changed, for the record
+## What the two-zone model changed (for the record)
 
-| 0.1.x | 0.2.0 |
+| pre-0.2.0 | 0.2.0+ |
 |---|---|
 | Protocol in a sibling clone, fetched per session | Vendored at `.context/core/`, versioned + checksummed |
 | Memory files flat under `.context/` | Under `.context/memory/` (same modules, same formats) |
-| `SYNC.md` basename rule (README/.gitignore = structural) | Zone ownership: core replaced whole, memory never touched |
+| `SYNC.md` basename rule | Zone ownership: core replaced whole, memory never touched |
 | Package PAT for cloud sessions | Bootstrap-only; sessions need no package access |
-| No overrides mechanism | `memory/overrides/rules.md` (beats the edition) |
 | No integrity/fallback | `context-sync verify` / `rollback` + `memory/core.lock` |
-| No root discovery file | `AGENTS.md` generated at bootstrap |
-
-Old GitHub URLs to `ai-engineering-protocol*.md` at the package root
-404 after 0.2.0 (the editions moved to `core/rules/`). Migrated
-projects don't fetch by URL anymore, so the only fix needed is the
-`workflows/active.md` update in step 5.
+| Manual multi-step sync | `context-sync migrate` — one command + fill the facts |

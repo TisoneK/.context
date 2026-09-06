@@ -68,7 +68,7 @@ core/
 ├── CHANGELOG.md         # one entry per release + migration notes
 ├── MANIFEST.sha256      # checksums of every core file — integrity check
 ├── bin/
-│   ├── context-sync     # POSIX-sh: status / verify / update / rollback / bootstrap
+│   ├── context-sync     # POSIX-sh: status / verify / update / migrate / rollback / bootstrap
 │   ├── context-sync.ps1   # PowerShell port (Windows): status / verify / update / rollback / lock
 │   ├── context-collab       # POSIX-sh: atomic collaboration events + status + check
 │   ├── context-collab.ps1   # PowerShell port (Windows): emit + status + check
