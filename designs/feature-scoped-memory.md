@@ -59,7 +59,7 @@ memory/features/
 
 Schema-table rows (extends the Zone 2 inventory):
 
-| Path (under `.context/memory/`) | Mode | Scope | Holds |
+| Path (under `.context_ledger/memory/`) | Mode | Scope | Holds |
 |---|---|---|---|
 | `features/ledger.md` | append-only | project | One line per feature ever: slug, started, outcome, finished |
 | `features/<slug>/manifest.md` | update-in-place | project | Goal, branch, status, started, current state, next steps |
@@ -156,7 +156,7 @@ need one.
 ## Weak-agent floor
 
 Tier-1 (`AGENTS.md` digest) gains one line: *"multi-session work is
-tracked under `.context/memory/features/<slug>/manifest.md` — read the
+tracked under `.context_ledger/memory/features/<slug>/manifest.md` — read the
 active one (named in `tasks/current.md`) before starting; update it
 before you stop."* Minimal compliance is manifest-only (no notes.md,
 no archival) — an agent that does only that does less, but nothing

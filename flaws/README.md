@@ -2,7 +2,7 @@
 
 This directory is where workflow-level flaws observed across **all
 projects** using this protocol are consolidated. Each project's
-`.context/flaws/log.md` is the source of truth for that project; this
+`.context_ledger/flaws/log.md` is the source of truth for that project; this
 directory is where patterns are back-ported so the protocol package
 itself can be improved.
 
@@ -10,8 +10,8 @@ itself can be improved.
 
 ```
 Project session hits a workflow flaw
-  → logged in the project's .context/memory/flaws/log.md (Status: open)
-  → context-sync harvest collects it here (into ../inbox/) — see below
+  → logged in the project's .context_ledger/memory/flaws/log.md (Status: open)
+  → ledger-sync harvest collects it here (into ../inbox/) — see below
   → protocol/core/roles updated in this package to fix it
   → the project's flaw entry gets a "Fixed in package" line
   → new projects bootstrap from the fixed core
@@ -20,7 +20,7 @@ Project session hits a workflow flaw
 ## Harvesting (automated collection)
 
 The collection step used to be manual copy-paste from each project. It is
-now `context-sync harvest`, run from a package clone. It reads `fleet.md`
+now `ledger-sync harvest`, run from a package clone. It reads `fleet.md`
 (the registry of bootstrapped projects), reaches each one read-only (a
 sibling clone matched by remote URL, else a shallow clone), and pulls in:
 
@@ -58,11 +58,11 @@ then delete the run file — the ledger remembers.
 ---
 ## YYYY-MM-DD — <agent> / <model> (consolidated from <project>, Session N)
 
-- **Flaw:** <what in the protocol or .context/ system didn't work>
+- **Flaw:** <what in the protocol or .context_ledger/ system didn't work>
 - **Symptom:** <what happened to the agent — the observable friction>
-- **Root cause:** <why the protocol/.context/ let this happen>
+- **Root cause:** <why the protocol/.context_ledger/ let this happen>
 - **Suggested fix:** <concrete change to the package>
-- **Source:** <project repo> — .context/flaws/log.md, Session N
+- **Source:** <project repo> — .context_ledger/flaws/log.md, Session N
 - **Status:** open | fixed in <commit-sha> on <date>
 ```
 
@@ -70,5 +70,5 @@ then delete the run file — the ledger remembers.
 
 The 4 flaws below were observed by GitHub Copilot / DeepSeek V4 Flash
 Free during LocalMind Session 3 (2026-07-11). They are all about the
-protocol not guiding the agent well enough during `.context/`-only
+protocol not guiding the agent well enough during `.context_ledger/`-only
 tasks. All 4 are open — none have been fixed in the protocol yet.

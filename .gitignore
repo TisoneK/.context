@@ -1,6 +1,6 @@
 .DS_Store
 
-# context-sync harvest: transient read-only clones + regenerated triage files.
+# ledger-sync harvest: transient read-only clones + regenerated triage files.
 # The dedup ledger (inbox/.harvested) is committed; per-run reports are not.
 /.harvest-cache/
 /inbox/harvest-*.md

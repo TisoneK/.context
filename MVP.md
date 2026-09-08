@@ -1,6 +1,6 @@
 # MVP — Public Release Plan & Feature Roadmap
 
-The plan for taking the `.context/` workflow public: what ships in the
+The plan for taking the `.context_ledger/` workflow public: what ships in the
 MVP, what comes after, and which logged flaws each feature retires.
 This file is the **single home for advanced/future feature ideas** — when
 a session or a flaw entry suggests a feature that's out of scope for a
@@ -19,16 +19,16 @@ channel, truthful/fast tooling, Windows CRLF fix) · `mvp`
 ## The distribution model (the MVP's spine) — `shipped 0.2.0`, evolved
 
 The original plan replaced the per-session clone with a versioned
-archive (`context-0.1.0.zip → ../context/`). **Core 0.2.0 went one step
+archive (`context-0.1.0.zip`, unpacked beside the project). **Core 0.2.0 went one step
 further: the protocol is *vendored into every project* as
-`.context/core/`** — versioned (`core/VERSION`), checksummed
+`.context_ledger/core/`** — versioned (`core/VERSION`), checksummed
 (`core/MANIFEST.sha256`), documented per release (`core/CHANGELOG.md`),
-managed by `core/bin/context-sync`. Sessions need no GitHub account, no
+managed by `core/bin/ledger-sync`. Sessions need no GitHub account, no
 PAT, no clone, no network: the protocol is already in the repo.
 
 What remains of the archive idea: **the release artifact for core
-updates.** A `context-X.Y.Z.zip` that unpacks to a core tree is exactly
-what `context-sync update <path>` accepts as a source — useful for
+updates.** A `context-ledger-X.Y.Z.zip` that unpacks to a core tree is exactly
+what `ledger-sync update <path>` accepts as a source — useful for
 users who don't clone the package repo at all. Still `mvp`: the release
 script that builds, stamps, and names that artifact (the `manifest`
 subcommand already exists; zipping + naming doesn't yet).
@@ -47,7 +47,7 @@ going stale mid-session, PAT-for-the-package after bootstrap, the
 The versioning, changelog, manifest, and update tooling shipped in
 0.2.0 (see above). What's left: a release script that zips `core/`
 (excluding dev-only files), names the artifact
-`context-<VERSION>.zip`, and publishes it. Open question: distribution
+`context-ledger-<VERSION>.zip`, and publishes it. Open question: distribution
 channel (GitHub Releases on a public repo vs. direct share) — decoupled
 from the repo's own visibility either way.
 
@@ -62,23 +62,23 @@ bootstrap guards state in words:
 - append-only files (`sessions.md`, `backlog.md`, `decisions.md`, both
   logs) show additions only
 - no unfilled `<PLACEHOLDER>`s outside HTML template comments
-- no mixed-surface staging (project paths and `.context/` paths staged
+- no mixed-surface staging (project paths and `.context_ledger/` paths staged
   together)
-- bootstrap sanity: `.context/.git` and protocol editions absent from
+- bootstrap sanity: `.context_ledger/.git` and protocol editions absent from
   the project's memory dir
 - exit-readiness mode (`check --exit`): clean tree, `tasks/current.md`
   cleared, session entry present for today
 
 Open question: portability — POSIX shell + a Python fallback, since
 sandboxes vary. The protocol gains one line: "run
-`.context/core/bin/check` before each commit; a failing check blocks
-the commit." (Distinct from `context-sync`, which manages the vendored
+`.context_ledger/core/bin/check` before each commit; a failing check blocks
+the commit." (Distinct from `ledger-sync`, which manages the vendored
 core itself — `check` guards *session output*. It ships inside `core/bin/`
 so it, too, travels with every project.)
 
 ### 3. Single-source editions — `mvp`
 The two editions duplicate ~90% of their text (all 42 pitfalls, the Ten
-Binding Rules, the `.context/` spec); every dual edit risks drift. MVP
+Binding Rules, the `.context_ledger/` spec); every dual edit risks drift. MVP
 restructures to **one core protocol + thin platform deltas** (local /
 cloud), with the editions either generated at release-build time (the
 zip ships the familiar two files, built from core + delta) or replaced
@@ -87,7 +87,7 @@ generation preferred — zero change to what agents consume.
 
 ### 4. Baked protocol — offline entry per project — `shipped 0.2.0`
 Shipped, maximally: the whole core is committed into every project as
-`.context/core/` — editions, schemas, templates, tool. A session can
+`.context_ledger/core/` — editions, schemas, templates, tool. A session can
 never find the protocol missing (task2sms Session 2's failure is
 impossible by construction), and `memory/core.lock` +
 `workflows/active.md` record exactly which core version is in force.
@@ -103,8 +103,8 @@ agreeing on the best-supported option plus one implementation owner —
 there is no timestamp or agent-ID tie-breaker. `tasks/current.md` remains
 the lock only when collaboration is not enabled.
 
-The mechanical helpers are `core/bin/context-collab` and
-`core/bin/context-gates`, covering collaboration events, integration checks,
+The mechanical helpers are `core/bin/ledger-collab` and
+`core/bin/ledger-gates`, covering collaboration events, integration checks,
 per-turn checkpoints, pre-commit, integration, and exit gates. Product
 merges remain peer-reviewed and explicit; the protocol does not silently
 merge conflicting code or choose a winner.
@@ -115,7 +115,7 @@ merge conflicting code or choose a winner.
 ## Future / advanced (post-MVP)
 
 - **Upgrade flow between package versions** — `shipped 0.2.0` (core),
-  `future` (memory-shape migrations) — `context-sync update` handles
+  `future` (memory-shape migrations) — `ledger-sync update` handles
   core upgrades (semver-gated, verified, memory untouched), and
   `core/CHANGELOG.md` carries per-release migration notes. Still open:
   *memory*-shape changes (a renamed module, a new mandatory memory

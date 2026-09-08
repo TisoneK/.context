@@ -20,7 +20,7 @@ was meant to extend. Three failure modes, all evidenced in the fleet:
 
 The event vocabulary is seven heavyweight legal instruments —
 `claim → proposal → assessment → agreement → correction → handoff →
-release` — every one requiring a separate `chore(context):` commit and a
+release` — every one requiring a separate `chore(ledger):` commit and a
 coordination-branch push; `agreement` additionally requires ≥2
 participants, cross-referenced proposals AND assessments, a selected
 option, and a named owner.
@@ -118,13 +118,13 @@ notes into shared durable files (kills B-2026-08-18-1's root cause).
 
 ### Part C — Make the tooling truthful, fast, and CR-tolerant
 
-- **Truthful closure:** `released()` (in `context-collab`) and
-  `claim_closed()` (in `context-collab-check`) recognize a claim as closed
+- **Truthful closure:** `released()` (in `ledger-collab`) and
+  `claim_closed()` (in `ledger-collab-check`) recognize a claim as closed
   when a later `release`/`handoff` either (a) references the claim event ID
   **or** (b) matches the claim's `session`+`issue` and overlaps its
   `paths` (the SHA-only case). Weak agents don't reliably copy event IDs;
   closure must infer from what they actually do.
-- **No more hang:** rewrite `context-collab-check` to parse every event
+- **No more hang:** rewrite `ledger-collab-check` to parse every event
   **once** into an in-memory index (single `awk` pass), then run all checks
   over the index — no re-globbing, no per-field `sed` forks. Add progress
   output so it can never look hung.
@@ -140,14 +140,14 @@ notes into shared durable files (kills B-2026-08-18-1's root cause).
   `bin/*`, `*.ps1`, `*.sh`, `*.md`, and `MANIFEST.sha256` — so a Windows
   clone can never get CRLF into the manifest-hashed tree. (Root file lives
   outside `core/`, so it is never itself hashed.)
-- Ship **`templates/.gitattributes`** and have `context-sync bootstrap`
-  install it as `.context/.gitattributes`, giving every future
-  bootstrapped project LF enforcement on `.context/core/**` and
-  `.context/memory/**` (fixes B-2026-08-30-17 and the Session-407 sh
+- Ship **`templates/.gitattributes`** and have `ledger-sync bootstrap`
+  install it as `.context_ledger/.gitattributes`, giving every future
+  bootstrapped project LF enforcement on `.context_ledger/core/**` and
+  `.context_ledger/memory/**` (fixes B-2026-08-30-17 and the Session-407 sh
   manifest-parse death at the root).
 - CHANGELOG migration note documents the one-time remediation for
   repos already checked out CRLF: `git add --renormalize .` (or
-  `core.autocrlf=false` + `git checkout -- .context`).
+  `core.autocrlf=false` + `git checkout -- .context_ledger`).
 
 ---
 
@@ -155,12 +155,12 @@ notes into shared durable files (kills B-2026-08-18-1's root cause).
 
 - Bump `core/VERSION` → `0.9.0`; add a `core/CHANGELOG.md` entry (newest
   first) with the migration note above.
-- Update `core/schemas/context-schema.md` + `context.schema.json` for the
+- Update `core/schemas/ledger-schema.md` + `ledger.schema.json` for the
   `note` type (additive; `note` requires only the universal fields).
 - Update the `core/templates/AGENTS.md` digest — the **weak-agent floor**:
   the collaboration summary a small local model actually reads must teach
   the light path (`note` + `claim`/`release`) first.
-- **Regenerate `core/MANIFEST.sha256`** (`sh core/bin/context-sync manifest`)
+- **Regenerate `core/MANIFEST.sha256`** (`sh core/bin/ledger-sync manifest`)
   in the **same commit** as the `core/` changes.
 - The maintainer's Mac has no `pwsh`; `.ps1` changes are validated
   statically and manifest-format cross-checked, per the standing note in
@@ -185,7 +185,7 @@ scrapamoja, vert, InjectX, PortalLens) sharpened the picture:
   and log the result"). The `note` gap is not hypothetical — agents already
   improvised it in the wrong place.
 - **Session-number collisions are real** (PortalLens: two agents both logged
-  "Session 8" the same day; "nothing in `.context/` prevented it"). Folded
+  "Session 8" the same day; "nothing in `.context_ledger/` prevented it"). Folded
   in as a lightweight guidance rule, not a new mechanism.
 - **CRLF is the dominant, still-open, cross-repo failure** (proxigrid,
   glyph, PortalLens, scrapamoja). glyph patched `.gitattributes` locally but
@@ -193,10 +193,10 @@ scrapamoja, vert, InjectX, PortalLens) sharpened the picture:
   append-only `memory/` logs (a 229-line phantom diff). Part D's template
   covers `memory/**` too, closing that second hole.
 - **Two concrete new bugs folded into Part C/D:**
-  - `context-gates.ps1` crashes on Windows — `Cannot bind parameter because
+  - `ledger-gates.ps1` crashes on Windows — `Cannot bind parameter because
     parameter 'PathType' is specified more than once` — two `Test-Path`
     calls chained with `-or` without parenthesizing each. **No gate runs.**
-  - `context-sync` on Windows Git Bash dead-ends with `need sha256sum or
+  - `ledger-sync` on Windows Git Bash dead-ends with `need sha256sum or
     shasum on PATH`; the error should point at the `.ps1` port instead of
     being a dead end.
 

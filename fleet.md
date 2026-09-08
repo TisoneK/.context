@@ -1,5 +1,5 @@
 # Fleet registry — every project bootstrapped from this protocol package.
-# Appended by 'context-sync bootstrap'; read by 'context-sync harvest'.
+# Appended by 'ledger-sync bootstrap'; read by 'ledger-sync harvest'.
 # One project per line:  <git-remote-url>  bootstrapped=<date>  core=<version>
 # Append-only. Edit by hand only to correct a URL or add a repo bootstrapped
 # elsewhere. A '#' comment or blank line is ignored by harvest.
