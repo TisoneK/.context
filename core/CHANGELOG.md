@@ -10,6 +10,32 @@ bump MINOR; wording and fixes bump PATCH.
 
 ---
 
+## 0.18.1 — 2026-09-08
+
+**Cross-platform `rename` fix.** The 0.18 `rename` command's entry-point
+sweep used `sed -i 's|…|…|g' file`, which only works on GNU sed (Linux,
+Git Bash on Windows). On BSD/macOS sed, `-i` consumes the next argument
+as a backup suffix and the filename is then parsed as a sed script — so
+every sweep errored (`sed: ... invalid command code .`) and the
+generated entry points (`README.md`, `kickoff.md`, `.gitattributes`,
+`AGENTS.md`, `CLAUDE.md`) were left with stale `.context/` references
+after the `git mv` succeeded.
+
+- **Fix.** The sweep now rewrites through a temp file (no `-i`) using
+  POSIX-only regex — and drops the GNU-only `\b` word boundary. It runs
+  identically on GNU and BSD sed: Linux, macOS, and Windows Git Bash.
+  `.context/` is rewritten first; bare `.context` is matched only at a
+  non-word/non-slash boundary or end of line, so an existing
+  `.context_ledger` is never double-renamed to `.context_ledger_ledger`.
+- **Scope.** `rename` (POSIX-sh tool) only; PATCH. No spec, layout,
+  memory, or behavioral change on GNU platforms — the sweep now simply
+  also works on macOS. The PowerShell port was already correct.
+- **Who needs it.** Anyone finishing the 0.18 `.context/` →
+  `.context_ledger/` migration on macOS. If you already ran `rename`
+  there, the `git mv` worked but the five entry-point files may still
+  say `.context/` — re-run `rename` against this core, or fix them by
+  hand. Memory files were never touched by the sweep regardless.
+
 ## 0.18.0 — 2026-09-08
 
 **Context Ledger.** The package went public and took its real name. The
