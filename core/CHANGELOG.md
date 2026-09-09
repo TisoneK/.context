@@ -10,6 +10,36 @@ bump MINOR; wording and fixes bump PATCH.
 
 ---
 
+## 0.19.0 — 2026-09-08
+
+**Resume after clock-out — the ghost-editor fix.** Clock-out (Step 15)
+removed the roster row and Step 17 logged the session as soon as "the
+main work looks done," yet Pitfall #30 holds that the session is not over
+until the user says so. So when the supervisor followed up after wrap-up,
+the agent resumed *after* it had already left the board: it kept editing
+under the identity it just retired, never re-registered, and peers saw
+edits landing from someone who was not in the office (from
+`flaws/log.md`, 2026-09-08 user report).
+
+- **Clock-out now means leaving, not wrapping up.** Vacate the board only
+  when you are actually leaving; if you expect a follow-up, keep your row
+  live and clock out later. Step 15 and the AGENTS.md digest say so
+  explicitly and cross-reference Pitfall #30.
+- **New resume rule (both editions, kickoff, digest):** if you already
+  clocked out and the user brings more work, you have left and returned —
+  **check back in before touching anything.** Re-add your row under the
+  **same name and codename `S<N>`** (you are the same session) and push it
+  as `chore(ledger): <name> (<codename>) checks back in — <task>`. Never
+  edit under a retired identity while your row is gone.
+- **One `sessions.md` entry per codename `S<N>`, even across a resume.**
+  Extend your existing Step 17 entry (commit range, outcome, open items);
+  never append a second `Session N`.
+- **`ledger-mem check` gains a duplicate-session audit** (POSIX +
+  PowerShell): two `Session N` entries for one codename warn (never fail)
+  — a resumed session re-logged instead of extending. Merge them. The
+  PowerShell port mirrors the POSIX logic but was not runtime-verified on
+  Windows this release (no `pwsh` on the authoring host).
+
 ## 0.18.1 — 2026-09-08
 
 **Cross-platform `rename` fix.** The 0.18 `rename` command's entry-point
