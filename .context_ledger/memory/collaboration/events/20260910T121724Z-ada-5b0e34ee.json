@@ -1,0 +1,16 @@
+{
+  "schema": 1,
+  "id": "20260910T121724Z-ada-5b0e34ee",
+  "type": "release",
+  "session": "S1",
+  "agent": "ada",
+  "created": "2026-09-10T12:17:24Z",
+  "issue": "self-hosted-sync",
+  "body": "Release-sync rule landed in README (ccc5957): vendored core tracks releases; releasing session syncs with ledger-sync update + chore(ledger): self-host commit.",
+  "paths": [],
+  "refs": ["20260910T121618Z-ada-386c7f32", "ccc5957"],
+  "option": null,
+  "selected": null,
+  "owner": null,
+  "participants": []
+}

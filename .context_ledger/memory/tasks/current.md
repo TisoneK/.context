@@ -7,5 +7,5 @@ its roster row (if left behind) says who was here; check the session
 entry and backlog before starting.
 
 - **Session:** 2026-09-10 — Ada / glm-5.3-flash
-- **Task:** self-host the ledger — add the release-sync rule to README (vendored core tracks releases)
-- **Status:** in-progress
+- **Task:** self-host the ledger — bootstrap + release-sync rule (done)
+- **Status:** done
