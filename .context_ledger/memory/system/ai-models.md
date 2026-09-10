@@ -32,3 +32,9 @@ Update in place when a newer session contradicts an old observation.
 <!-- TEMPLATE — one bullet per observation:
 - **<agent> / <model>:** <what was observed — concrete and checkable, e.g. "Read tool truncates files >500 lines; needs offset/limit", "SSRF fix shipped with regression test, verified green"> (YYYY-MM-DD)
 -->
+
+| Ada | glm-5.3-flash | 2026-09-10 | 2026-09-10 | 1 |
+
+## Observations
+
+- **Ada / glm-5.3-flash:** strict-profile JSON (one "key": value per line, escaped body) round-trips exactly through pure POSIX sh readers (sed/awk) and Windows PowerShell `ConvertFrom-Json` alike; PowerShell gotcha surfaced and fixed — a bare `-or` between two command calls inside `if()` does not evaluate as two boolean results, so parenthesize or name the booleans (2026-09-10)

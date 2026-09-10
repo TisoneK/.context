@@ -53,3 +53,7 @@ Format: - <preference> — <how to apply it> (provenance, YYYY-MM-DD)
 ## Review depth
 
 ## Risk & approvals
+
+## Workflow
+- The user runs multiple agent sessions concurrently (fleets); cross-session coordination — sequencing releases, resolving collisions — is relayed by the supervisor between sessions. (observed, 2026-09-10)
+- When a session's own conduct violates the protocol it is shipping, the user expects the miss named plainly and logged as a flaw, not smoothed over. (correction, 2026-09-10)

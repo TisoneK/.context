@@ -30,3 +30,5 @@ records.
 - A removed summary line MUST have a corresponding permanent entry in
   agents/sessions.md — never delete the only record of a session.
 -->
+
+- **2026-09-10 — Session 1** — Ada / glm-5.3-flash — core 0.22.0 shipped (collab events as JSON + backlog closeout sweep); ledger self-hosted with the release-sync rule. First solo claim→release cycle validated on the new board. summary only.

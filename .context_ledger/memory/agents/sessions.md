@@ -20,3 +20,11 @@ new group starts clean.
 - **Notes:** .context_ledger/memory/sessions/<date>-<N>/notes.md  (or "none")
 - **Report:** .context_ledger/memory/reviews/YYYY-MM-DD-review.md
 -->
+
+## 2026-09-10 — Session 1
+- **Agent:** Ada | **Model:** glm-5.3-flash | **Platform:** Windows 11 workstation (local, Git Bash) | **Role:** engineer | **Core:** 0.22.0
+- **Task:** ship collaboration-events-as-JSON (schema v1, solo light path, sh+ps1), resolve the two-session release collision, self-host the ledger on this repo with the release-sync rule
+- **Commits:** 6 (e84bdd1..0e8e7cc)
+- **Outcome:** done — core 0.22.0 released; .context_ledger/ bootstrapped; first solo claim→release cycle validated through `ledger-collab check`
+- **Open items:** none
+- **Notes:** summary only
