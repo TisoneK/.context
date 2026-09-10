@@ -89,8 +89,9 @@ Fix the source; let the instances pull.
   synced. Protocol learnings flow project → `memory/flaws/log.md` →
   this repo → the next core release.
 - **Append-only logs stay append-only** — `sessions.md`, both friction
-  logs, `backlog.md`, `decisions.md`. Corrections are appended, never
-  edited in.
+  logs, `decisions.md`. Corrections are appended, never edited in.
+  (`tasks/backlog.md` is the one live queue: open work only — delete a
+  line when its item is done; history is the session log + git.)
 - **No secrets in tracked files** — values live only in
   `memory/secrets/`, a self-gitignored local-only module.
 - **Fact scoping beats contamination** — edition by agent type,

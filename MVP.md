@@ -59,8 +59,9 @@ bootstrap guards state in words:
 
 - staged diff contains no credential markers (`x-access-token`,
   `github_pat_`, `ghp_`, `gho_`, key-looking strings)
-- append-only files (`sessions.md`, `backlog.md`, `decisions.md`, both
-  logs) show additions only
+- append-only files (`sessions.md`, `decisions.md`, both
+  logs) show additions only (`backlog.md` is exempt — a live queue,
+  deletions expected when an item finishes)
 - no unfilled `<PLACEHOLDER>`s outside HTML template comments
 - no mixed-surface staging (project paths and `.context_ledger/` paths staged
   together)
