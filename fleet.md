@@ -13,3 +13,4 @@ https://github.com/TisoneK/task2sms.git    bootstrapped=2026-07-13  core=0.1.0  
 https://github.com/TisoneK/scrapamoja.git  bootstrapped=2026-07-14  core=0.2.0  # backfilled
 https://github.com/TisoneK/glyph.git  bootstrapped=2026-07-29  core=0.3.0
 https://github.com/TisoneK/proxigrid.git  bootstrapped=2026-08-26  core=0.8.0
+https://github.com/TisoneK/context-ledger.git  bootstrapped=2026-09-10  core=0.22.0
