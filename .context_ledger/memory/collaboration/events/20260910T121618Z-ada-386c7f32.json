@@ -1,0 +1,16 @@
+{
+  "schema": 1,
+  "id": "20260910T121618Z-ada-386c7f32",
+  "type": "claim",
+  "session": "S1",
+  "agent": "ada",
+  "created": "2026-09-10T12:16:18Z",
+  "issue": "self-hosted-sync",
+  "body": "Adding the release-sync rule to README: the vendored core tracks releases, not dev head — releasing session syncs it as the closing step. Solo light path claim; no peer on the board.",
+  "paths": ["README.md"],
+  "refs": [],
+  "option": null,
+  "selected": null,
+  "owner": null,
+  "participants": []
+}
