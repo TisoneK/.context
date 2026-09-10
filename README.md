@@ -72,7 +72,11 @@ with the protocol found while doing package work goes straight into
 manifest in the same commit — `sh core/bin/ledger-sync manifest` — and
 release-worthy changes bump `core/VERSION` + add a `core/CHANGELOG.md`
 entry (semver: spec/layout breaks = MAJOR, features = MINOR, wording =
-PATCH).
+PATCH). **One workstream at a time.** This repo has no `.context_ledger/`
+of its own, so concurrent sessions have no board to meet on: if you find
+uncommitted files you did not author, that is a live peer — stop and
+surface to the supervisor instead of working around them, and leave the
+manifest regen to the last session to finish.
 
 **The boundary: a package session's output stops at the package push.**
 Fixes reach projects through **their own** next sessions —
