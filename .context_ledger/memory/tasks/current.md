@@ -6,12 +6,6 @@ you find a stale in-progress entry here, a prior session died mid-task —
 its roster row (if left behind) says who was here; check the session
 entry and backlog before starting.
 
-<!-- TEMPLATE — replace everything below this comment:
-- **Session:** YYYY-MM-DD — <agent> / <model>
-- **Task:** <what is being worked on right now>
-- **Status:** in-progress | done | blocked (<blocker>)
--->
-
-- **Session:** —
-- **Task:** none — no session in progress
-- **Status:** idle
+- **Session:** 2026-09-10 — Ada / glm-5.3-flash
+- **Task:** self-host the ledger — add the release-sync rule to README (vendored core tracks releases)
+- **Status:** in-progress

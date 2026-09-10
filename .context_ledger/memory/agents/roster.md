@@ -36,6 +36,7 @@ is your stable session tag.
 
 | Name | Codename | Model | Doing |
 |------|----------|-------|-------|
+| Ada | S1 | glm-5.3-flash | maintainer — self-hosted ledger bootstrap + release-sync rule |
 
 **Clock out when your session ends**: remove your row in the closing
 `chore(ledger):` commit. The board shows who is in the office *now*;
