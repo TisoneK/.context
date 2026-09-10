@@ -78,6 +78,17 @@ uncommitted files you did not author, that is a live peer — stop and
 surface to the supervisor instead of working around them, and leave the
 manifest regen to the last session to finish.
 
+**Self-hosting: this repo runs its own vendored `.context_ledger/`.**
+Sessions here work like any project's — check in on the roster, claim
+scope, log the session. The vendored core tracks **releases, not dev
+head**: when a release commit lands, the releasing session syncs the
+ledger as its closing step — `sh .context_ledger/core/bin/ledger-sync
+update core` (the source is this repo's own `core/`) — verifies, and
+commits as `chore(ledger): self-host core <version>`. Between releases
+the board deliberately runs the last release; dev head isn't protocol
+until it ships. MAJOR bumps still require the user's go-ahead
+(`update --major`).
+
 **The boundary: a package session's output stops at the package push.**
 Fixes reach projects through **their own** next sessions —
 `ledger-sync update` for core, regeneration for generated files — or
