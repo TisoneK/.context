@@ -12,6 +12,6 @@ entry and backlog before starting.
 - **Status:** in-progress | done | blocked (<blocker>)
 -->
 
-- **Session:** 2026-09-11 — Noor / glm-5.3-flash
-- **Task:** none — core 1.0.1 shipped (gate verdict + parse checks + test suite); session closed
-- **Status:** idle
+- **Session:** 2026-09-11 — Milo / glm-5.3-flash
+- **Task:** core 1.0.3 — Run-One gate-teeth fix (a configured command that prints to stdout and exits nonzero clears the gate) + regression tests
+- **Status:** in-progress

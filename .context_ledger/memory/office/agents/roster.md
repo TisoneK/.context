@@ -36,6 +36,7 @@ is your stable session tag.
 
 | Name | Codename | Model | Doing |
 |------|----------|-------|-------|
+| Milo | S004 | glm-5.3-flash | core 1.0.3 — Run-One gate-teeth fix (child stdout contaminating the verdict) + regression tests |
 
 **Clock out when your session ends**: remove your row in the closing
 `chore(ledger):` commit. The board shows who is in the office *now*;
