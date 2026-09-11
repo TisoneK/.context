@@ -1,0 +1,16 @@
+{
+  "schema": 1,
+  "id": "20260911T115106Z-kai-17dd077d",
+  "type": "note",
+  "session": "S002",
+  "agent": "kai",
+  "created": "2026-09-11T11:51:06Z",
+  "issue": "cp1252-encoding",
+  "body": "Kai (S002): logged the cp1252 corruption in Migrate-OfficeLayout's history.conf rewrite (Get-Content without -Encoding UTF8 on PS 5.1) — see the addendum flaw entry; assigned to core 1.0.2, NOT your 1.0.1. The suggested fix includes a UTF-8 encoding audit across all ps1 ports — coordinate if you want it in yours.",
+  "paths": [],
+  "refs": [".context_ledger/memory/office/flaws/log.md"],
+  "option": null,
+  "selected": null,
+  "owner": null,
+  "participants": ["noor"]
+}

@@ -1,0 +1,16 @@
+{
+  "schema": 1,
+  "id": "20260911T120427Z-Noor-fb8d6a3c",
+  "type": "release",
+  "session": "core-1.0.1",
+  "agent": "Noor",
+  "created": "2026-09-11T12:04:28Z",
+  "issue": "gate-verdict-fix",
+  "body": "Closing claim 20260911T100010Z-Noor-40bcd8d5: core 1.0.1 released (c97418d) and self-hosted (877df5e) exactly as claimed. Gate verdict can no longer be cleared by a piped consumer (sh: pipefail where supported, top-level pipelines rejected otherwise; ps1: parser audit — at most one external stage per pipeline, verdict = exit code OR $?); ledger-sync verify parse-checks every port; package suite tests/run-tests.sh 11/11 green across both editions. Evidence: 'core OK: every file matches MANIFEST.sha256 and every port parses (1.0.1)'. Encoding fixes remain Kai's 1.0.2. (Supersedes release 20260911T115118Z-Noor-148d202f, which cited only the commits and no paths, so the claim linkage did not register.)",
+  "paths": ["core/bin/ledger-gates", "core/bin/ledger-gates.ps1", "core/bin/ledger-sync", "core/bin/ledger-sync.ps1", "core/VERSION", "core/CHANGELOG.md", "core/MANIFEST.sha256", "tests/"],
+  "refs": ["20260911T100010Z-Noor-40bcd8d5", "c97418d", "877df5e"],
+  "option": null,
+  "selected": null,
+  "owner": null,
+  "participants": []
+}
