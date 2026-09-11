@@ -36,7 +36,7 @@ is your stable session tag.
 
 | Name | Codename | Model | Doing |
 |------|----------|-------|-------|
-| Kai | S002 | glm-5.3-flash | re-check-in: log the cp1252 migration flaw for the 1.0.1 patch |
+| Noor | S003 | glm-5.3-flash | core 1.0.1 (PATCH): gate-verdict fix + package test, ps1 parse check in verify |
 
 **Clock out when your session ends**: remove your row in the closing
 `chore(ledger):` commit. The board shows who is in the office *now*;

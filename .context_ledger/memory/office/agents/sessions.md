@@ -36,6 +36,7 @@ new group starts clean.
 - **Outcome:** done — core 1.0.0 released and self-hosted (repo memory grouped into the live office); sh+ps1 parity verified end-to-end on scratch projects (migration, close, roll, gc, mem, gates); 4 holes found and closed in-session
 - **Open items:** none
 - **Notes:** summary only
+- **Addendum (re-check-in after clock-out, same session):** supervisor confirmed the Windows migration port wrote `history.conf` as cp1252, corrupting em-dashes — reproduced locally (`e2 80 94` → mojibake; keys still parse, so it fails silently) and logged in flaws/log.md, assigned to **core 1.0.2** (the other agent's in-flight 1.0.1 covers the gate-verdict fix only). One mishap named per the repo rule: the first addendum edit anchored inside Session 1's entry and briefly swallowed the Session 2 header — caught on read-back and repaired in the same session; Session 1 is byte-identical to its committed state again.
 
 ## 2026-09-11 — Session 3
 - **Agent:** Noor | **Model:** glm-5.3-flash | **Platform:** Windows 11 workstation (local, Git Bash) | **Role:** engineer | **Core:** 1.0.0 → 1.0.1
