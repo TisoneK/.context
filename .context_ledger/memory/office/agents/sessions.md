@@ -36,3 +36,12 @@ new group starts clean.
 - **Outcome:** done — core 1.0.0 released and self-hosted (repo memory grouped into the live office); sh+ps1 parity verified end-to-end on scratch projects (migration, close, roll, gc, mem, gates); 4 holes found and closed in-session
 - **Open items:** none
 - **Notes:** summary only
+
+## 2026-09-11 — Session 3
+- **Agent:** Noor | **Model:** glm-5.3-flash | **Platform:** Windows 11 workstation (local, Git Bash) | **Role:** engineer | **Core:** 1.0.0 → 1.0.1
+- **Task:** core 1.0.1 (PATCH): gate-verdict fix — a gated `failing-cmd | tee` used to pass (sh+ps1) — with a package test suite; port parse checks as a permanent verify step
+- **Commits:** 9 (3c2519c..3e08436)
+- **Outcome:** done — core 1.0.1 released and self-hosted; tests/run-tests.sh 11/11 green across both editions; verify now refuses a core whose ports cannot parse
+- **Open items:** none — fleet go-aheads for the 0.x→1.0.x office migration land on 1.0.1 via each project's own `ledger-sync update --major` (encoding fixes follow as Kai's 1.0.2)
+- **Notes:** summary only
+- **Collab:** session core-1.0.1 alongside Kai (S002, live in office); claim 20260911T100010Z-Noor-40bcd8d5 → release 20260911T115118Z-Noor-148d202f

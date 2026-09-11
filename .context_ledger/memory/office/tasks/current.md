@@ -13,5 +13,5 @@ entry and backlog before starting.
 -->
 
 - **Session:** 2026-09-11 — Noor / glm-5.3-flash
-- **Task:** core 1.0.1 (PATCH) — fix the gate-verdict bug (piped consumer clears a red gate; sh+ps1) with a package test, and make a port parse check a permanent verify step
-- **Status:** in-progress
+- **Task:** none — core 1.0.1 shipped (gate verdict + parse checks + test suite); session closed
+- **Status:** idle
