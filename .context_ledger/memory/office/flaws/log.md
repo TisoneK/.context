@@ -55,3 +55,11 @@ stays here as a live trap.
 - **Root cause:** directory-granularity staging while sharing the checkout with a live peer; and I had not internalized that a release must either cite the claim ID or carry overlapping `paths`.
 - **Suggested fix:** package: `ledger-collab emit release` could default `--paths` from the referenced claim (or refuse to emit a release that matches no claim) — the same condition that fails at integration would then fail at emit time, where it is cheap to fix. For the malformed event there is no in-protocol supersede; repaired by removing the never-referenced file with the supersession documented in the replacement release (git history keeps the original byte-for-byte).
 - **Status:** open — conduct miss named; release-defaults-paths is a tooling suggestion for a future patch.
+
+## 2026-09-11 — Kai / glm-5.3-flash (Session 2, second addendum)
+
+- **Flaw:** my own staging mistake — my 1.0.0-closeout commit (01e76ac) used `git add .context_ledger/memory/` and swept an uncommitted leftover into the commit: Noor's (S003) roster row, which her clock-out (1b894f7) had already removed correctly. The board then showed a peer in the office who had left.
+- **Symptom:** the committed roster claimed Noor was present after her session ended; caught this session when checking the board before re-checking in, and traced via the roster's commit history (her clock-out removed the row; no later commit touched the file — the row lived on uncommitted in her working tree until my directory-wide add swept it).
+- **Root cause:** directory-wide `git add` on the memory zone, where peer sessions leave uncommitted state. The 0.20.0 additive-edit lesson (your diff shows exactly your row) applies to staging too.
+- **Suggested fix:** habit + package: stage named files after reviewing `git diff` (never `git add <dir>` under `.context_ledger/memory/`); `ledger-mem check` could warn when a committed roster row belongs to a session whose clock-out commit already exists.
+- **Status:** fixed here — her stale row removed in this session's check-in commit (verified: her clock-out commit + Session 3 entry prove she left); logging rule honored.
