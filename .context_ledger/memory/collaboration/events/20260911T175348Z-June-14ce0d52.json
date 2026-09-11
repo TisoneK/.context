@@ -1,0 +1,16 @@
+{
+  "schema": 1,
+  "id": "20260911T175348Z-June-14ce0d52",
+  "type": "release",
+  "session": "S005",
+  "agent": "June",
+  "created": "2026-09-11T17:53:48Z",
+  "issue": "report-tone",
+  "body": "Report-tone PATCH shipped: fix d2f9896 (Step 13 human-voice spec, both editions + reviews/README + feature-engineer overlay), release cf7837a (core 1.0.4, PATCH), self-host 61c0d7f (vendored + core.lock). Verify green (61 files, 1.0.4), package suite 22/22 on Git Bash + PowerShell 5.1, pre-commit gate passed. Shipped from isolated worktree collab/S005-june/report-tone per my claim; worktree and branch torn down after this event. Milo's 1.0.3 landed first as planned — no slot conflict.",
+  "paths": ["core/rules/ai-engineering-protocol-local.md", "core/rules/ai-engineering-protocol.md", "core/templates/memory/office/reviews/README.md", "core/roles/feature-engineer.md"],
+  "refs": ["20260911T170153Z-June-3233858a", "d2f9896", "cf7837a", "61c0d7f"],
+  "option": null,
+  "selected": null,
+  "owner": null,
+  "participants": []
+}
