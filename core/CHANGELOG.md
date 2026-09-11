@@ -10,6 +10,39 @@ bump MINOR; wording and fixes bump PATCH.
 
 ---
 
+## 1.0.1 — 2026-09-11
+
+**The gate can no longer be cleared by a piped consumer.** A gated
+command like `ci-check.sh 2>&1 | tee out.txt` used to pass even when
+the tool under test failed: both shells report only a pipeline's last
+stage, so the gate read the consumer's success (reported from a fleet
+project; tooling-correctness PATCH).
+
+- **sh edition (`core/bin/ledger-gates`):** gated commands run under
+  `set -o pipefail` when the shell — or a bash on PATH — supports it,
+  so any pipeline stage's failure fails the gate. On a shell without
+  pipefail, a gated command containing a top-level pipeline is
+  **rejected** with a fix-it message (use redirection
+  `tool > file 2>&1`, or one command per gates.conf line) instead of
+  silently passing. `||` fallbacks and quoted `|` are never rejected.
+- **PowerShell edition (`core/bin/ledger-gates.ps1`):** gated text is
+  audited with the real parser before it runs. A pipeline with two or
+  more external commands — or an unresolvable one — is rejected (its
+  verdict would be the last native command's exit code); a pipeline
+  with at most one external stage runs, and the verdict now fails on
+  the exit code OR a failed `$?` — either signal.
+- **Port parse checks are part of verify:** `ledger-sync verify` now
+  also refuses to bless a core whose scripts cannot run — `ParseFile`
+  over every `bin/*.ps1` and `sh -n` over every sh port (each edition
+  checks what its host can run; a missing engine skips that half).
+  Hashing catches corruption; this catches a port that shipped broken.
+- **Package test suite:** `tests/run-tests.sh` in the package repo runs
+  the gate-verdict tests against both editions on scratch projects — a
+  gated `failing-cmd | tee` must fail the gate everywhere. Maintainer
+  discipline: run it for every `core/` change.
+
+---
+
 ## 1.0.0 — 2026-09-11
 
 **Office architecture — the live session group is a directory, frozen
