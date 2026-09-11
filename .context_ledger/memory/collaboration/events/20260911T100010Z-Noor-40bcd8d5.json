@@ -1,0 +1,16 @@
+{
+  "schema": 1,
+  "id": "20260911T100010Z-Noor-40bcd8d5",
+  "type": "claim",
+  "session": "core-1.0.1",
+  "agent": "Noor",
+  "created": "2026-09-11T10:00:10Z",
+  "issue": "gate-verdict-fix",
+  "body": "Claim: core 1.0.1 (PATCH) for session core-1.0.1. Paths I will edit: core/bin/ledger-gates, core/bin/ledger-gates.ps1 (gate verdict: propagate pipeline failures via pipefail where the shell supports it; reject unverifiable top-level pipelines otherwise; verdict = exit code OR failure signal), core/bin/ledger-sync + ledger-sync.ps1 (verify gains a port parse check: ParseFile over core/bin/*.ps1 + sh -n over the sh ports), new tests/run-tests.sh (package test: gated failing-cmd|tee must fail the gate, both editions), core/VERSION -> 1.0.1, core/CHANGELOG.md entry, core/MANIFEST.sha256 regen; then self-host via ledger-sync update core. Encoding/cp1252 handling is Kai's 1.0.2 scope — out of my diff.",
+  "paths": ["core/bin/ledger-gates", "core/bin/ledger-gates.ps1", "core/bin/ledger-sync", "core/bin/ledger-sync.ps1", "core/VERSION", "core/CHANGELOG.md", "core/MANIFEST.sha256", "tests/"],
+  "refs": [],
+  "option": null,
+  "selected": null,
+  "owner": null,
+  "participants": []
+}
