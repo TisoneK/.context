@@ -80,7 +80,7 @@ codebase and its `.context_ledger/` memory in a better state.
 - **Focus areas:** all _[default]_
 - **Findings handling:** fix safe issues; flag architectural changes _[default]_
 - **Push policy:** push to main directly after each commit _[default]_
-- **Deliverable:** report in `.context_ledger/memory/reviews/` + chat summary _[default]_
+- **Deliverable:** report in `.context_ledger/memory/office/reviews/` + chat summary _[default]_
 - **Commit granularity:** one logical change per commit _[default]_
 
 ### GitHub PAT (CLOUD/SANDBOX AGENTS ONLY)
@@ -296,8 +296,8 @@ invent formats):
 - **`.context_ledger/memory/workflows/active.md`** — protocol **"by agent type", naming BOTH editions** (never just your own — see the template's comment), protocol location (vendored), package upstream URL, scope, push policy, deliverable
 - **`.context_ledger/memory/system/environments.md`** — this machine/sandbox, with its "Identify by" line
 - **`.context_ledger/memory/system/ai-models.md`** — this agent + model: first row
-- **`.context_ledger/memory/tasks/current.md`** — this session's task
-- **`.context_ledger/memory/agents/sessions.md`** — first session entry (include the core version)
+- **`.context_ledger/memory/office/tasks/current.md`** — this session's task
+- **`.context_ledger/memory/office/agents/sessions.md`** — first session entry (include the core version)
 
 If you record only your own edition in `workflows/active.md`, the next
 agent of the other type inherits your platform's behavior — a local
@@ -387,11 +387,11 @@ the canonical version of what follows — takes over:
 | Role overlays | `<REPO>/.context_ledger/core/roles/` |
 | The file/format spec | `<REPO>/.context_ledger/core/schemas/ledger-schema.md` |
 | Core version / integrity / updates | `sh <REPO>/.context_ledger/core/bin/ledger-sync status|verify|update` |
-| Prior agent sessions | `<REPO>/.context_ledger/memory/agents/sessions.md` |
-| Open tasks | `<REPO>/.context_ledger/memory/tasks/backlog.md` |
-| Known traps | `<REPO>/.context_ledger/memory/inefficiencies/log.md` |
-| Protocol problems found | `<REPO>/.context_ledger/memory/flaws/log.md` |
-| Architectural decisions | `<REPO>/.context_ledger/memory/plans/decisions.md` |
+| Prior agent sessions | `<REPO>/.context_ledger/memory/office/agents/sessions.md` |
+| Open tasks | `<REPO>/.context_ledger/memory/office/tasks/backlog.md` |
+| Known traps | `<REPO>/.context_ledger/memory/office/inefficiencies/log.md` |
+| Protocol problems found | `<REPO>/.context_ledger/memory/office/flaws/log.md` |
+| Architectural decisions | `<REPO>/.context_ledger/memory/office/plans/decisions.md` |
 | Your environment's quirks | `<REPO>/.context_ledger/memory/system/environments.md` |
 | User preferences | `<REPO>/.context_ledger/memory/user/preferences.md` |
 | Secret values (never tracked) | `<REPO>/.context_ledger/memory/secrets/` |

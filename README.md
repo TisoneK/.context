@@ -101,7 +101,7 @@ Fix the source; let the instances pull.
 
 - **Two zones, one direction:** core is replaced whole from the package
   and never hand-edited in a project; memory is project-owned and never
-  synced. Protocol learnings flow project → `memory/flaws/log.md` →
+  synced. Protocol learnings flow project → `memory/office/flaws/log.md` →
   this repo → the next core release.
 - **Append-only logs stay append-only** — `sessions.md`, both friction
   logs, `decisions.md`. Corrections are appended, never edited in.
@@ -117,7 +117,7 @@ Fix the source; let the instances pull.
 - **Inefficiency logging is mandatory** — friction you absorb silently
   is friction the next agent hits blind.
 - **Session data is disposable** — detailed session notes live in
-  `memory/sessions/` and can be deleted when no longer useful; the
+  `memory/office/sessions/` and can be deleted when no longer useful; the
   permanent record is `agents/sessions.md`. Durable facts are promoted
   to their domain before disposal — permanent context must never depend
   exclusively on an individual session.

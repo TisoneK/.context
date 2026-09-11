@@ -109,5 +109,5 @@ protocol): see [`MIGRATION.md`](MIGRATION.md).
 |---|---|---|
 | Holds | The core source: editions, schemas, templates, roles, tool | Vendored core copy + that project's memory |
 | Changes when | You improve the workflow (→ new core version) | Every agent session on the project |
-| Learnings about the **protocol** | land here (from projects' `flaws/log.md`) | logged in `memory/flaws/log.md`, flow here |
+| Learnings about the **protocol** | land here (from projects' `flaws/log.md`) | logged in `memory/office/flaws/log.md`, flow here |
 | Learnings about the **project** | — | accumulate in `memory/`, forever |

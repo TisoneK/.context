@@ -143,7 +143,7 @@ merge conflicting code or choose a winner.
   orchestrator session as an optional
   optimization. Workers must publish findings for the orchestrator or
   peers to reproduce before acting on them.
-- **Session-based context management (`memory/sessions/`)** — `shipped 0.5.0` —
+- **Session-based context management (`memory/office/sessions/`)** — `shipped 0.5.0` —
   three-layer model: disposable session detail (`<date>-N/notes.md`) →
   prunable summary (`SUMMARY.md`) → permanent registry (`agents/sessions.md`).
   Context promotion at session end ensures durable facts reach their domain
@@ -158,7 +158,7 @@ merge conflicting code or choose a winner.
   lifecycle: one directory per feature (`manifest.md` update-in-place +
   `notes.md` append-only) plus a permanent append-only
   `features/ledger.md`. The session-management aspect of this design
-  shipped in 0.5.0 (`memory/sessions/`); the feature-partitioning concern
+  shipped in 0.5.0 (`memory/office/sessions/`); the feature-partitioning concern
   (per-feature directories, ledger) remains `exploring`. Includes a
   sanctioned `Feature: none` path for hotfix-sized sessions and folds
   in the missing ADR `Author:` line.

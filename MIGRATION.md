@@ -4,6 +4,40 @@ Sync is meant to be **one command, then fill the facts**. This page is that
 recipe, plus the two special cases (the 0.18 rename, and pre-0.2.0 flat
 layouts) that need an extra step.
 
+## Core 1.0.0 — office architecture (automatic during sync)
+
+Core 1.0.0 moves the live session group from flat paths
+(`memory/agents/`, `memory/tasks/`, …) into the live office directory
+`memory/office/` (see `designs/office-architecture.md`). **No manual step:
+the migration runs during sync.** `update` always hands off to
+`migrate --backfill-only` on the just-installed core, and that detects the
+old layout and regroups it:
+
+- flat group-scoped directories (`agents/ sessions/ tasks/ plans/ flaws/
+  inefficiencies/ reviews/`) are moved into `memory/office/` — the old
+  layout becomes the live office, nothing is lost or rewritten;
+- `memory/agents/GROUP` (the group counter) is deleted — office numbers
+  are derived from the permanent records at close;
+- `memory/workflows/history.conf`'s `group_size` key is renamed
+  `office_size` (the tools still read the legacy key either way);
+- durable files (`workflows/`, `collaboration/`, `system/`, `user/`,
+  `overrides/`, `core.lock`, `secrets/`) never move.
+
+MAJOR bump: pass `--major` with the user's go-ahead (and read the 1.0.0
+CHANGELOG entry):
+
+```bash
+sh .context_ledger/core/bin/ledger-sync update core --major
+# or, without an update source:
+sh .context_ledger/core/bin/ledger-sync migrate --major
+```
+
+Then commit + push what the migration moved:
+`chore(ledger): group memory into the live office (core 1.0.0)`.
+Legacy `history/group-<NNN>.md` records from pre-1.0.0 closes stay in
+place as read-only history. The next office close uses the new lifecycle
+(freeze verbatim → number at close → permanent record in `history/`).
+
 ## Core 0.18 — any 0.2.0–0.17.0 project → Context Ledger (`.context_ledger/`)
 
 Core 0.18 renamed the project directory `.context/` → `.context_ledger/`
@@ -47,7 +81,7 @@ The vendored `context-sync` may lack the self-re-exec handoff. Run
 `update` (it swaps in a current-enough core regardless), then continue
 with `ledger-sync migrate` + `ledger-sync rename` as above.
 
-## The easy path — any 1.0 project → current
+## The easy path — any 0.18+ project → current
 
 From the project repo root, with a fresh package checkout reachable (a
 sibling `../context-ledger` clone freshened, or
@@ -59,8 +93,10 @@ sh .context_ledger/core/bin/ledger-sync migrate
 
 That single command updates the vendored core to the newest reachable
 version, backfills every zone/file newer releases added (`history/`,
-`archive/`, `CLAUDE.md`, `.gitattributes`, `roster.md`, `history.conf`,
-`GROUP`, …), LF-normalizes the core, relocks, and verifies. It is
+`archive/`, `CLAUDE.md`, `.gitattributes`, the `office/` skeleton,
+`history.conf`, …), groups a legacy flat memory layout into the live
+office (core 1.0.0, see above), LF-normalizes the core, relocks, and
+verifies. It is
 idempotent — safe to run again. Then it prints the **one manual step**:
 
 - **`.context_ledger/kickoff.md`** — refill Project Facts (remote URL, default
