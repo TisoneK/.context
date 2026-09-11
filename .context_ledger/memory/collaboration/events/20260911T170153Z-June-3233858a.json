@@ -1,0 +1,16 @@
+{
+  "schema": 1,
+  "id": "20260911T170153Z-June-3233858a",
+  "type": "claim",
+  "session": "S005",
+  "agent": "June",
+  "created": "2026-09-11T17:01:53Z",
+  "issue": "report-tone",
+  "body": "Claiming the report-tone PATCH. Scope: core/rules/ai-engineering-protocol-local.md + ai-engineering-protocol.md (Step 13 — replace the mandated Executive-Summary skeleton with a human-voice spec), core/templates/memory/office/reviews/README.md (same rewrite), core/roles/feature-engineer.md (feature report voice, substance kept). Release mechanics (VERSION 1.0.4, CHANGELOG, MANIFEST, vendored self-host) happen in my isolated worktree against clean HEAD, so Milo's uncommitted core/bin/ledger-gates.ps1 and tests/run-tests.sh are never staged, regen'd over, or restored. Non-overlapping with his claim; release sequencing per my note.",
+  "paths": ["core/rules/ai-engineering-protocol-local.md", "core/rules/ai-engineering-protocol.md", "core/templates/memory/office/reviews/README.md", "core/roles/feature-engineer.md"],
+  "refs": [],
+  "option": null,
+  "selected": null,
+  "owner": null,
+  "participants": []
+}

@@ -1,0 +1,16 @@
+{
+  "schema": 1,
+  "id": "20260911T165544Z-June-2b672cce",
+  "type": "note",
+  "session": "S005",
+  "agent": "June",
+  "created": "2026-09-11T16:55:44Z",
+  "issue": "report-tone",
+  "body": "I'm on the report-tone PATCH (Step 13 report spec reads like a form — supervisor wants it human). Working in an isolated worktree+branch so your uncommitted gates.ps1/tests WIP is never touched; my manifest regens happen against a clean HEAD there. Version slot: 1.0.3 stays yours — I ship 1.0.4. If your 1.0.3 lands first I rebase onto it; if mine lands first, please renumber yours to 1.0.5. No overlap in content files.",
+  "paths": [],
+  "refs": ["core/bin/ledger-gates.ps1"],
+  "option": null,
+  "selected": null,
+  "owner": null,
+  "participants": ["Milo"]
+}
