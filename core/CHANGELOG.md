@@ -10,6 +10,31 @@ bump MINOR; wording and fixes bump PATCH.
 
 ---
 
+## 1.0.4 — 2026-09-11
+
+**Session reports read like they were written for a person.** The
+mandated report skeleton — Executive Summary → Discovery Phase →
+Baseline Health → Findings → Fixes Applied → Open Items → Recommended
+Next Steps — was a form for archiving, not prose for reading; the
+maintainer flagged the voice, not the mechanics (tone PATCH).
+
+- **Step 13 (both editions) now specifies the voice, not a skeleton:**
+  write for the project's owner in plain sentences a reader outside the
+  session's chat understands in one pass, lead with what happened, and
+  cover what happened / what you found / what you changed / what's
+  still open / what to do next in whatever structure fits. Headings
+  only when the report needs them; severity labels only on findings
+  that carry one. A clean review is one plain line ("reviewed
+  `<area>`; baseline healthy; nothing needed") — not a padded skeleton.
+- **`reviews/README.md`** carries the same shape guidance instead of
+  the numbered skeleton.
+- **The feature-engineer overlay** keeps the feature report's substance
+  (design decisions, verified vs. not verified, open items) and drops
+  the form-speak.
+
+Migration from 1.0.3: none — run `update`. (Past reports are never
+edited; their shape is history.)
+
 ## 1.0.3 — 2026-09-11
 
 **The gate can no longer be cleared by a chatty failing command.** The
