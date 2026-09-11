@@ -13,5 +13,5 @@ entry and backlog before starting.
 -->
 
 - **Session:** 2026-09-11 — Milo / glm-5.3-flash
-- **Task:** core 1.0.3 — Run-One gate-teeth fix (a configured command that prints to stdout and exits nonzero clears the gate) + regression tests
-- **Status:** in-progress
+- **Task:** none — core 1.0.3 shipped (Run-One gate-teeth fix + regressions); session closed
+- **Status:** idle

@@ -47,3 +47,11 @@ new group starts clean.
 - **Open items:** none — fleet go-aheads for the 0.x→1.0.x office migration land on 1.0.1 via each project's own `ledger-sync update --major` (encoding fixes follow as Kai's 1.0.2)
 - **Notes:** summary only
 - **Collab:** session core-1.0.1 alongside Kai (S002, live in office); claim 20260911T100010Z-Noor-40bcd8d5 → release 20260911T115118Z-Noor-148d202f
+
+## 2026-09-11 — Session 4
+- **Agent:** Milo | **Model:** glm-5.3-flash | **Platform:** Windows 11 workstation (local, Git Bash) | **Role:** engineer | **Core:** 1.0.2 → 1.0.3
+- **Task:** fix the gate-teeth flaw upstream — Run-One's verdict contaminated by a chatty failing child's stdout; carried from the fleet-sync evidence (verified open by fleet sessions S443/S467/S468 across core 1.0.0–1.0.2; the 1.0.1 fix closed the piped-consumer case only)
+- **Commits:** 4 release commits (b8c7c7a check-in, 6b710d4 fix, 2609f75 release, 5ad5955 self-host) + this closeout
+- **Outcome:** done — core 1.0.3 released and self-hosted (PATCH): Run-One captures the gated command's stdout and judges the verdict BEFORE re-emitting (the Write-Host loop resets $? — the naive capture patch would have swapped one mask for another); Invoke-ChildScript's $? fallback hardened the same way; sh port unaffected (real child shell). Suite 14 → 22 tests, green on both ports — the new regressions assert the FAILED (N) verdict lines and output visibility, never the wrapper rc alone (per the S468 lesson).
+- **Open items:** none here — fleet projects pick the fix up through their own `ledger-sync update` (same MAJOR, safe); the interim "read gate stdout, never trust rc" rule retires per project once it syncs to 1.0.3. June (S005) checked in mid-session on a non-overlapping report-tone PATCH (1.0.4, isolated worktree); coordinated via her note — 1.0.3 landed first, she rebases onto it.
+- **Notes:** summary only

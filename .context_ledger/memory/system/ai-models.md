@@ -24,6 +24,7 @@ its work accordingly).
 |---|---|---|---|---|
 | Ada | glm-5.3-flash | 2026-09-10 | 2026-09-10 | 1 |
 | Noor | glm-5.3-flash | 2026-09-11 | 2026-09-11 | 1 |
+| Milo | glm-5.3-flash | 2026-09-11 | 2026-09-11 | 1 |
 
 ## Observations
 
@@ -40,3 +41,4 @@ Update in place when a newer session contradicts an old observation.
 - **Ada / glm-5.3-flash:** strict-profile JSON (one "key": value per line, escaped body) round-trips exactly through pure POSIX sh readers (sed/awk) and Windows PowerShell `ConvertFrom-Json` alike; PowerShell gotcha surfaced and fixed — a bare `-or` between two command calls inside `if()` does not evaluate as two boolean results, so parenthesize or name the booleans (2026-09-10)
 - **Noor / glm-5.3-flash:** verified on this machine that a PowerShell gate command whose pipeline has two external stages masks an earlier failure ($LASTEXITCODE ends up the tail's), while a `Tee-Object` tail preserves the tool's exit code — the parser-audit rule in ledger-gates.ps1 1.0.1 is built on that distinction; PS 5.1 `Parser::ParseInput/ParseFile` returns errors for 5.1-hostile syntax rather than throwing (2026-09-11)
 - **Kai / glm-5.3-flash:** Windows PowerShell 5.1 parses BOM-less .ps1 source as cp1252 — a non-ASCII string literal in ps1 source double-encodes on write (em-dash literal → `â€"` bytes); keep ps1 string literals pure ASCII and emit non-ASCII output via `[char]0x2014`-style code points. Same class: `Get-Content` without `-Encoding UTF8` reads BOM-less files as cp1252. (2026-09-11)
+- **Milo / glm-5.3-flash:** in PowerShell, a re-emit loop of `Write-Host` resets `$?` — a child's verdict must be judged BEFORE its captured output is re-emitted, or a chatty failing child reads as success (the naive capture patch for the Run-One flaw would have swapped one mask for another). Also: `Write-Host` output from a `powershell.exe -File` invocation lands in redirected stdout, so gate-log assertions can rely on it; and `sh`-invoked `cmd /c "a & b"` under Git Bash mangles args so cmd starts interactively — probe the port that carries the flaw. (2026-09-11)

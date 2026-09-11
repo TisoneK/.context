@@ -35,3 +35,10 @@ never makes an entry eligible.
 - **Cause:** whole-tree manifest + sequential dependent commits; sh test driver built a command as an assignment prefix instead of a wrapper function.
 - **Workaround / fix:** copy not-yet-committed core files to /tmp, `git checkout --` them, regen + commit fix 1, copy back, regen + commit fix 2 (no stash — a peer's uncommitted files were in the tree). Test drivers use wrapper functions.
 - **Prevent next time:** keep one core change in flight at a time (edit → verify → regen → commit → next); the cp-aside dance is the documented fallback when two fixes must ship in one release.
+
+## 2026-09-11 — Milo / glm-5.3-flash
+- **Problem:** my first behavioral probe of the Run-One fix ran the sh port under Git Bash instead of the ps1 port — and MSYS argument mangling made `cmd /c "echo x & exit /b 1"` start cmd.exe interactively (banner + prompt, read EOF, exit 0), so the probe showed a silent pass that proved nothing about either port. Two command cycles wasted before rerunning against the ps1 port directly.
+- **Cost:** ~2 command cycles (~5 minutes).
+- **Cause:** probed through the runner I had in context (the sh port) instead of the port that carries the flaw; compound-command quoting through sh → cmd is a second uncontrolled variable.
+- **Workaround / fix:** reran against `powershell.exe -NoProfile -File ledger-gates.ps1` on a scratch project (cygpath for the Windows path); chatty failing child → `FAILED (1)` + `GATE FAILED` + rc=2 as wanted.
+- **Prevent next time:** a probe goes to the port that carries the flaw, one variable at a time — the mirror image of the S468 scratch-repo false closure (right repo family, wrong port).
