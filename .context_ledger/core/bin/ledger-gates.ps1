@@ -62,17 +62,56 @@ function Invoke-ChildScript { param([string]$Path, [string[]]$ScriptArgs = @())
   elseif ($?) { $script:ChildExit = 0 }
   else { $script:ChildExit = 1 }
 }
+# PowerShell has no pipefail: after `failing-cmd | tee out.txt`, $LASTEXITCODE
+# is the last native command's (tee = 0) and $? follows the pipeline tail, so a
+# piped consumer used to clear a red gate. Before running a gated command, its
+# text is audited with the real parser: a multi-stage pipeline may run only
+# when at most one of its stages resolves to an external program. One external
+# stage is sound (its $LASTEXITCODE survives cmdlet stages, which cannot touch
+# it, and cmdlet failures throw under $ErrorActionPreference = Stop); two or
+# more can mask each other, and an unresolvable stage cannot be vetted -- those
+# shapes are rejected with a fix-it message instead of silently passing.
+function Test-PipelineVerifiable { param([string]$Text)
+  $tokens = $null; $errors = $null
+  $ast = [System.Management.Automation.Language.Parser]::ParseInput($Text, [ref]$tokens, [ref]$errors)
+  if ($null -eq $ast) { return $true }  # unparseable: the run itself will fail it
+  $pipelines = $ast.FindAll({ param($a) $a -is [System.Management.Automation.Language.PipelineAst] -and $a.PipelineElements.Count -gt 1 }, $true)
+  foreach ($pipe in $pipelines) {
+    $natives = 0
+    foreach ($element in $pipe.PipelineElements) {
+      if ($element -isnot [System.Management.Automation.Language.CommandAst]) { continue }  # expression stages run in-process
+      $name = $element.GetCommandName()
+      if (-not $name) { return $false }  # dynamic command (& $var): cannot vet
+      $resolved = Get-Command -Name $name -ErrorAction SilentlyContinue | Select-Object -First 1
+      if ($resolved -is [System.Management.Automation.ApplicationInfo]) { $natives++ }
+    }
+    if ($natives -gt 1) { return $false }
+  }
+  return $true
+}
 function Run-One { param([string]$Label, [string]$Text)
   Log "GATE command: $Label -> $Text"
   $status = 0
   Push-Location $projectDir
   try {
-    # $LASTEXITCODE is only written by native executables; resetting it first
-    # keeps a cmdlet-only command from inheriting a stale previous exit code.
-    $global:LASTEXITCODE = $null
-    & ([scriptblock]::Create($Text))
-    if ($null -ne $LASTEXITCODE) { $status = $LASTEXITCODE }
-    elseif (-not $?) { $status = 1 }
+    if (-not (Test-PipelineVerifiable $Text)) {
+      $status = 1
+      [Console]::Error.WriteLine("ledger-gates: REJECTED: $Text")
+      [Console]::Error.WriteLine('ledger-gates:   a pipeline with two or more external commands (or an unresolvable')
+      [Console]::Error.WriteLine('ledger-gates:   one) can hide an earlier stage''s failure on PowerShell -- the verdict')
+      [Console]::Error.WriteLine('ledger-gates:   would be the last native command''s exit code. End the pipeline with')
+      [Console]::Error.WriteLine('ledger-gates:   a PowerShell cmdlet (Tee-Object, not tee) or use redirection: tool > file 2>&1')
+    } else {
+      # $LASTEXITCODE is only written by native executables; resetting it first
+      # keeps a cmdlet-only command from inheriting a stale previous exit code.
+      $global:LASTEXITCODE = $null
+      & ([scriptblock]::Create($Text))
+      # Fail on EITHER signal: a nonzero native exit code or a failed final
+      # stage -- either alone can miss a compound command's real verdict.
+      if (($null -ne $LASTEXITCODE -and $LASTEXITCODE -ne 0) -or -not $?) {
+        if ($null -ne $LASTEXITCODE) { $status = $LASTEXITCODE } else { $status = 1 }
+      }
+    }
   } catch {
     $status = 1
     [Console]::Error.WriteLine("ledger-gates: ERROR: $($_.Exception.Message)")
