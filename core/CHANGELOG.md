@@ -10,6 +10,40 @@ bump MINOR; wording and fixes bump PATCH.
 
 ---
 
+## 1.0.2 — 2026-09-11
+
+**The Windows ports are UTF-8-clean — explicit encodings everywhere.**
+Windows PowerShell 5.1 reads BOM-less files — *and parses BOM-less .ps1
+source* — in the system ANSI codepage (cp1252) unless UTF-8 is explicit.
+The office migration rewrote `history.conf` through an unencoded
+`Get-Content`, corrupting the em-dash in the template comment (found by
+the maintainer after the 1.0.0 ship; reproduced byte-for-byte). The
+audit closed the whole class:
+
+- **`Migrate-OfficeLayout` reads UTF-8 explicitly** — the migrated
+  config keeps every non-ASCII byte; the key rename still applies.
+  Regression test asserts the em-dash bytes survive a ps1 migrate.
+- **`Write-Lock` is byte-identical to the sh port** — the em-dash in the
+  `core.lock` header comes from a code point (`[char]0x2014`), so the
+  file stops churning when the two ports alternate on one install. The
+  rule this teaches: **string literals in ps1 sources stay pure ASCII**
+  — a literal in a BOM-less ps1 is itself parsed as cp1252 and
+  double-encodes on write.
+- **The `rename` entry-point sweep** reads and writes UTF-8 explicitly
+  (it edits the generated em-dash-bearing files in place).
+- **All 27 `Get-Content` call sites across the six ps1 ports** pass
+  `-Encoding UTF8` explicitly; no `Set-Content` of non-ASCII content
+  remains anywhere in the ports.
+- **tests/run-tests.sh grows to 14 tests**: em-dash survives a ps1
+  migrate, the `group_size` → `office_size` rename still applies, and a
+  ps1 `verify` writes a `core.lock` byte-identical to the sh port's
+  (em-dash present, no BOM). Suite green on Git Bash + Windows
+  PowerShell 5.1.
+
+Migration from 1.0.1: none — run `update`. (If your project's
+`history.conf` was already mojibake'd by a 1.0.0–1.0.1 ps1 migration,
+repair the comment by hand; the keys were always parsed correctly.)
+
 ## 1.0.1 — 2026-09-11
 
 **The gate can no longer be cleared by a piped consumer.** A gated
