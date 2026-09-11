@@ -10,6 +10,39 @@ bump MINOR; wording and fixes bump PATCH.
 
 ---
 
+## 1.0.3 — 2026-09-11
+
+**The gate can no longer be cleared by a chatty failing command.** The
+1.0.1 fix closed the piped-consumer case, but the PowerShell edition
+still ran the gated command inline: its stdout rode `Run-One`'s return
+pipeline, so a command that prints a line and exits nonzero returned
+`@(lines..., $false)`, `-not` on that array never registered the
+failure, and the gate printed `FAILED (N)` and then `GATE PASSED` with
+rc=0. Silent failures kept failing correctly, which is why the flaw
+looked intermittent (verified open by fleet sessions across 1.0.0–1.0.2;
+tooling-correctness PATCH).
+
+- **PowerShell edition (`core/bin/ledger-gates.ps1`):** `Run-One` now
+  captures the gated command's stdout, judges the verdict first (the
+  re-emit loop's `Write-Host` successes would reset `$?` and mask a
+  failed final stage), and re-emits each line on the host stream — the
+  same capture-and-host-stream shape `Invoke-ChildScript` already used.
+  The wrapper's exit code is the verdict again on Windows; the interim
+  "read gate stdout, never trust rc" rule can retire once projects
+  sync to 1.0.3.
+- **Same-class hardening:** `Invoke-ChildScript` judged its
+  `$LASTEXITCODE`-less fallback (`$?`) after the re-emit loop — a chatty
+  child failing without a reliable exit code would have read as 0. The
+  verdict is captured before the loop (behavior-preserving when no
+  output is emitted).
+- **sh edition unaffected:** the gated command runs in a real child
+  shell, its exit code propagates, and its stdout never passes through
+  a function return.
+- **Regressions:** the package suite grows 14 → 22 tests — on both
+  editions, a gated command that prints a line and exits nonzero must
+  fail the gate with its output visible and the `FAILED (N)` verdict
+  line asserted, never the wrapper rc alone.
+
 ## 1.0.2 — 2026-09-11
 
 **The Windows ports are UTF-8-clean — explicit encodings everywhere.**
