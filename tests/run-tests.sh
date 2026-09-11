@@ -4,14 +4,22 @@
 #
 # Run from anywhere:  sh tests/run-tests.sh
 #
-# What it covers (core 1.0.2): the gate verdict (shipped 1.0.1) and the UTF-8
-# encoding regressions (shipped 1.0.2). The gate half: a POSIX pipeline reports only
-# its last stage's status, so a gated `failing-cmd | tee out.txt` used to pass
-# with the tool under test failing (flaw back-ported from a fleet project).
+# What it covers (core 1.0.3): the gate verdict (shipped 1.0.1, completed
+# 1.0.3) and the UTF-8 encoding regressions (shipped 1.0.2). The gate half:
+# a POSIX pipeline reports only its last stage's status, so a gated
+# `failing-cmd | tee out.txt` used to pass with the tool under test failing
+# (flaw back-ported from a fleet project). Core 1.0.3 closes the second half
+# of the same flaw on the PowerShell edition: Run-One ran the gated command
+# inline, so a command that PRINTS to stdout and exits nonzero returned
+# @(lines..., $false) -- -not on a non-empty array never registered the
+# failure, and the gate printed FAILED (N) and then GATE PASSED with rc=0.
 # The suite asserts, on scratch projects, against BOTH editions:
 #   - a gated failing command piped into a succeeding consumer fails the gate
 #     (via pipefail where the shell supports it, via rejection where it does
 #     not -- either way the gate fails);
+#   - a gated command that prints a line and exits nonzero fails the gate,
+#     its output stays visible, and the verdict line (FAILED (N)) is asserted
+#     -- never the wrapper rc alone;
 #   - a gated succeeding pipeline still passes where the verdict is verifiable;
 #   - `||` fallbacks and quoted `|` are not rejected on no-pipefail shells;
 #   - the PowerShell edition rejects pipelines with two or more external
@@ -90,6 +98,22 @@ expect_rc fail "sh: plain failing command fails" "$SH_SCRATCH" $SH_GATE
 set_conf "$SH_SCRATCH" "pre-commit|sh -c 'exit 0'"
 expect_rc pass "sh: plain succeeding command passes" "$SH_SCRATCH" $SH_GATE
 
+# The chatty-failure half of the gate-teeth flaw: stdout must never change
+# the verdict, the tool's output must stay visible, and the per-command
+# verdict line must be asserted -- never the wrapper rc alone.
+set_conf "$SH_SCRATCH" "pre-commit|sh -c 'echo gate-teeth-probe; exit 3'"
+expect_rc fail "sh: chatty failing command fails the gate" "$SH_SCRATCH" $SH_GATE
+if grep -q "gate-teeth-probe" "$SH_SCRATCH/.test-out.log"; then
+  ok "sh: chatty failing command's output stays visible"
+else
+  bad "sh: chatty failing command's output was swallowed"
+fi
+if grep -q "FAILED (3):" "$SH_SCRATCH/.test-out.log"; then
+  ok "sh: verdict line asserted (FAILED (3))"
+else
+  bad "sh: no FAILED verdict line for the chatty failure"
+fi
+
 # `||` is deliberate fallback semantics -- never rejected, on any shell.
 set_conf "$SH_SCRATCH" "pre-commit|sh -c 'exit 3' || sh -c 'exit 0'"
 expect_rc pass "sh: '||' fallback is not rejected" "$SH_SCRATCH" $SH_GATE
@@ -129,6 +153,33 @@ else
 
   set_conf "$PS_SCRATCH" "pre-commit|cmd /c exit 0"
   expect_rc pass "ps: plain succeeding command passes" "$PS_SCRATCH" ps_gate
+
+  # The headline 1.0.3 regression: a gated command that prints a line and
+  # exits nonzero used to return @(lines..., $false) from Run-One -- -not on
+  # a non-empty array never registered the failure, so the gate printed
+  # FAILED (1) and then GATE PASSED with rc=0. Assert the verdict line AND
+  # the gate-level failure, with the child's output visible.
+  set_conf "$PS_SCRATCH" 'pre-commit|cmd /c "echo gate-teeth-probe & exit /b 1"'
+  expect_rc fail "ps: chatty failing command fails the gate" "$PS_SCRATCH" ps_gate
+  if grep -q "gate-teeth-probe" "$PS_SCRATCH/.test-out.log"; then
+    ok "ps: chatty failing command's output is re-emitted, not swallowed"
+  else
+    bad "ps: chatty failing command's output was swallowed"
+  fi
+  if grep -q "FAILED (1):" "$PS_SCRATCH/.test-out.log" \
+     && grep -q "pre-commit gate failed" "$PS_SCRATCH/.test-out.log"; then
+    ok "ps: verdict lines asserted (FAILED (1) + gate failed)"
+  else
+    bad "ps: no FAILED (1)/gate-failed verdict line for the chatty failure"
+  fi
+
+  set_conf "$PS_SCRATCH" 'pre-commit|cmd /c "echo ok-probe & exit /b 0"'
+  expect_rc pass "ps: chatty succeeding command still passes" "$PS_SCRATCH" ps_gate
+  if grep -q "ok-probe" "$PS_SCRATCH/.test-out.log"; then
+    ok "ps: chatty succeeding command's output stays visible"
+  else
+    bad "ps: chatty succeeding command's output was swallowed"
+  fi
 fi
 
 # ---- UTF-8 encoding (core 1.0.2) --------------------------------------------
