@@ -36,7 +36,6 @@ is your stable session tag.
 
 | Name | Codename | Model | Doing |
 |------|----------|-------|-------|
-| Kai | S002 | glm-5.3-flash | office architecture — core 1.0.0 (memory layout: live office/, freeze-at-close) |
 
 **Clock out when your session ends**: remove your row in the closing
 `chore(ledger):` commit. The board shows who is in the office *now*;

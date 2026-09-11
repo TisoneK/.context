@@ -32,3 +32,4 @@ records.
 -->
 
 - **2026-09-10 — Session 1** — Ada / glm-5.3-flash — core 0.22.0 shipped (collab events as JSON + backlog closeout sweep); ledger self-hosted with the release-sync rule. First solo claim→release cycle validated on the new board. summary only.
+- **2026-09-11 — Session 2** — Kai / glm-5.3-flash — office architecture shipped as core 1.0.0 (live memory/office/, verbatim freeze at close, permanent accomplishments records, during-sync migration, checkpoint nudge); self-hosted, repo memory grouped into the office; sh+ps1 verified e2e. summary only.

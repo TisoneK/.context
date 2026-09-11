@@ -28,3 +28,11 @@ new group starts clean.
 - **Outcome:** done — core 0.22.0 released; .context_ledger/ bootstrapped; first solo claim→release cycle validated through `ledger-collab check`
 - **Open items:** none
 - **Notes:** summary only
+
+## 2026-09-11 — Session 2
+- **Agent:** Kai | **Model:** glm-5.3-flash | **Platform:** Windows 11 workstation (local, Git Bash) | **Role:** engineer | **Core:** 0.22.0 → 1.0.0
+- **Task:** office architecture (major): live unnumbered memory/office/, verbatim freeze at close, permanent accomplishments records, during-sync migration of flat layouts, full-office checkpoint nudge
+- **Commits:** 6 (089a423..b5bbbf9)
+- **Outcome:** done — core 1.0.0 released and self-hosted (repo memory grouped into the live office); sh+ps1 parity verified end-to-end on scratch projects (migration, close, roll, gc, mem, gates); 4 holes found and closed in-session
+- **Open items:** none
+- **Notes:** summary only
