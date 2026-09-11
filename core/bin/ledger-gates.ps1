@@ -121,13 +121,13 @@ function Run-One { param([string]$Label, [string]$Text)
 }
 function Config-Mode {
   if (-not (Test-Path -LiteralPath $config -PathType Leaf)) { return 'hybrid' }
-  $line = Get-Content -LiteralPath $config | Where-Object { $_ -match '^mode=' } | Select-Object -First 1
+  $line = Get-Content -Encoding UTF8 -LiteralPath $config | Where-Object { $_ -match '^mode=' } | Select-Object -First 1
   if ($null -eq $line) { return 'hybrid' } else { return ($line -replace '^mode=', '') }
 }
 function Explicit-Commands { param([string]$RequestedGate)
   $commands = @()
   if (Test-Path -LiteralPath $config -PathType Leaf) {
-    foreach ($line in Get-Content -LiteralPath $config) {
+    foreach ($line in Get-Content -Encoding UTF8 -LiteralPath $config) {
       if ($line -match "^$RequestedGate\|(.+)$") { $commands += $matches[1] }
     }
   }
@@ -143,7 +143,7 @@ function Package-Manager {
 function Package-Scripts {
   $package = Join-Path $projectDir 'package.json'
   if (-not (Test-Path -LiteralPath $package -PathType Leaf)) { return @() }
-  try { return @((Get-Content -LiteralPath $package -Raw | ConvertFrom-Json).scripts.PSObject.Properties.Name) }
+  try { return @((Get-Content -Encoding UTF8 -LiteralPath $package -Raw | ConvertFrom-Json).scripts.PSObject.Properties.Name) }
   catch { return @() }
 }
 function Discovered-Commands { param([string]$RequestedGate)
@@ -197,11 +197,11 @@ function Checkpoint { param([string[]]$CheckpointArgs)
   $sm = Join-Path $memoryDir 'office/agents/sessions.md'
   if (Test-Path -LiteralPath $sm) {
     $sc = 0
-    foreach ($raw in Get-Content -LiteralPath $sm) { if ($raw -match '^## \d{4}-\d{2}-\d{2}.*Session ') { $sc++ } }
+    foreach ($raw in Get-Content -Encoding UTF8 -LiteralPath $sm) { if ($raw -match '^## \d{4}-\d{2}-\d{2}.*Session ') { $sc++ } }
     $os = 0; $gsz = 0
     $hc = Join-Path $memoryDir 'workflows/history.conf'
     if (Test-Path -LiteralPath $hc) {
-      foreach ($raw in Get-Content -LiteralPath $hc) {
+      foreach ($raw in Get-Content -Encoding UTF8 -LiteralPath $hc) {
         $line = $raw.TrimEnd("`r")
         if ($line -match '^office_size=(\d+)') { $os = [int]$matches[1] }
         elseif ($line -match '^group_size=(\d+)') { $gsz = [int]$matches[1] }

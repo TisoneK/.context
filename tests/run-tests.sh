@@ -4,7 +4,8 @@
 #
 # Run from anywhere:  sh tests/run-tests.sh
 #
-# What it covers (core 1.0.1): the gate verdict. A POSIX pipeline reports only
+# What it covers (core 1.0.2): the gate verdict (shipped 1.0.1) and the UTF-8
+# encoding regressions (shipped 1.0.2). The gate half: a POSIX pipeline reports only
 # its last stage's status, so a gated `failing-cmd | tee out.txt` used to pass
 # with the tool under test failing (flaw back-ported from a fleet project).
 # The suite asserts, on scratch projects, against BOTH editions:
@@ -128,6 +129,58 @@ else
 
   set_conf "$PS_SCRATCH" "pre-commit|cmd /c exit 0"
   expect_rc pass "ps: plain succeeding command passes" "$PS_SCRATCH" ps_gate
+fi
+
+# ---- UTF-8 encoding (core 1.0.2) --------------------------------------------
+# Windows PowerShell 5.1 reads BOM-less files in the ANSI codepage unless
+# -Encoding UTF8 is passed. The office migration rewrote history.conf through
+# such a read and corrupted the em-dash in the template comment; the lockfile
+# writer had the same class of bug (ASCII header instead of the sh port's
+# em-dash, churning the file on every port alternation). Regressions, on a
+# scratch project, against the ps1 edition only (the sh tools read raw bytes):
+#   - a ps1 migrate over a UTF-8 history.conf holding an em-dash preserves the
+#     em-dash bytes and still renames the group_size key;
+#   - a ps1 verify writes a core.lock byte-identical to the sh port's
+#     (em-dash present, no BOM).
+if [ -n "$PS_BIN" ]; then
+  ENC_SCRATCH=${TMPDIR:-/tmp}/ledger-test-enc
+  rm -rf "$ENC_SCRATCH"
+  mkdir -p "$ENC_SCRATCH/.context_ledger/memory/agents" "$ENC_SCRATCH/.context_ledger/memory/workflows"
+  cp -R "$CORE" "$ENC_SCRATCH/.context_ledger/core"
+  # flat-layout marker (memory/agents) so the office migration must fire; the
+  # conf holds the real template comment with its em-dash, plus the legacy key.
+  printf '# Session-group rotation config \xe2\x80\x94 read by ledger-history.\ngroup_size=20\n' \
+    > "$ENC_SCRATCH/.context_ledger/memory/workflows/history.conf"
+  CONF_W=$ENC_SCRATCH/.context_ledger/memory/workflows/history.conf
+  if command -v cygpath >/dev/null 2>&1; then
+    SYNC_PS_W=$(cygpath -w "$ENC_SCRATCH/.context_ledger/core/bin/ledger-sync.ps1")
+  else
+    SYNC_PS_W=$ENC_SCRATCH/.context_ledger/core/bin/ledger-sync.ps1
+  fi
+  "$PS_BIN" -NoProfile -ExecutionPolicy Bypass -File "$SYNC_PS_W" migrate --backfill-only >/dev/null 2>&1
+
+  if grep -q "$(printf '\xe2\x80\x94')" "$CONF_W"; then
+    ok "ps: migrate preserves the em-dash in history.conf (UTF-8 read)"
+  else
+    bad "ps: migrate corrupted history.conf non-ASCII (cp1252 regression)"
+  fi
+  if grep -q '^office_size=' "$CONF_W" && ! grep -q '^group_size=' "$CONF_W"; then
+    ok "ps: migrate still renames group_size -> office_size"
+  else
+    bad "ps: migrate lost the config key rename"
+  fi
+
+  LOCK_W=$ENC_SCRATCH/.context_ledger/memory/core.lock
+  "$PS_BIN" -NoProfile -ExecutionPolicy Bypass -File "$SYNC_PS_W" verify >/dev/null 2>&1
+  if grep -q "$(printf '\xe2\x80\x94')" "$LOCK_W" \
+     && [ "$(head -c 3 "$LOCK_W" | od -An -tx1 | tr -d ' ')" != "efbbbf" ]; then
+    ok "ps: verify writes a core.lock byte-identical to the sh port (em-dash, no BOM)"
+  else
+    bad "ps: core.lock lost the em-dash or grew a BOM"
+  fi
+  rm -rf "$ENC_SCRATCH" 2>/dev/null || true
+else
+  say "  skip: UTF-8 encoding regressions (no powershell/pwsh on PATH)"
 fi
 
 rm -rf "$SH_SCRATCH" "$PS_SCRATCH" 2>/dev/null || true
