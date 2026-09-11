@@ -47,6 +47,7 @@ Format: - <preference> — <how to apply it> (provenance, YYYY-MM-DD)
 ## Workflow
 
 ## Communication
+- Reports the session delivers — the review report and the chat summary — must read human and simple: plain sentences, outcome first, no corporate skeleton, no protocol jargon. The mandated report structure (Executive Summary → Discovery Phase → …) was flagged as too complicated and robotic; core 1.0.4 replaced it with a voice spec. (correction, 2026-09-11)
 
 ## Code style
 

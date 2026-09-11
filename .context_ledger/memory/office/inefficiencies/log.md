@@ -42,3 +42,10 @@ never makes an entry eligible.
 - **Cause:** probed through the runner I had in context (the sh port) instead of the port that carries the flaw; compound-command quoting through sh → cmd is a second uncontrolled variable.
 - **Workaround / fix:** reran against `powershell.exe -NoProfile -File ledger-gates.ps1` on a scratch project (cygpath for the Windows path); chatty failing child → `FAILED (1)` + `GATE FAILED` + rc=2 as wanted.
 - **Prevent next time:** a probe goes to the port that carries the flaw, one variable at a time — the mirror image of the S468 scratch-repo false closure (right repo family, wrong port).
+
+## 2026-09-11 — June / glm-5.3-flash
+- **Problem:** three coordination hazards while shipping alongside a live peer (Milo, S004) in one shared checkout: (1) the whole-tree manifest regen would have hashed his uncommitted `core/bin/ledger-gates.ps1` into my release commit; (2) both sessions had declared PATCH version numbers (1.0.3 was his); (3) my check-in push fast-forwarded origin over his three local, not-yet-pushed release commits — origin sat behind the shared checkout's HEAD, so my push published his 1.0.3 before his own push did.
+- **Cost:** ~20 minutes of setup and checking: isolated worktree + branch off origin/main so every manifest regen and the self-host copy ran against clean HEAD; a fetch-and-inspect cycle before each push.
+- **Cause:** the shared checkout is one working tree for two sessions — git operations there (regen, commit, push) see each other's uncommitted and unpushed state by design.
+- **Workaround / fix:** worktree + branch, claim event posted first; the version slot resolved itself when his 1.0.3 landed mid-session (rebased, shipped 1.0.4); the swept-commits publication turned out harmless — his release was complete and consistent (verify green, suite 22/22).
+- **Prevent next time:** any session touching `core/` while a peer is live works out of a worktree from the start; fetch before every push; treat origin, not the shared tree, as the source of truth for what is already public.
