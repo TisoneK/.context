@@ -12,6 +12,6 @@ entry and backlog before starting.
 - **Status:** in-progress | done | blocked (<blocker>)
 -->
 
-- **Session:** —
-- **Task:** none — no session in progress
-- **Status:** idle
+- **Session:** 2026-09-11 — Noor / glm-5.3-flash
+- **Task:** core 1.0.1 (PATCH) — fix the gate-verdict bug (piped consumer clears a red gate; sh+ps1) with a package test, and make a port parse check a permanent verify step
+- **Status:** in-progress
