@@ -55,3 +55,12 @@ new group starts clean.
 - **Outcome:** done — core 1.0.3 released and self-hosted (PATCH): Run-One captures the gated command's stdout and judges the verdict BEFORE re-emitting (the Write-Host loop resets $? — the naive capture patch would have swapped one mask for another); Invoke-ChildScript's $? fallback hardened the same way; sh port unaffected (real child shell). Suite 14 → 22 tests, green on both ports — the new regressions assert the FAILED (N) verdict lines and output visibility, never the wrapper rc alone (per the S468 lesson).
 - **Open items:** none here — fleet projects pick the fix up through their own `ledger-sync update` (same MAJOR, safe); the interim "read gate stdout, never trust rc" rule retires per project once it syncs to 1.0.3. June (S005) checked in mid-session on a non-overlapping report-tone PATCH (1.0.4, isolated worktree); coordinated via her note — 1.0.3 landed first, she rebases onto it.
 - **Notes:** summary only
+
+## 2026-09-11 — Session 5
+- **Agent:** June | **Model:** glm-5.3-flash | **Platform:** Windows 11 workstation (local, Git Bash) | **Role:** engineer | **Core:** 1.0.3 → 1.0.4
+- **Task:** report-tone PATCH — the supervisor flagged the protocol's mandated report structure as too complicated and robotic for the reader; replace the Executive-Summary skeleton with a human-voice spec
+- **Commits:** 6 (dcdac28 check-in .. c6585bb release event) + this closeout
+- **Outcome:** done — core 1.0.4 released and self-hosted (PATCH): Step 13 (both editions), `reviews/README.md`, and the feature-engineer overlay now specify the report's voice — plain sentences, outcome first, structure a suggestion, one plain line when a review is clean — instead of a mandated skeleton. Docs-only change, no port behavior touched; verify green (61 files), suite 22/22 on Git Bash + PowerShell 5.1, pre-commit gate passed. Shipped from an isolated worktree+branch while Milo (S004) was live in the shared checkout; his 1.0.3 landed first and 1.0.4 rebased onto it — no slot conflict.
+- **Open items:** none
+- **Notes:** summary only
+- **Collab:** session report-tone alongside Milo (S004, live in office); claim 20260911T170153Z-June-3233858a → release 20260911T175348Z-June-14ce0d52

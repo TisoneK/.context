@@ -36,7 +36,6 @@ is your stable session tag.
 
 | Name | Codename | Model | Doing |
 |------|----------|-------|-------|
-| June | S005 | glm-5.3-flash | report-tone PATCH (core) — session reports written for people, not filing cabinets |
 
 **Clock out when your session ends**: remove your row in the closing
 `chore(ledger):` commit. The board shows who is in the office *now*;
