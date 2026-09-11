@@ -29,10 +29,10 @@ block (and its "last verified" date) every time you run on it again.
 - **Quirks:** <e.g., "no psql installed", "port 3000 usually taken", "system Python locked down">
 -->
 
-## Lameck's Windows workstation (last verified 2026-09-10)
+## Lameck's Windows workstation (last verified 2026-09-11)
 - **Identify by:** win32 10.0.26200 x64, user `Lameck`, workspace `C:\Users\Lameck\Tisone\context-ledger`, shell Git Bash
 - **OS:** Windows 11
-- **Runtimes:** Git Bash (POSIX sh, GNU sed/awk, od, sha256sum), Windows PowerShell 5.1, Python 3 (used only for JSON validation in tests)
+- **Runtimes:** Git Bash (POSIX sh, GNU sed/awk, od, sha256sum, cygpath), Windows PowerShell 5.1, Python 3 (used only for JSON validation in tests)
 - **Package manager:** none needed — tooling is pure sh + ps1
-- **Verified commands:** `sh core/bin/ledger-sync verify|manifest|bootstrap|update core`; `.context_ledger/core/bin/ledger-collab emit|status|check` (sh + .ps1); `.context_ledger/core/bin/ledger-mem check|closeout` (sh + .ps1)
+- **Verified commands:** `sh core/bin/ledger-sync verify|manifest|bootstrap|update core`; `sh tests/run-tests.sh` (package suite, 11/11 green); `.context_ledger/core/bin/ledger-gates run pre-commit|checkpoint` (sh + .ps1); `.context_ledger/core/bin/ledger-collab emit|status|check` (sh + .ps1); `.context_ledger/core/bin/ledger-mem check|closeout` (sh + .ps1)
 - **Quirks:** Git Bash `/tmp` is not a Windows path for python (use `cygpath -w`); JSON strict profile needs LF + UTF-8 without BOM — ps1 writers must use `[IO.File]::WriteAllText`, never `Set-Content` (BOM breaks the sh reader); repo `.gitattributes` enforces `eol=lf`

@@ -22,6 +22,8 @@ its work accordingly).
 
 | Agent | Model | First seen | Last seen | Sessions |
 |---|---|---|---|---|
+| Ada | glm-5.3-flash | 2026-09-10 | 2026-09-10 | 1 |
+| Noor | glm-5.3-flash | 2026-09-11 | 2026-09-11 | 1 |
 
 ## Observations
 
@@ -33,8 +35,7 @@ Update in place when a newer session contradicts an old observation.
 - **<agent> / <model>:** <what was observed — concrete and checkable, e.g. "Read tool truncates files >500 lines; needs offset/limit", "SSRF fix shipped with regression test, verified green"> (YYYY-MM-DD)
 -->
 
-| Ada | glm-5.3-flash | 2026-09-10 | 2026-09-10 | 1 |
-
 ## Observations
 
 - **Ada / glm-5.3-flash:** strict-profile JSON (one "key": value per line, escaped body) round-trips exactly through pure POSIX sh readers (sed/awk) and Windows PowerShell `ConvertFrom-Json` alike; PowerShell gotcha surfaced and fixed — a bare `-or` between two command calls inside `if()` does not evaluate as two boolean results, so parenthesize or name the booleans (2026-09-10)
+- **Noor / glm-5.3-flash:** verified on this machine that a PowerShell gate command whose pipeline has two external stages masks an earlier failure ($LASTEXITCODE ends up the tail's), while a `Tee-Object` tail preserves the tool's exit code — the parser-audit rule in ledger-gates.ps1 1.0.1 is built on that distinction; PS 5.1 `Parser::ParseInput/ParseFile` returns errors for 5.1-hostile syntax rather than throwing (2026-09-11)

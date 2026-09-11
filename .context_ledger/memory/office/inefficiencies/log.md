@@ -29,9 +29,9 @@ never makes an entry eligible.
   worth a core fix; omit entirely for project-local friction.
 -->
 
-## 2026-09-11 — Kai / glm-5.3-flash
-- **Problem:** shipped a PowerShell port with `&&` statement separators that parses on PowerShell 7 but dies on Windows PowerShell 5.1 (the fleet's default) — caught only because a parse check was added to the verification matrix.
-- **Cost:** one fix cycle + a re-run of the manifest regen; would have been a broken tool for every 5.1 user if released.
-- **Cause:** no automated syntax gate for the ps1 ports; 5.1 compatibility is a per-release manual concern.
-- **Workaround / fix:** added a Parser::ParseFile syntax check to the session's verification routine; suggest packaging it as a `ledger-mem` check or a maintainer checklist line.
-- **Prevent next time:** a `ps1-parse` maintenance check in the package (ParseFile over every bin/*.ps1) so a port that doesn't parse can't ship.
+## 2026-09-11 — Noor / glm-5.3-flash
+- **Problem:** shipping two independent `core/` fixes in one release against the "manifest regen in the same commit" rule — the manifest hashes the whole tree, so regenerating it for commit 1 would have hashed commit 2's still-uncommitted files, and a checkout of commit 1 would have failed verify. Plus a test-harness slip: assigning a multi-word command with `VAR="x" cmd` prefix syntax runs only the assignment, not the command.
+- **Cost:** one juggling cycle per problem (~10 minutes total): copy the sibling edit aside, restore to HEAD, regen, commit, copy back, regen; one failed test-suite run.
+- **Cause:** whole-tree manifest + sequential dependent commits; sh test driver built a command as an assignment prefix instead of a wrapper function.
+- **Workaround / fix:** copy not-yet-committed core files to /tmp, `git checkout --` them, regen + commit fix 1, copy back, regen + commit fix 2 (no stash — a peer's uncommitted files were in the tree). Test drivers use wrapper functions.
+- **Prevent next time:** keep one core change in flight at a time (edit → verify → regen → commit → next); the cp-aside dance is the documented fallback when two fixes must ship in one release.

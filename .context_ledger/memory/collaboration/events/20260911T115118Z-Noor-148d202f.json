@@ -1,0 +1,16 @@
+{
+  "schema": 1,
+  "id": "20260911T115118Z-Noor-148d202f",
+  "type": "release",
+  "session": "core-1.0.1",
+  "agent": "Noor",
+  "created": "2026-09-11T11:51:19Z",
+  "issue": "gate-verdict-fix",
+  "body": "Released core 1.0.1 (c97418d) and self-hosted it (877df5e): gate verdict can no longer be cleared by a piped consumer (sh: pipefail where supported, top-level pipelines rejected otherwise; ps1: parser audit — at most one external stage per pipeline, verdict = exit code OR $?); ledger-sync verify now parse-checks every port (ParseFile over bin/*.ps1, sh -n over sh ports); package suite tests/run-tests.sh green 11/11 across both editions. Suite + verify evidence: 'core OK: every file matches MANIFEST.sha256 and every port parses (1.0.1)'. Scope released exactly as claimed; encoding fixes remain Kai's 1.0.2.",
+  "paths": [],
+  "refs": ["c97418d", "877df5e"],
+  "option": null,
+  "selected": null,
+  "owner": null,
+  "participants": []
+}
