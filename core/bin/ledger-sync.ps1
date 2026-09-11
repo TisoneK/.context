@@ -251,18 +251,51 @@ function Cmd-Status {
   }
 }
 
+# Port parse check (core 1.0.1): hashing catches a corrupted file, not a port
+# that shipped unable to run. This edition ParseFiles every ps1 port natively
+# and, when a POSIX sh is on PATH (Git Bash on Windows), `sh -n`s every sh
+# port; the sh edition is the mirror image (its ps1 half is skipped where no
+# PowerShell engine exists). Returns $true clean, $false broken.
+function Parse-Ports { param([string]$dir)
+  $bad = $false
+  foreach ($f in (Get-ChildItem -LiteralPath (Join-Path $dir 'bin') -Filter 'ledger-*.ps1' -File)) {
+    $tok = $null; $errs = $null
+    [void][System.Management.Automation.Language.Parser]::ParseFile($f.FullName, [ref]$tok, [ref]$errs)
+    if ($errs -and $errs.Count -gt 0) {
+      foreach ($e in $errs) { Err ("{0}: {1}" -f $f.Name, $e.Message) }
+      $bad = $true
+    }
+  }
+  if (Get-Command sh -ErrorAction SilentlyContinue) {
+    foreach ($f in (Get-ChildItem -LiteralPath (Join-Path $dir 'bin') -File)) {
+      if ($f.Name -like '*.ps1' -or $f.Name -like '*.cmd') { continue }
+      $eap = $ErrorActionPreference; $ErrorActionPreference = 'Continue'
+      try { $out = @(& sh -n $f.FullName 2>&1); $code = $LASTEXITCODE }
+      finally { $ErrorActionPreference = $eap }
+      if ($code -ne 0) { Err ("sh parse: {0}: {1}" -f $f.Name, ($out -join ' ')); $bad = $true }
+    }
+  }
+  return (-not $bad)
+}
+
 function Cmd-Verify {
   param([string]$target)
   if (-not $target) { $target = $CORE_DIR }
-  if (Verify-Tree $target) {
-    Say "core OK: every file matches MANIFEST.sha256 ($(Core-Version $target))"
-    if ($target -eq $CORE_DIR) { Write-Lock (Core-Version $target) }
-    exit 0
+  if (-not (Verify-Tree $target)) {
+    Err 'CORE INTEGRITY FAILURE -- core/ does not match its manifest.'
+    Err 'Do not ''fix'' core in place. Run: ledger-sync rollback'
+    Err 'Then log the incident in memory/flaws/log.md and continue.'
+    exit 3
   }
-  Err 'CORE INTEGRITY FAILURE -- core/ does not match its manifest.'
-  Err 'Do not ''fix'' core in place. Run: ledger-sync rollback'
-  Err 'Then log the incident in memory/flaws/log.md and continue.'
-  exit 3
+  if (-not (Parse-Ports $target)) {
+    Err 'PORT PARSE FAILURE -- a script in core/bin cannot be parsed.'
+    Err 'If this core just arrived from a release: ledger-sync rollback <previous-version>, and report it upstream.'
+    Err 'Do not ''fix'' core in place.'
+    exit 3
+  }
+  Say "core OK: every file matches MANIFEST.sha256 and every port parses ($(Core-Version $target))"
+  if ($target -eq $CORE_DIR) { Write-Lock (Core-Version $target) }
+  exit 0
 }
 
 # One-time layout migration (core 1.0.0): group a legacy flat memory layout
