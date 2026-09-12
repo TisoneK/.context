@@ -40,7 +40,6 @@ is your stable session tag.
 
 | Name | Codename | Model | Doing |
 |------|----------|-------|-------|
-| Ines | S007 | glm-5.3-flash | check-in-first PATCH (core 1.0.6) — arrived, checking in before analysis |
 
 **Clock out when your session ends**: remove your row in the closing
 `chore(ledger):` commit. The board shows who is in the office *now*;

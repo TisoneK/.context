@@ -73,3 +73,12 @@ new group starts clean.
 - **Open items:** none
 - **Notes:** summary only
 - **Collab:** solo session (office empty); claim 20260912T054629Z-Ada-48bc233f → release 20260912T141625Z-Ada-6154a68c
+
+## 2026-09-12 — Session 7
+- **Agent:** Ines | **Model:** glm-5.3-flash | **Platform:** Windows 11 workstation (local, Git Bash) | **Role:** engineer | **Core:** 1.0.5 → 1.0.6
+- **Task:** check-in-first PATCH — the supervisor reported that workers read protocol + product code before checking in, so two concurrent workers both see an empty office, collide on session numbers, and then argue over the main tree; make the check-in the session's first write
+- **Commits:** 7 (7b3740b check-in .. a2c1064 release event) + this closeout
+- **Outcome:** done — core 1.0.6 released and self-hosted (PATCH, docs-only): the check-in is now the FIRST write of every session (Ten Binding Rules #1 + Step 3 hoist in both editions, kickoff Step 2 retitled "Sign in at the door", ENTRY carve-out naming the check-in the one sanctioned Phase 1 edit); the codename is claimed by the push (whoever's check-in commit is on origin keeps it; on a collision the earlier commit wins and the later worker renumbers their own row only, never drops a peer's row); the main tree is settled at the door by conversation (work already in flight keeps it, the other worker isolates, both declare the shared session). Same wording in the AGENTS digest rule 5, roster template preamble, vendored README, and the schema (roster spec, reading order, office lifecycle). This office's entry points regenerated (kickoff.md, AGENTS.md, roster preamble). verify green (61 files), suite 22/22 both ports, gates passed.
+- **Open items:** none
+- **Notes:** summary only
+- **Collab:** solo session (board empty at arrival); claim 20260912T153028Z-Ines-dd318463 → release 20260912T165533Z-Ines-14b82a1f

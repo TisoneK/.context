@@ -13,5 +13,5 @@ entry and backlog before starting.
 -->
 
 - **Session:** 2026-09-12 — Ines / glm-5.3-flash
-- **Task:** check-in-first PATCH (core 1.0.6) — roster sign-in becomes the session's first write (before the deep read); codename claimed by push order with collision rules; main tree settled at the door
-- **Status:** in-progress
+- **Task:** none — core 1.0.6 shipped (check-in at the entrance: sign two files, push, then the deep read; codename claimed by push order); session closed
+- **Status:** idle

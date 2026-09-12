@@ -49,3 +49,11 @@ never makes an entry eligible.
 - **Cause:** the shared checkout is one working tree for two sessions — git operations there (regen, commit, push) see each other's uncommitted and unpushed state by design.
 - **Workaround / fix:** worktree + branch, claim event posted first; the version slot resolved itself when his 1.0.3 landed mid-session (rebased, shipped 1.0.4); the swept-commits publication turned out harmless — his release was complete and consistent (verify green, suite 22/22).
 - **Prevent next time:** any session touching `core/` while a peer is live works out of a worktree from the start; fetch before every push; treat origin, not the shared tree, as the source of truth for what is already public.
+
+## 2026-09-12 — Ines / glm-5.3-flash
+
+- **Problem:** one `git push` failed with "Could not resolve host: github.com" immediately after the core 1.0.6 release commit — transient DNS on the workstation; a single retry seconds later pushed cleanly.
+- **Cost:** one failed command cycle (~1 minute).
+- **Cause:** network blip, not a protocol or tool issue.
+- **Workaround / fix:** retried the push; it succeeded at once.
+- **Prevent next time:** none needed — a transport-level push failure with an unchanged tree is retry-safe; if it had persisted, that is machine config for the supervisor, not something to work around.
