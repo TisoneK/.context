@@ -22,7 +22,7 @@ its work accordingly).
 
 | Agent | Model | First seen | Last seen | Sessions |
 |---|---|---|---|---|
-| Ada | glm-5.3-flash | 2026-09-10 | 2026-09-10 | 1 |
+| Ada | glm-5.3-flash | 2026-09-10 | 2026-09-12 | 2 |
 | Noor | glm-5.3-flash | 2026-09-11 | 2026-09-11 | 1 |
 | Milo | glm-5.3-flash | 2026-09-11 | 2026-09-11 | 1 |
 | June | glm-5.3-flash | 2026-09-11 | 2026-09-11 | 1 |

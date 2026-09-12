@@ -1,0 +1,16 @@
+{
+  "schema": 1,
+  "id": "20260912T141625Z-Ada-6154a68c",
+  "type": "release",
+  "session": "S006",
+  "agent": "Ada",
+  "created": "2026-09-12T14:16:26Z",
+  "issue": "backlog-presentation",
+  "body": "Shipped core 1.0.5: backlog file arranged as priority-grouped ID|Summary tables (High/Medium/Low) with stable B-<date>-<n> IDs; workstream view documented as derived. Spec commit 05e30e4, release 40aa164, self-host ebfc596.",
+  "paths": [],
+  "refs": ["05e30e4", "40aa164", "ebfc596"],
+  "option": null,
+  "selected": null,
+  "owner": null,
+  "participants": []
+}

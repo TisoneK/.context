@@ -64,3 +64,12 @@ new group starts clean.
 - **Open items:** none
 - **Notes:** summary only
 - **Collab:** session report-tone alongside Milo (S004, live in office); claim 20260911T170153Z-June-3233858a → release 20260911T175348Z-June-14ce0d52
+
+## 2026-09-12 — Session 6
+- **Agent:** Ada | **Model:** glm-5.3-flash | **Platform:** Windows 11 workstation (local, Git Bash) | **Role:** engineer | **Core:** 1.0.4 → 1.0.5
+- **Task:** backlog arrangement PATCH — the supervisor supplied a backlog rendering (priority tables + workstream clusters) and mid-session corrected the design: not a reporting convention but "formatting and arranging the actual file"
+- **Commits:** 5 (ea9979d check-in .. ebfc596 self-host) + this closeout
+- **Outcome:** done — core 1.0.5 released and self-hosted (PATCH, docs-only): `tasks/backlog.md` is now arranged as priority-grouped `ID | Summary` tables (High/Medium/Low; the table an item sits in IS its priority) with stable IDs `B-<added date>-<n>`; finished = delete the row, no checkboxes to check off. Spec lives in the schema ("The backlog: arrangement + workstream view"), taught in Step 15 of both editions, seeded by the backlog template; repo AGENTS.md digest refreshed. The **workstream view is derived, never stored** — an item's only home is its priority-table row, so finishing it stays a single delete (stored clusters would need two deletes and drift). Legacy checkbox backlogs need no migration; `ledger-mem closeout`/`check` keep sweeping `- [x]` tombstones. This office's own backlog migrated to the new arrangement. Suite 22/22 both ports, verify green, gates passed.
+- **Open items:** none
+- **Notes:** summary only
+- **Collab:** solo session (office empty); claim 20260912T054629Z-Ada-48bc233f → release 20260912T141625Z-Ada-6154a68c
