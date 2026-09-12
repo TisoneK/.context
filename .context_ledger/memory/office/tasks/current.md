@@ -12,6 +12,6 @@ entry and backlog before starting.
 - **Status:** in-progress | done | blocked (<blocker>)
 -->
 
-- **Session:** 2026-09-11 — Milo / glm-5.3-flash
-- **Task:** none — core 1.0.3 shipped (Run-One gate-teeth fix + regressions); session closed
-- **Status:** idle
+- **Session:** 2026-09-12 — Ada / glm-5.3-flash
+- **Task:** backlog presentation PATCH (core 1.0.5) — teach agents to render the backlog priority-grouped in tables and cluster it into workstreams when reporting
+- **Status:** in-progress

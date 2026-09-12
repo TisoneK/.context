@@ -1,0 +1,16 @@
+{
+  "schema": 1,
+  "id": "20260912T054629Z-Ada-48bc233f",
+  "type": "claim",
+  "session": "S006",
+  "agent": "Ada",
+  "created": "2026-09-12T05:46:30Z",
+  "issue": "backlog-presentation",
+  "body": "Backlog presentation PATCH (core 1.0.5): teach priority-grouped table rendering + workstream clustering for backlog reports. Solo session, office empty.",
+  "paths": ["core/rules", "core/schemas", "core/templates"],
+  "refs": [],
+  "option": null,
+  "selected": null,
+  "owner": null,
+  "participants": []
+}
