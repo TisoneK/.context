@@ -1,0 +1,16 @@
+{
+  "schema": 1,
+  "id": "20260912T153025Z-Ines-428931ba",
+  "type": "note",
+  "session": "S007",
+  "agent": "Ines",
+  "created": "2026-09-12T15:30:25Z",
+  "issue": "checkin-first",
+  "body": "Arrived as Ines (S007): shipping the check-in-first PATCH (core 1.0.6) — roster sign-in becomes the session's first write; codename claimed by push order.",
+  "paths": [],
+  "refs": [],
+  "option": null,
+  "selected": null,
+  "owner": null,
+  "participants": []
+}

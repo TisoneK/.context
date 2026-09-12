@@ -12,6 +12,6 @@ entry and backlog before starting.
 - **Status:** in-progress | done | blocked (<blocker>)
 -->
 
-- **Session:** 2026-09-12 — Ada / glm-5.3-flash
-- **Task:** none — core 1.0.5 shipped (backlog arranged as priority-grouped tables + derived workstream view); session closed
-- **Status:** idle
+- **Session:** 2026-09-12 — Ines / glm-5.3-flash
+- **Task:** check-in-first PATCH (core 1.0.6) — roster sign-in becomes the session's first write (before the deep read); codename claimed by push order with collision rules; main tree settled at the door
+- **Status:** in-progress
