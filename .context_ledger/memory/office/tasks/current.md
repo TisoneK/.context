@@ -13,5 +13,5 @@ entry and backlog before starting.
 -->
 
 - **Session:** 2026-09-12 — Ada / glm-5.3-flash
-- **Task:** backlog presentation PATCH (core 1.0.5) — teach agents to render the backlog priority-grouped in tables and cluster it into workstreams when reporting
-- **Status:** in-progress
+- **Task:** none — core 1.0.5 shipped (backlog arranged as priority-grouped tables + derived workstream view); session closed
+- **Status:** idle
