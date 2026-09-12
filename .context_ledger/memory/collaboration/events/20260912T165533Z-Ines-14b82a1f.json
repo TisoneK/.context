@@ -1,0 +1,16 @@
+{
+  "schema": 1,
+  "id": "20260912T165533Z-Ines-14b82a1f",
+  "type": "release",
+  "session": "S007",
+  "agent": "Ines",
+  "created": "2026-09-12T16:55:33Z",
+  "issue": "checkin-first",
+  "body": "Check-in-first PATCH shipped as core 1.0.6. Release bd39226 (editions, kickoff/AGENTS/roster/ledger-README templates, schema, VERSION, CHANGELOG, MANIFEST regen), self-host 21ecc1c; kickoff regenerated fa784eb, AGENTS digest + roster preamble 88a6e30. Verified: sh core/bin/ledger-sync verify green (61 files, 1.0.6), tests/run-tests.sh 22/22 both ports, vendored core updated + verified by ledger-sync.",
+  "paths": ["core/rules/ai-engineering-protocol-local.md", "core/rules/ai-engineering-protocol.md", "core/templates/kickoff.md", "core/templates/AGENTS.md", "core/templates/ledger-README.md", "core/templates/memory/office/agents/roster.md", "core/schemas/ledger-schema.md", "core/VERSION", "core/CHANGELOG.md", "core/MANIFEST.sha256"],
+  "refs": ["20260912T153028Z-Ines-dd318463", "bd39226", "21ecc1c"],
+  "option": null,
+  "selected": null,
+  "owner": null,
+  "participants": []
+}
